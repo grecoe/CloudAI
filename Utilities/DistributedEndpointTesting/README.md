@@ -41,9 +41,11 @@ To do this, you configure the optional Azure Event Hub settings in the configura
 - An Azure Stream Analytics Job
 - An Azure SQL Database
 
-As an example, there are Azure VM's set up in 3 different regions all exercising the same endpoint. The followign diagram shows what the architecture would look like. 
+As an example, there are Azure VM's set up in 3 different regions all exercising the same endpoint. The followign diagram shows what the architecture might look like. 
 
-DAN FIX THIS WITH IMAGE
+<p aligh="center">
+<img src="https://github.com/grecoe/CloudAI/blob/master/Utilities/DistributedEndpointTesting/Images/architecture.png?raw=true" </img?>
+</p>
 
 # Project Components
 
