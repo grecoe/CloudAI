@@ -1,32 +1,12 @@
-# Prerequisites
-*.d
+# AmlWorkbenchFullExample
+/Demos/AmlWorkbenchFullExample/Client/.vs/*
+/Demos/AmlWorkbenchFullExample/Client/bin/*
+/Demos/AmlWorkbenchFullExample/Client/obj/*
+/Demos/AmlWorkbenchFullExample/Client/packages/*
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# Image Classification
+/Utilities/ImageClassification/.vs/*
+/Utilities/ImageClassification/bin/*
+/Utilities/ImageClassification/obj/*
+/Utilities/ImageClassification/packages/*

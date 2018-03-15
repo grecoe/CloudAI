@@ -1,0 +1,8 @@
+﻿{
+  "defaultProvider": "LocalStorageService",
+  "classifications": [
+    "success",
+    "failure",
+    "other"
+  ]
+}

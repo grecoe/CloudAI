@@ -1,0 +1,5 @@
+# VS Files
+/Client/.vs/*
+/Client/bin/*
+/Client/obj/*
+/Client/packages/*
