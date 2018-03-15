@@ -1,0 +1,4 @@
+﻿{
+  "endpointUrl": "[YOUR_OVERRIDE_SCORING_ENDPOINT]",
+  "endpointKey": "[YOUR_OVERRIDE_SCORING_ENDPOINT_KEY]"
+}

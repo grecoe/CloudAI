@@ -10,3 +10,14 @@
 /Utilities/ImageClassification/bin/*
 /Utilities/ImageClassification/obj/*
 /Utilities/ImageClassification/packages/*
+
+# Distributed Throughput
+/Utilities/DistributedEndpointTesting/DistributedThroughput/.vs/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/packages/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/RecordProviderExample/bin/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/RecordProviderExample/obj/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputApp/bin/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputApp/obj/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputInterfaces/bin/*
+/Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputInterfaces/obj/*
+

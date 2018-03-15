@@ -1,0 +1,88 @@
+********************************************************
+ASA Stream Job Query
+********************************************************
+InputHub == EventHub
+OutputTable == Throughput table on server wherever it was created
+
+SELECT
+     Client,
+     CAST(Time as datetime) AS SentTime,
+     CAST(AILatency as float) AS Latency,
+     CAST(State as bigint) AS SentState,
+     SendError AS Error
+INTO
+    OutputTable
+FROM
+    InputHub
+	
+
+********************************************************
+SQL Queries
+********************************************************
+## Table Creation
+CREATE TABLE Throughput (
+	Client varchar(max),
+	SentTime datetime2,
+	Latency float,
+	SentState int,
+	Error varchar(max)
+);
+
+## How many messages in all have been recieved
+select count(*) from Throughput;
+
+## What distinct errors have been detected
+SELECT DISTINCT(Error) as Error, Count(*) as Total, Client
+From Throughput
+WHERE SentState = 0
+Group By Error, Client;
+
+## What is the average latency of all succesful calls
+Select SentTime, AVG(Latency) AS AverageLatency , COUNT(*) AS ProcessedCount
+FROM Throughput
+WHERE SentState=1
+GROUP BY SentTime
+ORDER BY SentTime;
+
+## List the errors for each client 
+select Error, Client, COUNT(*) from Throughput
+where SentState=0
+GROUP BY Error, Client
+
+## Get information on each client in the test pool 
+SELECT	err.Client as Client, 
+		suc.SucTime as FirstSuccess, 
+		suc.MaxSucTime as LastSuccess, 
+		suc.TotalGood as TotalGood,
+		err.ErrTime as FirstError, 
+		err.MaxErrTime as LastError,
+		err.TotalBad as TotalBad,
+		(CAST(suc.TotalGood as decimal)/CAST((err.TotalBad+suc.TotalGood) AS decimal)) AS SuccessRate,
+		DATEDIFF ( second , suc.SucTime, suc.MaxSucTime) as TotalExecutionTime 
+FROM (
+	SELECT Client, Min(SentTime) as ErrTime, Max(SentTime) as MaxErrTime, COUNT(*) as TotalBad
+	FROM Throughput
+	WHERE SentState = 0
+	GROUP BY Client 
+	) AS err,
+	(
+	SELECT Client, Min(SentTime) as SucTime , Max(SentTime) as MaxSucTime, COUNT(*) as TotalGood
+	FROM Throughput
+	WHERE SentState = 1
+	GROUP BY Client 
+	) AS suc
+WHERE err.Client = suc.Client;
+
+## Count all messages sent by each client 
+Select Client, Count(*) 
+FROM Throughput
+WHERE SentState=1
+Group By Client;
+
+
+
+
+
+
+
+
