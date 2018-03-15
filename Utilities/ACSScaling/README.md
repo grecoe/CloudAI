@@ -3,6 +3,9 @@
 
 This repo contains demonstrations on using Azure or Azure Machine Learning services.
 
-![CPU 1](https://github.com/grecoe/CloudAI/tree/master/Utilities/ACSScaling/images/cpuconfig1.png "CPU Configuration 1")
+![alt text](https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/cpuconfig1.png?raw=true "CPU Configuration 1")
 
-![CPU 2](https://github.com/grecoe/CloudAI/tree/master/Utilities/ACSScaling/images/cpuconfig2.png "CPU Configuration 2")
+
+<img src="https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/cpuconfig2.png?raw=true" width="200" height="200" />
+
+![alt text](https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/cpuconfig2.png?raw=true "CPU Configuration 2")
