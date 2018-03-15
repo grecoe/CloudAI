@@ -75,14 +75,75 @@ Understanding the system overhead allows for a simple formula to determining ava
 <img src="https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/formula1.png?raw=true" />
 </p>
 
+## Pod Calculation
+Using the crucial pieces of information gathered while understanding performance the number of pods can be calculated; service latency under load and expected requests per second. 
+
 <p align="center">
 <img src="https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/formula2.png?raw=true" />
 </p>
 
 <p align="center">
+<b>NOTE: MaxReplicaConcurrency is currently 1 as the backend is not currently able to manage concurrent calls. This will change in the future and therefore is included in the calculation. 
+</b>
+</p>
+
+## Agent Virtual Machine Calculation
+With the simple formulae above, it becomes somewhat trivial to calculate the cluster size required to meet a certain workload if the following information has been collected already.
+-	CPU allocation and latency time of the service found from testing the service under load. 
+-	A selection of an Azure Virtual Machine type to use as the cluster agent nodes thereby identifying the number of available CPU per agent (VMCPU). 
+
+<p align="center">
 <img src="https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/formula3.png?raw=true" />
 </p>
+
+As an example, let us use a model that returns in a configurable constant time:
+-	VMCPU : Using D3_v2 which have 4 CPU per machine
+-	RequestPerSecond : 24
+-	ModelLatency : Constant set at 500ms
+-	CPUAllocation: 0.5
+-	MaxReplicaConcurrency: 1
+To determine the size of the cluster just plug in the numbers:
 
 <p align="center">
 <img src="https://github.com/grecoe/CloudAI/blob/master/Utilities/ACSScaling/images/formula4.png?raw=true" />
 </p>
+
+In this example the most cost-effective cluster would be a cluster of 3 agent nodes to manage the 12 pods each using 0.5 CPU. In practice Kubernetes will allow you to allocate virtually all of the available CPU on the cluster to your service. During the scaling phase both the Azure CLI and Kubernetes will display errors with regards to that type of CPU allocation. This may take several minutes, but you can use the Kubernetes dashboard can ensure that the scaling has taken effect.
+
+## Practical: Applying Formulae 
+To put these formulae to the test, an Azure Container Service cluster was created and a simple ML service that sleeps on a thread for a pre-defined number of milliseconds (a constant time, low resource model) was operationalized on the cluster. The following table describes the input values to the pod formula and the expected throughput results:
+
+|Model Latency (milliseconds)|Pods|Calculated RPS|
+|----------------------------|----|--------------|
+|20|12|600
+|500|12|24|
+|1000|12|12|
+
+Remember that the formulae are theoretic and cannot reasonably consider:
+-	Network latencies: Are the requests coming from the same geographic location? Closer gateways will physically be faster than further machines.
+-	Model resources: Some models are CPU intensive and others are memory intensive. These resources can alter service latencies if the system becomes overwhelmed. 
+-	Kubernetes and Azure Machine Learning overhead: These services do not come with zero cost. For example, when the cluster starts to queue messages for a pod during a high-volume period, latencies increase.
+
+Given these unknowns testing the service with the constant time low resource model provides some insights through stress testing. 
+
+A test application was installed on Azure Virtual Machines in three separate geographic regions. Each application was programmed to increase the volume of traffic on the exposed cluster endpoint until it received errors.  The tests varied the amount of time that the service would sleep by altering the service input. 
+
+Generalizing the results across many tests: 
+
+|Requested Model Latency (milliseconds)|% of Calculated RPS achieved|
+|--------------------------------------|---------------------------|
+|20-100|65-80%|
+|100-500|85-95%|
+|1000|95-100%|
+
+This chart shows that as the model latency decreases, the overhead costs increase. Again, the increases in overhead will vary from service to service depending on resource dependencies such as CPU and memory.
+
+While the formulae are a good start in determining your cluster size, it is very likely that some manual adjustments to scale will be required. 
+
+# Summary
+We provide a set of cluster sizing formulae for setting the cluster scale starting point. These formulae are based on requirements of latency and throughput as well as testing the cluster service. These initial formulae can help guide the user to jump start cluster scaling, though even a simple example service may not perform exactly to the formulae. The more complex the service, the more the actual performance can diverge from the calculated performance levels. We suggest using these formulae to determine the starting point of the cluster with the given inputs of latency, CPU allocation per pod, and expected requests per second. Once the cluster has been deployed and the service operationalized on it, test the service to see determine how to modify the resources to obtain the required performance levels. Once you understand how the cluster is performing, it’s trivial to scale it out and up with more pods.
+
+It’s worth repeating that there are no formulae that will definitively spit out the cluster size for you, this document is intended to give the user a starting point towards a performant machine learning cluster.
+
+There are many useful documents online concerning scaling of clusters, here is a nice one talking about scaling for Workbench projects. I hope this post has helped some of you out who are getting started with Azure Container Services and Kubernetes clusters!
+

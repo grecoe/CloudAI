@@ -19,6 +19,8 @@ When classifying images, the results are stored in a sub directory of the applic
 
 The format of the files is CSV and can easily be imported by any data scientist when training a deep learning model. 
 
+Under the hood, the [C# API](https://docs.microsoft.com/en-us/dotnet/api/microsoft.windowsazure.storage.blob.cloudblobcontainer.listblobs?view=azure-dotnet) is used to list blobs.
+
 ### Local Disk Files
 When using Local Disk Files no catalog is needed as the directory structure is read in realtime. 
 
