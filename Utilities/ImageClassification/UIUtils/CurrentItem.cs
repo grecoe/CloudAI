@@ -23,12 +23,26 @@ using System.Drawing;
 
 namespace ImageClassifier.UIUtils
 {
-    class CurrentItem
+    /// <summary>
+    /// Class used by the main window to track what the current image being displayed is.
+    /// </summary>
+    public class CurrentItem
     {
+        /// <summary>
+        /// The current IDataSource object that is being displayed
+        /// </summary>
         public SourceFile CurrentSource { get; set; }
+        /// <summary>
+        /// Original Size of the image when loaded from disk
+        /// </summary>
         public Size OriginalSize { get; set; }
+        /// <summary>
+        /// Current size of the image as being shown.
+        /// </summary>
         public Size CurrentSize { get; set; }
-
+        /// <summary>
+        /// Determine the current zoom level of the image
+        /// </summary>
         public int Zoom
         {
             get

@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using ImageClassifier.Interfaces.GenericUI;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource
 {
@@ -43,12 +44,15 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
 
         public bool DeleteSourceFilesWhenComplete { get { return true; } }
 
+        public IContainerControl ContainerControl { get; private set; }
+
         public IConfigurationControl ConfigurationControl { get; private set; }
+
+        public IImageControl ImageControl { get; set; }
 
         public string CurrentContainer { get; private set; }
 
         public IEnumerable<string> Containers { get { return this.CatalogFiles; } }
-
         public void SetContainer(string container)
         {
             if (this.CatalogFiles.Contains(container) && 
@@ -58,7 +62,6 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 this.InitializeOnNewContainer();
             }
         }
-
         public bool CanMoveNext
         {
             get
@@ -66,7 +69,6 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
             }
         }
-
         public bool CanMovePrevious
         {
             get
@@ -223,9 +225,18 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             this.CatalogFiles = new List<string>(BlobPersistenceLogger.GetAcquisitionFiles(this.Configuration));
             this.CurrentContainer = this.CatalogFiles.FirstOrDefault();
             this.InitializeOnNewContainer();
+
+            this.ContainerControl = new GenericContainerControl(this);
+            this.ImageControl = new SingleImageControl(this);
         }
 
         #region Support Methods
+        /// <summary>
+        /// Triggered by the configuration UI when the underlying source catalog is updated.
+        /// 
+        /// Performs work then bubbles the call out to the parent app (listener)
+        /// </summary>
+        /// <param name="caller">unused</param>
         private void UpdateInformationRequested(object caller)
         {
             // Update the data source
@@ -290,6 +301,12 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
+        /// <summary>
+        /// Triggered by the configuration UI when the underlying configuration is updated.
+        /// 
+        /// Performs work then bubbles the call out to the parent app (listener)
+        /// </summary>
+        /// <param name="caller">unused</param>
         private void ConfigurationSaved(object caller)
         {
             // Save the configuration
@@ -300,6 +317,9 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
         }
 
+        /// <summary>
+        /// Called when the container has been changed. Data for the new container is loaded.
+        /// </summary>
         private void InitializeOnNewContainer()
         {
             this.CurrentImage = -1;
@@ -334,6 +354,12 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             }
         }
 
+        /// <summary>
+        /// Download an image from Azure Storage with the given URL. File is downloaded to a temp
+        /// directory with a GUID name. 
+        /// </summary>
+        /// <param name="imageUrl">Azure Storage URL to the blob to be downloaded.</param>
+        /// <returns>Local path location of the blob after download</returns>
         private String DownloadStorageFile(string imageUrl)
         {
             String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");

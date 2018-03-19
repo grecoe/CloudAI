@@ -23,6 +23,7 @@ using System.Windows.Input;
 
 namespace ImageClassifier.UIUtils
 {
+    public delegate void OnClassifcationsChanged();
     /// <summary>
     /// ICommand objects are required for KeyBinding so we can enable
     /// actions through key commands.
@@ -31,6 +32,7 @@ namespace ImageClassifier.UIUtils
     /// </summary>
     public class ToggleButtonCommand : ICommand
     {
+        public event OnClassifcationsChanged ClassificationsChanged;
         public event EventHandler CanExecuteChanged;
 
         /// <summary>
@@ -53,6 +55,7 @@ namespace ImageClassifier.UIUtils
             if(this.Toggle != null)
             {
                 this.Toggle.IsChecked = !this.Toggle.IsChecked;
+                ClassificationsChanged?.Invoke();
             }
         }
     }

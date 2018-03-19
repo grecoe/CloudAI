@@ -21,11 +21,21 @@
 using ImageClassifier.Interfaces;
 using System;
 
-namespace ImageClassifier.UIUtils
+namespace ImageClassifier.Interfaces.GenericUI
 {
+    /// <summary>
+    /// UI ComboBox item for source containers.
+    /// </summary>
     class ContainerComboItem
     {
+        /// <summary>
+        /// The name of the source container
+        /// </summary>
         public String SourceContainer { get; set; }
+        /// <summary>
+        /// The source type so that the override ToString() can
+        /// return the appropriate answer.
+        /// </summary>
         public DataSourceType SourceType { get; set; }
 
         public ContainerComboItem(DataSourceType type, string file)

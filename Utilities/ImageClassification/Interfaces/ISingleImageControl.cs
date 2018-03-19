@@ -17,43 +17,16 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-
-using System;
+using ImageClassifier.UIUtils;
 
 namespace ImageClassifier.Interfaces
 {
-  
+    public delegate void OnImageChanged(SourceFile file);
 
-    public interface IDataSink
+    public interface ISingleImageControl : IImageControl
     {
-        /// <summary>
-        /// Display name of this sink
-        /// </summary>
-        String Name { get; }
-        /// <summary>
-        /// Find an item based on it's location
-        /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns></returns>
-        ScoredItem Find(string container, string name);
-        /// <summary>
-        /// Determine if an item has already been scored
-        /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns>True if in catalog, false otherwise</returns>
-        bool ItemHasBeenScored(string container, string name);
-        /// <summary>
-        /// Add a catalog entry for the given item. Causes the catalog
-        /// to be persisted.
-        /// </summary>
-        /// <param name="item">Item to record</param>
-        void Record(ScoredItem item);
-        /// <summary>
-        /// Purges the catalog data. Use on a refresh where the new catalog items
-        /// may not match teh existing catalog data.
-        /// </summary>
-        void Purge();
+        event OnImageChanged ImageChanged;
+
+        CurrentItem CurrentSourceFile { get; }
     }
 }

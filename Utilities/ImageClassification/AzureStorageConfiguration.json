@@ -1,9 +1,9 @@
 {
-  "storageAccount": "[AZURE_STORAGE_NAME]",
-  "storageKey": "[AZURE_STORAGE_KEY]",
-  "storageContainer": "[AZURE_STORAGE_CONTAINER]",
+  "storageAccount": "dpumpdata",
+  "storageKey": "vZ6sZv42bel+GcdU1egYbJ+cO3JOLN9oJB5PD1v8fNsaMJPNJMxsxmuBojTzWv4DK9p1IfLKzWs+OajOXnpaNw==",
+  "storageContainer": "preprocessedtaggeddatasets",
   "blobPrefix": "",
   "fileType": ".png",
-  "fileCount": 1000,
-  "recordLocation": "[LOCAL_DIRECTORY_FOR_STORAGE_CATALOG]"
+  "fileCount": 100,
+  "recordLocation": "C:\\Scheider_Test_RECORDS"
 }

@@ -21,7 +21,15 @@ using System.Windows;
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Delegate that handles notifications when the underlying configuration data
+    /// has been updated.
+    /// </summary>
     public delegate void OnConfigurationUpdatedHandler(IDataSource source);
+    /// <summary>
+    /// Delegate that handles notifications when the underlying data
+    /// catalog has been updated.
+    /// </summary>
     public delegate void OnUpdateSourceData(IDataSource source);
 
     /// <summary>

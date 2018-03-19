@@ -24,12 +24,23 @@ using ImageClassifier.Interfaces.Source.LocalDisk;
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Enum to identify which type of provider to load
+    /// </summary>
     public enum DataSourceProvider
     {
         AzureBlob,
         LocalDisk
     };
 
+    public enum ImageControl
+    {
+        SingleImageControl
+    };
+
+    /// <summary>
+    /// Enum to identify which type of sink to load
+    /// </summary>
     public enum DataSink
     {
         Catalog,
@@ -38,7 +49,10 @@ namespace ImageClassifier.Interfaces
 
     class DataSourceFactory
     {
-        public static IDataSource GetDataSource(DataSourceProvider provider, DataSink sink)
+        /// <summary>
+        /// Construct a IDataSource object based on a provider and sink type.
+        /// </summary>
+        public static IDataSource GetDataSource(DataSourceProvider provider, DataSink dataSink)
         {
             IDataSource returnSource = null;
             switch (provider)
@@ -53,7 +67,7 @@ namespace ImageClassifier.Interfaces
                     throw new System.Exception("Invalid provider");
             }
 
-            switch (sink)
+            switch (dataSink)
             {
                 case DataSink.Catalog:
                     returnSource.Sink = new CatalogSink(returnSource.Name);
@@ -66,5 +80,6 @@ namespace ImageClassifier.Interfaces
 
             return returnSource;
         }
+  
     }
 }

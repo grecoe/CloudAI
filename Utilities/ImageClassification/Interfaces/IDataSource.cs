@@ -24,42 +24,6 @@ namespace ImageClassifier.Interfaces
 {
 
     /// <summary>
-    /// DataSource types 
-    /// </summary>
-    public enum DataSourceType
-    {
-        Blob,
-        Disk
-    };
-
-    /// <summary>
-    /// SourceFile is used to pass data back and forth about a particular 
-    /// item/image. 
-    /// </summary>
-    public class SourceFile
-    {
-        /// <summary>
-        /// Display name of the item
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// The full local disk path of the item. Source may have to 
-        /// retrieve this from a network. Use the IDataSource.DeleteSourceFilesWhenComplete
-        /// to determine if deleting when complete is acceptable.
-        /// </summary>
-        public string DiskLocation { get; set; }
-        /// <summary>
-        /// Applied classifications to the object (if any)
-        /// </summary>
-        public List<string> Classifications { get; set; }
-
-        public SourceFile()
-        {
-            this.Classifications = new List<string>();
-        }
-    }
-
-    /// <summary>
     /// IDataSource is an object that can 
     /// 1. COnfigure itself
     /// 2. Collect data from the source system to view
@@ -77,15 +41,6 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         DataSourceType SourceType { get;  }
         /// <summary>
-        /// Configuration UI with delegates for notifying
-        /// parent when changes occur
-        /// </summary>
-        IConfigurationControl ConfigurationControl { get; }
-        /// <summary>
-        /// Sink for outputting data
-        /// </summary>
-        IDataSink Sink { get; set; }
-        /// <summary>
         /// Indicates whether the file at SourceFile.DiskLocation can 
         /// be deleted when complted
         /// </summary>
@@ -94,6 +49,24 @@ namespace ImageClassifier.Interfaces
         /// Flag indicating if multi class is supported for items
         /// </summary>
         bool MultiClass { get; }
+
+        /// <summary>
+        /// Configuration UI with delegates for notifying
+        /// parent when changes occur
+        /// </summary>
+        IConfigurationControl ConfigurationControl { get; }
+        /// <summary>
+        /// Container Control
+        /// </summary>
+        IContainerControl ContainerControl { get; }
+        /// <summary>
+        /// Control for the images
+        /// </summary>
+        IImageControl ImageControl { get; }
+        /// <summary>
+        /// Sink for outputting data
+        /// </summary>
+        IDataSink Sink { get; set; }
         #endregion
 
         #region Containers

@@ -18,42 +18,26 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
+using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
-  
-
-    public interface IDataSink
+    /// <summary>
+    /// Scored is used to pass data back and forth with IDataSink
+    /// </summary>
+    public class ScoredItem
     {
         /// <summary>
-        /// Display name of this sink
+        /// Container the item was in
         /// </summary>
-        String Name { get; }
+        public string Container { get; set; }
         /// <summary>
-        /// Find an item based on it's location
+        /// Item identifier, could be a name, path or URL
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns></returns>
-        ScoredItem Find(string container, string name);
+        public string Name { get; set; }
         /// <summary>
-        /// Determine if an item has already been scored
+        /// Applied classifications to the object (if any)
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns>True if in catalog, false otherwise</returns>
-        bool ItemHasBeenScored(string container, string name);
-        /// <summary>
-        /// Add a catalog entry for the given item. Causes the catalog
-        /// to be persisted.
-        /// </summary>
-        /// <param name="item">Item to record</param>
-        void Record(ScoredItem item);
-        /// <summary>
-        /// Purges the catalog data. Use on a refresh where the new catalog items
-        /// may not match teh existing catalog data.
-        /// </summary>
-        void Purge();
+        public List<string> Classifications { get; set; }
     }
 }

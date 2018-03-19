@@ -1,5 +1,5 @@
 ﻿{
-  "defaultProvider": "AzureStorageSource",
+  "defaultProvider": "LocalStorageService",
   "classifications": [
     "success",
     "failure",

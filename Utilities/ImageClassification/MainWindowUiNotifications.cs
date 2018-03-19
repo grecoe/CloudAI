@@ -22,7 +22,6 @@ using ImageClassifier.UIUtils;
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using ImageClassifier.Interfaces;
 
 namespace ImageClassifier
@@ -45,7 +44,8 @@ namespace ImageClassifier
                 {
                     int index = int.Parse(this.StatusTextJumpTo.Text);
                     this.SelectedDataSource.JumpToSourceFile(index);
-                    this.ClassificationTabNextImage();
+                    //TODO:DELETE how to hook this this.ClassificationTabNextImage();
+                    this.SelectedDataSource.ImageControl.ShowNext();
                 }
                 catch (Exception)
                 {
@@ -69,229 +69,40 @@ namespace ImageClassifier
         {
             if (this.ConfigurationTabSourceProviderCombo.SelectedItem is DataSourceComboItem)
             {
-                this.SelectedDataSource = (this.ConfigurationTabSourceProviderCombo.SelectedItem as DataSourceComboItem).Source;
-                this.ConfigurationContext.DefaultProvider = this.SelectedDataSource.Name;
-                this.ConfigurationContext.Save();
-                this.InitializeUi(true);
-            }
-        }
-        #endregion
+                this.StatusBarClearStatus();
 
-        #region Annotation Tab Events
-        private void ClassificationTabContainerChanged(object sender, SelectionChangedEventArgs args)
-        {
-            this.StatusBarClearStatus();
-            this.ClassificationTabImageLabel.Text = String.Empty;
-            this.ClassificationTabImageSizeData.Text = String.Empty;
-            this.ClassificationTabImagePanel.Children.Clear();
-            this.ClassificationTabNavigationButtonNext.IsEnabled = false;
-            this.ClassificationTabNavigationButtonPrevious.IsEnabled = false;
-
-            if (this.SelectedDataSource != null &&
-                this.CurrentSourceFile != null &&
-                this.SelectedDataSource.DeleteSourceFilesWhenComplete &&
-                System.IO.File.Exists(this.CurrentSourceFile.CurrentSource.DiskLocation))
-            {
-                System.IO.File.Delete(this.CurrentSourceFile.CurrentSource.DiskLocation);
-            }
-
-            ContainerComboItem item = null;
-            if ((item = this.ClassificationTabContainerCombo.SelectedItem as ContainerComboItem) != null)
-            {
-                this.StatusBarCollection.Text = item.ToString();
-
+                // Unhook control callbacks......
                 if (this.SelectedDataSource != null)
                 {
-                    this.SelectedDataSource.SetContainer(item.SourceContainer);
-
-                    this.ClassificationTabNavigationButtonNext.IsEnabled = this.SelectedDataSource.CanMoveNext;
-                    this.ClassificationTabNavigationButtonPrevious.IsEnabled = this.SelectedDataSource.CanMovePrevious;
-                }
-
-                // Now fast forward through what we have.
-                if(this.SelectedDataSource.Sink != null &&
-                    this.SelectedDataSource.CurrentContainerCollectionCount > 0 )
-                {
-                    int imageIdx = 1;
-                    this.SelectedDataSource.JumpToSourceFile(imageIdx);
-                    foreach(String itemName in this.SelectedDataSource.CurrentContainerCollectionNames)
+                    this.SelectedDataSource.ContainerControl.OnContainerChanged -= this.IContainerControlContainerChanged;
+                    if (this.SelectedDataSource.ImageControl is ISingleImageControl)
                     {
-                        if(!this.SelectedDataSource.Sink.ItemHasBeenScored(this.SelectedDataSource.CurrentContainer, itemName))
-                        {
-                            break;
-                        }
-                        imageIdx++;
+                        ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged -= this.ISingleImageControlFileChanged;
                     }
-                    this.SelectedDataSource.JumpToSourceFile(imageIdx);
                 }
 
-                this.ClassificationTabNextImage();
-            }
-        }
+                this.SelectedDataSource = (this.ConfigurationTabSourceProviderCombo.SelectedItem as DataSourceComboItem).Source;
 
-        private void ClassificationTabZoomImage()
-        {
-            foreach (UIElement item in this.ClassificationTabImagePanel.Children)
-            {
-                Image child = null;
-                if ((child = item as Image) != null)
+                this.ConfigurationContext.DefaultProvider = this.SelectedDataSource.Name;
+                this.ConfigurationContext.Save();
+
+                this.InitializeUi(true);
+
+                // Hook control callbacks......
+                if (this.SelectedDataSource.ImageControl is ISingleImageControl)
                 {
-                    child.Height = child.Height * 1.2;
-                    child.Width = child.Width * 1.2;
-
-                    this.CurrentSourceFile.CurrentSize = new System.Drawing.Size((int)child.Width, (int)child.Height);
-                    this.ClassificationTabUpdateSizeInformation();
+                    ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged += this.ISingleImageControlFileChanged;
                 }
+
+                this.SelectedDataSource.ContainerControl.OnContainerChanged += this.IContainerControlContainerChanged;
+                this.SelectedDataSource.ContainerControl.Refresh();
             }
         }
 
-        private void ClassificationTabZoomOutImage()
-        {
-            foreach (UIElement item in this.ClassificationTabImagePanel.Children)
-            {
-                Image child = null;
-                if ((child = item as Image) != null)
-                {
-                    child.Height = child.Height * .8;
-                    child.Width = child.Width * .8;
+        #endregion
 
-                    this.CurrentSourceFile.CurrentSize = new System.Drawing.Size((int)child.Width, (int)child.Height);
-                    this.ClassificationTabUpdateSizeInformation();
-                }
-            }
-        }
-
-        private void ClassificationTabUpdateSizeInformation()
-        {
-            String imageSizeInfo = String.Empty;
-            if (this.CurrentSourceFile != null)
-            {
-                imageSizeInfo = String.Format("Original Size: {0}{3}Current Size:{1}{3}Zoom Level: {2}%",
-                    this.CurrentSourceFile.OriginalSize.ToString(),
-                    this.CurrentSourceFile.CurrentSize.ToString(),
-                    this.CurrentSourceFile.Zoom.ToString(),
-                    Environment.NewLine);
-            }
-            this.ClassificationTabImageSizeData.Text = imageSizeInfo;
-        }
-        private void ClassificationTabMoveImage(SourceFile file)
-        {
-            if(this.CurrentSourceFile != null && this.CurrentSourceFile.CurrentSource != null)
-            {
-                this.CurrentSourceFile.CurrentSource.Classifications = this.AnnotationsPanelCollectSelections();
-                this.SelectedDataSource.UpdateSourceFile(this.CurrentSourceFile.CurrentSource);
-
-                if (this.SelectedDataSource.DeleteSourceFilesWhenComplete &&
-                    System.IO.File.Exists(this.CurrentSourceFile.CurrentSource.DiskLocation))
-                {
-                        System.IO.File.Delete(this.CurrentSourceFile.CurrentSource.DiskLocation);
-                }
-            }
-            this.CurrentSourceFile.CurrentSource = file;
-
-            // Update the status bar
-            this.StatusBarLocationStatus.Text =
-                String.Format("Viewing {0} of {1} ",
-                this.SelectedDataSource.CurrentContainerIndex + 1,
-                this.SelectedDataSource.CurrentContainerCollectionCount);
-
-
-            // Clear the stack panel
-            double height = this.ClassificationTabSelectionPanel.ActualHeight;
-            double width = this.ClassificationTabSelectionPanel.ActualWidth;
-            this.ClassificationTabImageLabel.Text = String.Empty;
-            this.ClassificationTabImagePanel.Children.Clear();
-
-            System.IO.MemoryStream downloadFile = this.GetFileStream(file.DiskLocation);
-
-            // Set up the annotations from the selected image
-            this.AnnotationPanelSelectFromImage(file);
-
-            // Add the image to the stack panel for viewing and the image name
-            this.ClassificationTabImageLabel.Text = String.Format("Current Image: {0}", file.Name);
-            this.ClassificationTabImagePanel.Children.Add(this.CreateUiImage(width, height, downloadFile));
-
-            // UPdate the image information 
-            this.ClassificationTabUpdateSizeInformation();
-
-            // Update the navigation buttons
-            this.ClassificationTabNavigationButtonNext.IsEnabled = this.SelectedDataSource.CanMoveNext;
-            this.ClassificationTabNavigationButtonPrevious.IsEnabled = this.SelectedDataSource.CanMovePrevious;
-        }
-
-        private void ClassificationTabPreviousImage()
-        {
-            if (this.SelectedDataSource != null && this.SelectedDataSource.CanMovePrevious)
-            {
-                this.ClassificationTabMoveImage(this.SelectedDataSource.PreviousSourceFile());
-            }
-        }
-
-        private void ClassificationTabNextImage()
-        {
-            if(this.SelectedDataSource != null && this.SelectedDataSource.CanMoveNext)
-            {
-                this.ClassificationTabMoveImage(this.SelectedDataSource.NextSourceFile());
-            }
-        }
-
-        #region Annotation Tab Image Helpers
-        private Image CreateUiImage(double parentWidth, double parentHeight, System.IO.MemoryStream stream)
-        {
-            System.Windows.Media.Imaging.BitmapImage bi = new System.Windows.Media.Imaging.BitmapImage();
-            bi.BeginInit();
-            bi.StreamSource = stream;
-            bi.EndInit();
-
-            Image newImage = new Image();
-            newImage.Source = bi;
-            newImage.Width = bi.Width;
-            newImage.Height = bi.Height;
-            newImage.Stretch = System.Windows.Media.Stretch.Fill;
-            newImage.StretchDirection = StretchDirection.Both;
-
-
-            this.CurrentSourceFile.OriginalSize = new System.Drawing.Size((int)bi.Width, (int)bi.Height);
-            this.CurrentSourceFile.CurrentSize = new System.Drawing.Size((int)bi.Width, (int)bi.Height);
-
-            if (parentWidth > 0 && parentHeight > 0)
-            {
-                if (
-                    ((parentWidth < newImage.Width) && (parentHeight < newImage.Height)) ||
-                    ((parentWidth > newImage.Width) && (parentHeight > newImage.Height))
-                    )
-                {
-                    double widthChange = parentWidth / newImage.Width;
-                    double heightChange = parentHeight / newImage.Height;
-
-                    double use = (widthChange > heightChange) ? widthChange : heightChange ;
-                    use = use * .8;
-
-                    newImage.Width = newImage.Width * use;
-                    newImage.Height = newImage.Height * use;
-                    this.CurrentSourceFile.CurrentSize = new System.Drawing.Size((int)newImage.Width, (int)newImage.Height);
-                }
-            }
-            return newImage;
-        }
-
-        private System.IO.MemoryStream GetFileStream(string fileLocation)
-        {
-            System.IO.MemoryStream returnStream = null;
-            using (System.IO.FileStream stream = new System.IO.FileStream(fileLocation, System.IO.FileMode.Open))
-            {
-                returnStream = new System.IO.MemoryStream();
-                stream.CopyTo(returnStream);
-            }
-
-            returnStream.Position = 0;
-            return returnStream;
-
-        }
-        #endregion  Annotation Tab Image Helpers
-
-        #region Annotation Tab Data Collection
-        private List<String> AnnotationsPanelCollectSelections()
+        #region Classification Tab
+        private List<String> ClassificationPanelCollectSelections()
         {
             List<String> annotations = new List<string>();
 
@@ -310,7 +121,7 @@ namespace ImageClassifier
             return annotations;
         }
 
-        private void AnnotationPanelSelectFromImage(SourceFile image)
+        private void ClassificationPanelMakeSelections(SourceFile image)
         {
             foreach (UIElement ui in this.ClassificationTabSelectionPanel.Children)
             {
@@ -321,8 +132,6 @@ namespace ImageClassifier
                 }
             }
         }
-        #endregion Annotation Tab Data Collection
-
         #endregion Annotation Tab Events
     }
 }

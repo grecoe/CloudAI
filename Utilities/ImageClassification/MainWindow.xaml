@@ -20,97 +20,34 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="200"/>
                 </Grid.ColumnDefinitions>
-                
-                <ComboBox 
-                    x:Name="ClassificationTabContainerCombo"
-                    Margin="10,10,10,10"
-                    Grid.Row="0">
-                </ComboBox>
-                <Grid 
-                    Grid.Row="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="150"/>
-                    </Grid.ColumnDefinitions>
 
-                        <Grid 
-                            Grid.Row="0"
-                            Grid.Column="0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" 
-                                       x:Name="ClassificationTabImageLabel"
-                                       FontSize="14"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"></TextBlock>
+                <DockPanel
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    Height="Auto"
+                    x:Name="ContainerPanel"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2">
+                </DockPanel>
 
-                            <ScrollViewer Grid.Row="1"
-                                          VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollBarVisibility="Auto">
-                                <StackPanel
-                                    ScrollViewer.CanContentScroll="True"
-                                    x:Name="ClassificationTabImagePanel"
-                                    Grid.Row="1"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
-                                </StackPanel>
-                            </ScrollViewer>
-                            
-                            <TextBlock Grid.Row="2" 
-                                       x:Name="ClassificationTabImageSizeData"
-                                       FontSize="12"
-                                       HorizontalAlignment="Center"></TextBlock>
+                <DockPanel
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    Height="Auto"
+                    x:Name="ImagePanel"
+                    Grid.Row="1"
+                    Grid.Column="0">
+                </DockPanel>
 
-                        </Grid>
-                    
-                    <!-- Classifications -->
-                    <StackPanel 
-                        Grid.Row="0"
+                <StackPanel 
+                        Grid.Row="1"
                         Grid.Column="1" 
                         x:Name="ClassificationTabSelectionPanel"
                         Orientation="Vertical">
-                    </StackPanel>
-
-                        <!-- Navigation -->
-                    <StackPanel 
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Center">
-                        <Button 
-                            x:Name="ClassificationTabNavigationButtonDownZoom"
-                            FontSize="14"
-                            Margin="10,5,10,5">
-                            -Zoom
-                        </Button>
-                        <Button 
-                            x:Name="ClassificationTabNavigationButtonPrevious"
-                            FontSize="14"
-                            Margin="10,5,10,5">
-                            Previous
-                        </Button>
-                        <Button 
-                            x:Name="ClassificationTabNavigationButtonNext"
-                            FontSize="14"
-                            Margin="10,5,10,5">
-                            Next
-                        </Button>
-                        <Button 
-                            x:Name="ClassificationTabNavigationButtonUpZoom"
-                            FontSize="14"
-                            Margin="10,5,10,5">
-                            +Zoom
-                        </Button>
-                    </StackPanel>
-                </Grid>
+                </StackPanel>
             </Grid>
         </TabItem>
         <TabItem Header="Configuration">
@@ -155,16 +92,6 @@
                 </ComboBox>
 
                 <TextBlock 
-                        x:Name="ConfigurationTabSinkLabel"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Margin="5,5,5,5"
-                    FontSize="10"
-                        HorizontalAlignment="Center">
-                    Sink Provider......
-                </TextBlock>
-
-                <TextBlock 
                     Grid.Row="3"
                     Grid.Column="0"
                     Margin="5,5,5,20"
@@ -191,7 +118,7 @@
                     Source Provider Configurations
                 </TextBlock>
 
-                    <TabControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ConfigurationTabSourceTabControl">
+                <TabControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ConfigurationTabSourceTabControl">
                 </TabControl>
             </Grid>
         </TabItem>

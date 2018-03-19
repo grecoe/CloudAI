@@ -22,6 +22,7 @@ using System.Windows;
 using ImageClassifier.UIUtils;
 using System.Windows.Input;
 using System.Collections.Generic;
+using ImageClassifier.Interfaces.GenericUI;
 
 namespace ImageClassifier
 {
@@ -30,46 +31,35 @@ namespace ImageClassifier
         private void InitializeUi(bool fullInitialization)
         {
             PopulateAnnotationsTabAnnotationsPanel();
-            this.ClassificationTabImageSizeData.Text = String.Empty;
 
             if (fullInitialization)
             {
-                this.ClassificationTabImagePanel.Children.Clear();
-                this.ClassificationTabImageLabel.Text = String.Empty;
-                this.ClassificationTabContainerCombo.Items.Clear();
-                this.ConfigurationTabSinkLabel.Text = String.Empty;
-
                 if (this.SelectedDataSource != null)
                 {
-                    if (this.SelectedDataSource != null)
-                    {
-                        this.ConfigurationTabSinkLabel.Text = String.Format("Sink Provider: {0}", this.SelectedDataSource.Sink.Name);
-                    }
+                    // Set up the IImageControl 
+                    this.ImagePanel.Children.Clear();
+                    this.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
+                    this.ImagePanel.Children.Add(this.SelectedDataSource.ImageControl.Control);
 
-                    foreach (String file in this.SelectedDataSource.Containers)
-                    {
-                        this.ClassificationTabContainerCombo.Items.Add(new ContainerComboItem(this.SelectedDataSource.SourceType, file));
-                    }
-
-                    this.ClassificationTabContainerCombo.SelectedIndex = 0;
+                    // Set up the IContainerControl 
+                    this.ContainerPanel.Children.Clear();
+                    this.ContainerPanel.Children.Add(this.SelectedDataSource.ContainerControl.Control);
                 }
             }
         }
 
         /// <summary>
-        /// Checks to see if this is a multi-class scenario and uses either CheckBox or RadioButton to enforce it.
+        /// Populate the panel with the selections for classifications and then hook all of the key bindings
+        /// so it can be made with shortcuts.
         /// </summary>
         private void PopulateAnnotationsTabAnnotationsPanel()
         {
             this.InputBindings.Clear();
 
-            bool multiClass = true;
-            // Multiclass available by default
-            if(this.SelectedDataSource != null && !this.SelectedDataSource.MultiClass)
-            {
-                multiClass = false;
-            }
+            // Multiclass by default
+            bool multiClass = !(this.SelectedDataSource != null && !this.SelectedDataSource.MultiClass);
 
+            // Set up the controls on the panel
             this.ClassificationTabSelectionPanel.Children.Clear();
             List<System.Windows.Controls.Primitives.ToggleButton> boxes = new List<System.Windows.Controls.Primitives.ToggleButton>();
             foreach (String annotation in this.ConfigurationContext.Classifications)
@@ -84,6 +74,8 @@ namespace ImageClassifier
                     buttonX = new System.Windows.Controls.RadioButton() { GroupName = "Classifications" };
                 }
 
+                // Set up click so we can force change 
+                buttonX.Click += (o, e) => this.ForceClassificationUpdate(); 
                 buttonX.Content = annotation;
                 buttonX.Margin = new Thickness(5, 10, 5, 10);
 
@@ -91,6 +83,7 @@ namespace ImageClassifier
                 boxes.Add(buttonX);
             }
 
+            // Now set up all of the key bindings 
             this.PrepareAllInputBindings(boxes);
         }
 
@@ -114,11 +107,18 @@ namespace ImageClassifier
 
             foreach(System.Windows.Controls.Primitives.ToggleButton cb in boxes)
             {
-                this.PrepareInputBindings(new ToggleButtonCommand(cb), keys[keyIdx++]);
+                ToggleButtonCommand cmd = new ToggleButtonCommand(cb);
+                cmd.ClassificationsChanged += this.ForceClassificationUpdate;
+                this.PrepareInputBindings(cmd, keys[keyIdx++]);
             }
 
-            this.PrepareInputBindings(new ImageChangeCommand(this.ClassificationTabNavigationButtonNext, this.ClassificationTabNextImage), Key.N);
-            this.PrepareInputBindings(new ImageChangeCommand(this.ClassificationTabNavigationButtonPrevious, this.ClassificationTabPreviousImage), Key.P);
+            if (this.SelectedDataSource != null && this.SelectedDataSource.ImageControl != null)
+            {
+                foreach (KeyBinding binding in this.SelectedDataSource.ImageControl.Bindings)
+                {
+                    this.InputBindings.Add(binding);
+                }
+            }
         }
 
         private void PrepareInputBindings(ICommand command, System.Windows.Input.Key key)

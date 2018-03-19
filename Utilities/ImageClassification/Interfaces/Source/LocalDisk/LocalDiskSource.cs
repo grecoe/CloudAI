@@ -18,6 +18,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+using ImageClassifier.Interfaces.GenericUI;
 using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.Source.LocalDisk.Configuration;
 using ImageClassifier.Interfaces.Source.LocalDisk.UI;
@@ -34,19 +35,23 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
     class LocalDiskSource : ConfigurationBase<LocalDiskSourceConfiguration>, IDataSource
     {
         #region Private Members
+        /// <summary>
+        /// Configuration file for this source
+        /// </summary>
         private LocalDiskSourceConfiguration Configuration { get; set; }
-
         /// <summary>
         /// Index into CurrentImageList
         /// </summary>
         private int CurrentImage { get; set; }
         /// <summary>
-        /// List of files from the currently selected catalog file
+        /// List of files from the currently selected directory
         /// </summary>
         private List<String> CurrentImageList { get; set; }
+        /// <summary>
+        /// List of directories, which in this case become the containers.
+        /// </summary>
         private List<String> DirectoryListings { get; set; }
         #endregion
-
 
         public LocalDiskSource()
         : base("LocalStorageConfiguration.json")
@@ -67,17 +72,29 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             this.UpdateInformationRequested(null);
             this.InitializeOnNewContainer();
+
+            this.ContainerControl = new GenericContainerControl(this);
+            this.ImageControl = new SingleImageControl(this);
         }
 
         #region IDataSource
-        public IDataSink Sink { get; set; }
 
+        #region General
         public string Name { get; private set; }
         public DataSourceType SourceType { get; private set; }
+        public bool MultiClass { get { return false; } }
+        public bool DeleteSourceFilesWhenComplete { get { return false; } }
+        #endregion
+
+        #region Interfaces
+        public IDataSink Sink { get; set; }
         public IConfigurationControl ConfigurationControl { get; private set; }
+        public IContainerControl ContainerControl { get; private set; }
+        public IImageControl ImageControl { get; set; }
+        #endregion
+
         public string CurrentContainer { get; private set; }
         public IEnumerable<string> Containers { get { return this.DirectoryListings; } }
-        public bool DeleteSourceFilesWhenComplete { get { return false; } }
         public int CurrentContainerIndex { get { return this.CurrentImage; } }
         public int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
 
@@ -94,8 +111,6 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             }
 
         }
-        public bool MultiClass { get { return false; } }
-
         public bool CanMoveNext
         {
             get
@@ -110,9 +125,6 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
                 return !(this.CurrentImage <= 0);
             }
         }
-
-        public IEnumerable<string> FileUtils { get; private set; }
-
         public bool JumpToSourceFile(int index)
         {
             bool returnValue = true;
@@ -139,7 +151,6 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             return returnValue;
         }
-
         public SourceFile NextSourceFile()
         {
             SourceFile returnFile = null;
@@ -171,7 +182,6 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             }
             return returnFile;
         }
-
         public SourceFile PreviousSourceFile()
         {
             SourceFile returnFile = null;

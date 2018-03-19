@@ -22,6 +22,9 @@ using ImageClassifier.Interfaces;
 
 namespace ImageClassifier.UIUtils
 {
+    /// <summary>
+    /// ComboBox item used to display an IDataSource object
+    /// </summary>
     class DataSourceComboItem
     {
         public IDataSource Source { get; set; }

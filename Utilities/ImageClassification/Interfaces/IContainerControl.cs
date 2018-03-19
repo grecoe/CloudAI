@@ -17,43 +17,40 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-
-using System;
+using System.Windows;
 
 namespace ImageClassifier.Interfaces
 {
-  
+    /// <summary>
+    /// Delegate that handles notifications when the underlying configuration data
+    /// has been updated.
+    /// </summary>
+    public delegate void OnContainerChangedHandler(IContainerControl source, object container);
 
-    public interface IDataSink
+    /// <summary>
+    /// Control for the container drop list portion of the UI
+    /// </summary>
+    public interface IContainerControl
     {
         /// <summary>
-        /// Display name of this sink
+        /// Event for changing of the container
         /// </summary>
-        String Name { get; }
+        event OnContainerChangedHandler OnContainerChanged;
         /// <summary>
-        /// Find an item based on it's location
+        /// The current container
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns></returns>
-        ScoredItem Find(string container, string name);
+        string CurrentContainer { get;  }
         /// <summary>
-        /// Determine if an item has already been scored
+        /// DataSource that provides information
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns>True if in catalog, false otherwise</returns>
-        bool ItemHasBeenScored(string container, string name);
+        IDataSource DataSource { get; }
         /// <summary>
-        /// Add a catalog entry for the given item. Causes the catalog
-        /// to be persisted.
+        /// Re-populate the control
         /// </summary>
-        /// <param name="item">Item to record</param>
-        void Record(ScoredItem item);
+        void Refresh();
         /// <summary>
-        /// Purges the catalog data. Use on a refresh where the new catalog items
-        /// may not match teh existing catalog data.
+        /// The actual control to display
         /// </summary>
-        void Purge();
+        UIElement Control { get; }
     }
 }

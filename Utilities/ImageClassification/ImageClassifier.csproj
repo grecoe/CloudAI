@@ -66,14 +66,26 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Configuration\ClassificationContext.cs" />
+    <Compile Include="Interfaces\DataSourceType.cs" />
+    <Compile Include="Interfaces\GenericUI\GenericContainerControl.xaml.cs">
+      <DependentUpon>GenericContainerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\GenericUI\SingleImageControl.xaml.cs">
+      <DependentUpon>SingleImageControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\GlobalUtils\ConfigurationBase.cs" />
     <Compile Include="Interfaces\DataSourceFactory.cs" />
     <Compile Include="Interfaces\GlobalUtils\FileUtils.cs" />
     <Compile Include="Interfaces\GlobalUtils\GenericCsvLogger.cs" />
     <Compile Include="Interfaces\IConfigurationControl.cs" />
+    <Compile Include="Interfaces\IContainerControl.cs" />
     <Compile Include="Interfaces\IDataSink.cs" />
     <Compile Include="Interfaces\IDataSource.cs" />
+    <Compile Include="Interfaces\IImageControl.cs" />
+    <Compile Include="Interfaces\ISingleImageControl.cs" />
+    <Compile Include="Interfaces\ScoredItem.cs" />
     <Compile Include="Interfaces\Sink\Catalog\CatalogSink.cs" />
+    <Compile Include="Interfaces\SourceFile.cs" />
     <Compile Include="Interfaces\Source\BlobSource\AzureBlobSource.cs" />
     <Compile Include="Interfaces\Source\BlobSource\AzureStorage\StorageUtility.cs" />
     <Compile Include="Interfaces\Source\BlobSource\Configuration\AzureBlobStorageConfiguration.cs" />
@@ -91,13 +103,24 @@
     <Compile Include="Interfaces\Source\LocalDisk\UI\LocalSourceConfigurationUi.xaml.cs">
       <DependentUpon>LocalSourceConfigurationUi.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MainWindowIContainerControlCallback.cs" />
+    <Compile Include="MainWindowIDataSourceCallbacks.cs" />
+    <Compile Include="MainWindowIImageControlCallback.cs" />
     <Compile Include="MainWindowUiNotifications.cs" />
     <Compile Include="MainWindowUiPreparation.cs" />
     <Compile Include="UIUtils\CurrentItem.cs" />
     <Compile Include="UIUtils\ToggleButtonCommand.cs" />
     <Compile Include="UIUtils\DataSourceComboItem.cs" />
-    <Compile Include="UIUtils\ContainerComboItem.cs" />
+    <Compile Include="Interfaces\GenericUI\ContainerComboItem.cs" />
     <Compile Include="UIUtils\ImageChangeCommand.cs" />
+    <Page Include="Interfaces\GenericUI\GenericContainerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\GenericUI\SingleImageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Interfaces\Source\BlobSource\UI\AcquireContentWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

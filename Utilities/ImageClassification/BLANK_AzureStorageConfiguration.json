@@ -1,0 +1,9 @@
+{
+  "storageAccount": "[AZURE_STORAGE_NAME]",
+  "storageKey": "[AZURE_STORAGE_KEY]",
+  "storageContainer": "[AZURE_STORAGE_CONTAINER]",
+  "blobPrefix": "",
+  "fileType": ".png",
+  "fileCount": 1000,
+  "recordLocation": "[LOCAL_DIRECTORY_FOR_STORAGE_CATALOG]"
+}

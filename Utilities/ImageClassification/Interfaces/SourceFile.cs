@@ -18,42 +18,33 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
+using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
-  
-
-    public interface IDataSink
+    /// <summary>
+    /// SourceFile is used to pass data back and forth with an IDataSource
+    /// </summary>
+    public class SourceFile
     {
         /// <summary>
-        /// Display name of this sink
+        /// Display name of the item
         /// </summary>
-        String Name { get; }
+        public string Name { get; set; }
         /// <summary>
-        /// Find an item based on it's location
+        /// The full local disk path of the item. Source may have to 
+        /// retrieve this from a network. Use the IDataSource.DeleteSourceFilesWhenComplete
+        /// to determine if deleting when complete is acceptable.
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns></returns>
-        ScoredItem Find(string container, string name);
+        public string DiskLocation { get; set; }
         /// <summary>
-        /// Determine if an item has already been scored
+        /// Applied classifications to the object (if any)
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns>True if in catalog, false otherwise</returns>
-        bool ItemHasBeenScored(string container, string name);
-        /// <summary>
-        /// Add a catalog entry for the given item. Causes the catalog
-        /// to be persisted.
-        /// </summary>
-        /// <param name="item">Item to record</param>
-        void Record(ScoredItem item);
-        /// <summary>
-        /// Purges the catalog data. Use on a refresh where the new catalog items
-        /// may not match teh existing catalog data.
-        /// </summary>
-        void Purge();
+        public List<string> Classifications { get; set; }
+
+        public SourceFile()
+        {
+            this.Classifications = new List<string>();
+        }
     }
 }

@@ -46,69 +46,20 @@ namespace ImageClassifier
         /// A list of all known data sources
         /// </summary>
         private List<IDataSource> DataSources { get; set; }
-        /// <summary>
-        /// The currently selected item from the provider
-        /// </summary>
-        private CurrentItem CurrentSourceFile { get; set; }
         #endregion
 
-        #region Data source provider callbacks
-        /// <summary>
-        /// Called by a data source configuration UI to notify that the 
-        /// settings have changed.
-        /// </summary>
-        /// <param name="sender">The provider that made the change</param>
-        private void DataSourceConfigurationChanged(IDataSource sender)
-        {
-            // Something changed, make sure we get the annotations saved out
-            this.ConfigurationContext.Classifications = 
-                new List<string>(this.ConfigurationTabTextAnnotationTags.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-            this.ConfigurationContext.Save();
-
-            this.PopulateAnnotationsTabAnnotationsPanel();
-
-            if (sender == this.SelectedDataSource)
-            {
-                InitializeUi(false);
-            }
-        }
-
-        /// <summary>
-        /// Called by a data source configuration UI to notify that the 
-        /// data for the source has changed.
-        /// </summary>
-        /// <param name="sender">The provider that made the change</param>
-        private void DataSourceDataUpdated(IDataSource sender)
-        {
-            if (sender == this.SelectedDataSource)
-            {
-                InitializeUi(true);
-            }
-        }
-        #endregion
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Not sure if this is the right thing
-            this.CurrentSourceFile = new CurrentItem();
-
-
             // Class Objects
             this.ConfigurationContext = ClassificationContext.LoadConfiguration();
-           
-            // Hook UI events for the Annotation tab
-            this.ClassificationTabContainerCombo.SelectionChanged += ClassificationTabContainerChanged;
-            this.ClassificationTabNavigationButtonNext.Click += (o, e) => ClassificationTabNextImage();
-            this.ClassificationTabNavigationButtonPrevious.Click += (o, e) => ClassificationTabPreviousImage();
-            this.ClassificationTabNavigationButtonUpZoom.Click += (o, e) => ClassificationTabZoomImage();
-            this.ClassificationTabNavigationButtonDownZoom.Click += (o, e) => ClassificationTabZoomOutImage();
 
             // Hook events for the status bar
             this.StatusButtonJumpTo.Click += (o, e) => StatusBarJumpToImage();
 
-            // Source Provider setup 
+            // Source Provider setup and hooking the provider combo change event 
             this.LoadSourceProviders();
             this.ConfigurationTabSourceProviderCombo.SelectionChanged += (o, e) => SourceProviderChanged();
 
@@ -121,14 +72,11 @@ namespace ImageClassifier
                 foreach(object child in this.ConfigurationTabSourceProviderCombo.Items)
                 {
                     DataSourceComboItem comboItem = child as DataSourceComboItem;
-                    if (comboItem != null)
+                    if (comboItem != null && String.Compare(comboItem.Source.Name, this.ConfigurationContext.DefaultProvider) == 0)
                     {
-                        if(String.Compare(comboItem.Source.Name, this.ConfigurationContext.DefaultProvider) == 0)
-                        {
-                            this.ConfigurationTabSourceProviderCombo.SelectedIndex =
-                                this.ConfigurationTabSourceProviderCombo.Items.IndexOf(child);
-                            break;
-                        }
+                        this.ConfigurationTabSourceProviderCombo.SelectedIndex =
+                            this.ConfigurationTabSourceProviderCombo.Items.IndexOf(child);
+                        break;
                     }
                 }
             }
@@ -137,12 +85,11 @@ namespace ImageClassifier
                 this.ConfigurationTabSourceProviderCombo.SelectedIndex = 0;
             }
 
+            // Hook the closing event so we can ensure we capture all changes
             this.Closing += WindowClosing;
+
+            // Initialize with the settings we have.
             InitializeUi(true);
-
-            // Above line causes us to move with initialize so move back
-            this.ClassificationTabPreviousImage();
-
         }
 
         /// <summary>
@@ -155,8 +102,8 @@ namespace ImageClassifier
         {
             // Blob Source
             IDataSource blobSource = DataSourceFactory.GetDataSource(DataSourceProvider.AzureBlob,DataSink.Catalog);
-            blobSource.ConfigurationControl.OnConfigurationUdpated = this.DataSourceConfigurationChanged;
-            blobSource.ConfigurationControl.OnSourceDataUpdated = this.DataSourceDataUpdated;
+            blobSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
+            blobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             blobSource.ConfigurationControl.Parent = this;
 
             TabItem tabItem = new TabItem();
@@ -166,8 +113,8 @@ namespace ImageClassifier
 
             // Disk Source
             IDataSource localSource = DataSourceFactory.GetDataSource(DataSourceProvider.LocalDisk, DataSink.Catalog);
-            localSource.ConfigurationControl.OnConfigurationUdpated = this.DataSourceConfigurationChanged;
-            localSource.ConfigurationControl.OnSourceDataUpdated = this.DataSourceDataUpdated;
+            localSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
+            localSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             localSource.ConfigurationControl.Parent = this;
 
             tabItem = new TabItem();
@@ -190,10 +137,17 @@ namespace ImageClassifier
         /// </summary>
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (this.CurrentSourceFile != null && this.CurrentSourceFile.CurrentSource != null)
+            this.ForceClassificationUpdate();
+        }
+
+        /// <summary>
+        /// Helper function used whenever we need to save the current selections
+        /// </summary>
+        private void ForceClassificationUpdate()
+        {
+            if (this.SelectedDataSource != null && this.SelectedDataSource.ImageControl != null)
             {
-                this.CurrentSourceFile.CurrentSource.Classifications = this.AnnotationsPanelCollectSelections();
-                this.SelectedDataSource.UpdateSourceFile(this.CurrentSourceFile.CurrentSource);
+                this.SelectedDataSource.ImageControl.UpdateClassifications(this.ClassificationPanelCollectSelections());
             }
         }
     }

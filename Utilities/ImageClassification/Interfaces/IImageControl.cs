@@ -18,42 +18,50 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Input;
 
 namespace ImageClassifier.Interfaces
 {
-  
+    public delegate void OnClassificationsChanged(List<string> classifications);
 
-    public interface IDataSink
+    public interface IImageControl
     {
         /// <summary>
-        /// Display name of this sink
+        /// Parent control for sizing information
         /// </summary>
-        String Name { get; }
+        UIElement ParentControl { get; set; }
+
+        IEnumerable<KeyBinding> Bindings { get; }
+
         /// <summary>
-        /// Find an item based on it's location
+        /// Allow owner to update the classifications on the current image or set of images
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns></returns>
-        ScoredItem Find(string container, string name);
+        void UpdateClassifications(List<string> classifications);
+
         /// <summary>
-        /// Determine if an item has already been scored
+        /// DataSource that provides information
         /// </summary>
-        /// <param name="container">Container the item came from</param>
-        /// <param name="name">Name of the item</param>
-        /// <returns>True if in catalog, false otherwise</returns>
-        bool ItemHasBeenScored(string container, string name);
+        IDataSource DataSource { get; }
         /// <summary>
-        /// Add a catalog entry for the given item. Causes the catalog
-        /// to be persisted.
+        /// The actual control to display
         /// </summary>
-        /// <param name="item">Item to record</param>
-        void Record(ScoredItem item);
+        UIElement Control { get; }
+
         /// <summary>
-        /// Purges the catalog data. Use on a refresh where the new catalog items
-        /// may not match teh existing catalog data.
+        /// Clear UI elements
         /// </summary>
-        void Purge();
+        void Clear();
+
+        /// <summary>
+        /// Fast forward through the collection to the first un-tagged item
+        /// </summary>
+        void FastForward();
+
+        /// <summary>
+        /// Force the UI to show whatever the datasource has
+        /// </summary>
+        void ShowNext();
     }
 }
