@@ -45,6 +45,8 @@ namespace ImageClassifier.Interfaces
         /// be deleted when complted
         /// </summary>
         bool DeleteSourceFilesWhenComplete { get; }
+        void ClearSourceFiles();
+
         /// <summary>
         /// Flag indicating if multi class is supported for items
         /// </summary>
@@ -91,6 +93,7 @@ namespace ImageClassifier.Interfaces
         /// Count of items in the current container selection
         /// </summary>
         int CurrentContainerCollectionCount { get; }
+
         IEnumerable<string> CurrentContainerCollectionNames { get; }
         #endregion
 
@@ -100,24 +103,12 @@ namespace ImageClassifier.Interfaces
         /// the current container collection is valid.
         /// </summary>
         bool CanMovePrevious { get; }
-        /// <summary>
-        /// Request the previous item in the current container
-        /// collection.
-        /// </summary>
-        /// <returns>SourceFile indicating information for the previous item</returns>
-        SourceFile PreviousSourceFile();
 
         /// <summary>
         /// Flag indicating if a move to the next item in 
         /// the current container collection is valid.
         /// </summary>
         bool CanMoveNext { get; }
-        /// <summary>
-        /// Request the next item in the current container
-        /// collection.
-        /// </summary>
-        /// <returns>SourceFile indicating information for the next item</returns>
-        SourceFile NextSourceFile();
 
         /// <summary>
         /// Jump to another point in the current container collection

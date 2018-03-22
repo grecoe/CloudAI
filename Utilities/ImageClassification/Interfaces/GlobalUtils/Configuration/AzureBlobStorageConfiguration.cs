@@ -20,49 +20,26 @@
 
 using System;
 
-namespace ImageClassifier.Interfaces.GlobalUtils
+namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
-    class ConfigurationBase<T> where T: class,new()
+    public class AzureBlobStorageConfiguration
     {
-        [Newtonsoft.Json.JsonIgnore]
-        public String FileName { get; private set; }
-
-        [Newtonsoft.Json.JsonIgnore]
-        private String FileLocation { get; set; }
-
-        public ConfigurationBase(String fileName)
-        {
-            if(String.IsNullOrEmpty(fileName))
-            {
-                throw new ArgumentNullException("ConfigurationBase : fileName");
-            }
-
-            this.FileName = fileName;
-
-            this.FileLocation = System.IO.Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                fileName);
-        }
-
-        public T LoadConfiguration()
-        {
-            if (System.IO.File.Exists(this.FileLocation))
-            {
-                String content = System.IO.File.ReadAllText(this.FileLocation);
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(content);
-            }
-
-            T returnVal = new T();
-            this.SaveConfiguration(returnVal);
-            return returnVal;
-        }
-
-        public void SaveConfiguration(T data)
-        {
-            System.IO.File.WriteAllText(
-                this.FileLocation,
-                Newtonsoft.Json.JsonConvert.SerializeObject(data,Newtonsoft.Json.Formatting.Indented));
-        }
-
+        [Newtonsoft.Json.JsonProperty(PropertyName = "storageAccount")]
+        public String StorageAccount { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "storageKey")]
+        public String StorageAccountKey { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "storageContainer")]
+        public String StorageContainer { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "blobPrefix")]
+        public String BlobPrefix { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "recurseDirectories")]
+        public bool RecurseDirectories { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "fileType")]
+        public String FileType { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "fileCount")]
+        public int FileCount { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "recordLocation")]
+        public string RecordLocation { get; set; }
+        
     }
 }

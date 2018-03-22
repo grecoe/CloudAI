@@ -20,15 +20,49 @@
 
 using System;
 
-namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
+namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
-    class ScoringImage
+    class ConfigurationBase<T> where T: class,new()
     {
-        public String Url { get; set; }
+        [Newtonsoft.Json.JsonIgnore]
+        public String FileName { get; private set; }
 
-        public override string ToString()
+        [Newtonsoft.Json.JsonIgnore]
+        private String FileLocation { get; set; }
+
+        public ConfigurationBase(String fileName)
         {
-            return this.Url;
+            if(String.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentNullException("ConfigurationBase : fileName");
+            }
+
+            this.FileName = fileName;
+
+            this.FileLocation = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                fileName);
         }
+
+        public T LoadConfiguration()
+        {
+            if (System.IO.File.Exists(this.FileLocation))
+            {
+                String content = System.IO.File.ReadAllText(this.FileLocation);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(content);
+            }
+
+            T returnVal = new T();
+            this.SaveConfiguration(returnVal);
+            return returnVal;
+        }
+
+        public void SaveConfiguration(T data)
+        {
+            System.IO.File.WriteAllText(
+                this.FileLocation,
+                Newtonsoft.Json.JsonConvert.SerializeObject(data,Newtonsoft.Json.Formatting.Indented));
+        }
+
     }
 }

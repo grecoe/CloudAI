@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.UIUtils;
 
 namespace ImageClassifier.Interfaces.GenericUI
@@ -174,14 +175,6 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void MoveImage(SourceFile file)
         {
-            if (this.CurrentSourceFile != null && this.CurrentSourceFile.CurrentSource != null)
-            {
-                if (this.DataSource.DeleteSourceFilesWhenComplete &&
-                    System.IO.File.Exists(this.CurrentSourceFile.CurrentSource.DiskLocation))
-                {
-                    System.IO.File.Delete(this.CurrentSourceFile.CurrentSource.DiskLocation);
-                }
-            }
             this.CurrentSourceFile.CurrentSource = file;
 
             // Get the size of the parent
@@ -202,14 +195,14 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ImageLabel.Text = String.Empty;
             this.ImagePanel.Children.Clear();
 
-            System.IO.MemoryStream downloadFile = this.GetFileStream(file.DiskLocation);
+            System.IO.MemoryStream downloadFile = FileUtils.GetFileStream(file.DiskLocation);
 
             // Call the image changed so that the base can update what it needs.
             this.ImageChanged?.Invoke(file);
 
             // Add the image to the stack panel for viewing and the image name
             this.ImageLabel.Text = String.Format("Current Image: {0}", file.Name);
-            this.ImagePanel.Children.Add(this.CreateUiImage(width, height, downloadFile));
+            this.ImagePanel.Children.Add(ElementCreation.CreateUiImage(this.CurrentSourceFile, width, height, downloadFile));
 
             // UPdate the image information 
             this.UpdateSizeInformation();
@@ -221,75 +214,27 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void PreviousImage()
         {
-            if (this.DataSource != null && this.DataSource.CanMovePrevious)
+            this.DataSource.ClearSourceFiles();
+
+            if (this.DataSource != null && 
+                this.DataSource.CanMovePrevious &&
+                this.DataSource is ISingleImageDataSource)
             {
-                this.MoveImage(this.DataSource.PreviousSourceFile());
+                this.MoveImage((this.DataSource as ISingleImageDataSource).PreviousSourceFile());
             }
         }
 
         private void NextImage()
         {
-            if (this.DataSource != null && this.DataSource.CanMoveNext)
+            this.DataSource.ClearSourceFiles();
+
+            if (this.DataSource != null && 
+                this.DataSource.CanMoveNext &&
+                this.DataSource is ISingleImageDataSource)
             {
-                this.MoveImage(this.DataSource.NextSourceFile());
+                this.MoveImage((this.DataSource as ISingleImageDataSource).NextSourceFile());
             }
         }
         #endregion
-
-        #region Image Helpers
-        private Image CreateUiImage(double parentWidth, double parentHeight, System.IO.MemoryStream stream)
-        {
-            System.Windows.Media.Imaging.BitmapImage bi = new System.Windows.Media.Imaging.BitmapImage();
-            bi.BeginInit();
-            bi.StreamSource = stream;
-            bi.EndInit();
-
-            Image newImage = new Image();
-            newImage.Source = bi;
-            newImage.Width = bi.Width;
-            newImage.Height = bi.Height;
-            newImage.Stretch = System.Windows.Media.Stretch.Fill;
-            newImage.StretchDirection = StretchDirection.Both;
-
-
-            this.CurrentSourceFile.OriginalSize = new System.Drawing.Size((int)bi.Width, (int)bi.Height);
-            this.CurrentSourceFile.CurrentSize = new System.Drawing.Size((int)bi.Width, (int)bi.Height);
-
-            if (parentWidth > 0 && parentHeight > 0)
-            {
-                if (
-                    ((parentWidth < newImage.Width) && (parentHeight < newImage.Height)) ||
-                    ((parentWidth > newImage.Width) && (parentHeight > newImage.Height))
-                    )
-                {
-                    double widthChange = parentWidth / newImage.Width;
-                    double heightChange = parentHeight / newImage.Height;
-
-                    double use = (widthChange > heightChange) ? heightChange : widthChange;
-                    use = use * .8;
-
-                    newImage.Width = newImage.Width * use;
-                    newImage.Height = newImage.Height * use;
-                    this.CurrentSourceFile.CurrentSize = new System.Drawing.Size((int)newImage.Width, (int)newImage.Height);
-                }
-            }
-            return newImage;
-        }
-
-        private System.IO.MemoryStream GetFileStream(string fileLocation)
-        {
-            System.IO.MemoryStream returnStream = null;
-            using (System.IO.FileStream stream = new System.IO.FileStream(fileLocation, System.IO.FileMode.Open))
-            {
-                returnStream = new System.IO.MemoryStream();
-                stream.CopyTo(returnStream);
-            }
-
-            returnStream.Position = 0;
-            return returnStream;
-
-        }
-        #endregion  Image Helpers
-
     }
 }

@@ -18,22 +18,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System.Windows;
+using System;
 
-namespace ImageClassifier.Interfaces.GlobalUtils
+namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
-    class ConfigurationControlImpl : IConfigurationControl
+    class ScoringImage
     {
-        public OnUpdateSourceData OnSourceDataUpdated { get; set; }
-        public OnConfigurationUpdatedHandler OnConfigurationUdpated { get; set; }
-        public Window Parent { get; set; }
-        public string Title { get; private set; }
-        public UIElement Control { get; private set; }
+        public String Url { get; set; }
 
-        public ConfigurationControlImpl(string title, UIElement config)
+        public override string ToString()
         {
-            this.Title = title;
-            this.Control = config;
+            return this.Url;
         }
     }
 }

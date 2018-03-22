@@ -17,9 +17,10 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-using ImageClassifier.Interfaces.Source.BlobSource.Configuration;
-using ImageClassifier.Interfaces.GlobalUtils;
 using System;
+using ImageClassifier.Interfaces.GlobalUtils;
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
 {
@@ -34,11 +35,6 @@ namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
                 new string[] { "Url" })
         {
             this.Configuration = configuration;
-        }
-
-        public void Record(ScoringImage image)
-        {
-            this.Record(image.ToString());
         }
 
         public static ScoringImage ParseRecord(String entry)

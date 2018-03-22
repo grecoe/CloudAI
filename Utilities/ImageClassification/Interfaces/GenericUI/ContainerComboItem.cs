@@ -18,7 +18,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces;
 using System;
 
 namespace ImageClassifier.Interfaces.GenericUI
@@ -54,6 +53,11 @@ namespace ImageClassifier.Interfaces.GenericUI
                     // Directories
                     string root = System.IO.Path.GetPathRoot(this.SourceContainer);
                     returnValue = this.SourceContainer.Substring(root.Length);
+                }
+                else if(this.SourceType == DataSourceType.LabelledBlob)
+                {
+                    // Blob prefixes from storage
+                    returnValue = this.SourceContainer.Trim(new char[] { '/', '\\' });
                 }
                 else
                 {

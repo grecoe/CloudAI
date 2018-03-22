@@ -20,6 +20,7 @@
 
 using ImageClassifier.Configuration;
 using ImageClassifier.Interfaces;
+using ImageClassifier.Interfaces.Source.LabeldBlobSource;
 using ImageClassifier.UIUtils;
 using System;
 using System.Collections.Generic;
@@ -67,7 +68,7 @@ namespace ImageClassifier
             // the default, which is set every time the user changes it, if it's not
             // set just set the first one, but it has to happen here to get the right
             // context for the UI before initializing
-            if(!String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
+            if (!String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
             {
                 foreach(object child in this.ConfigurationTabSourceProviderCombo.Items)
                 {
@@ -122,7 +123,18 @@ namespace ImageClassifier
             tabItem.Content = localSource.ConfigurationControl.Control;
             this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
 
-            this.DataSources = new List<IDataSource>() { blobSource, localSource };
+            // Labelled blob Source
+            IDataSource labelledBlobSource = DataSourceFactory.GetDataSource(DataSourceProvider.LabeledAzureBlob, DataSink.Catalog);
+            labelledBlobSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
+            labelledBlobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
+            labelledBlobSource.ConfigurationControl.Parent = this;
+
+            tabItem = new TabItem();
+            tabItem.Header = labelledBlobSource.ConfigurationControl.Title;
+            tabItem.Content = labelledBlobSource.ConfigurationControl.Control;
+            this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
+
+            this.DataSources = new List<IDataSource>() { blobSource, localSource, labelledBlobSource };
 
             // Set the UI up but don't select one, happens later after we hook the selection changed.
             foreach (IDataSource source in this.DataSources)

@@ -75,9 +75,15 @@ namespace ImageClassifier
                 if (this.SelectedDataSource != null)
                 {
                     this.SelectedDataSource.ContainerControl.OnContainerChanged -= this.IContainerControlContainerChanged;
+
                     if (this.SelectedDataSource.ImageControl is ISingleImageControl)
                     {
                         ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged -= this.ISingleImageControlFileChanged;
+                    }
+
+                    if(this.SelectedDataSource is IMultiImageDataSource)
+                    {
+                        (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired -= this.MultiImageSourceContainerLabelsChanged;
                     }
                 }
 
@@ -89,9 +95,17 @@ namespace ImageClassifier
                 this.InitializeUi(true);
 
                 // Hook control callbacks......
-                if (this.SelectedDataSource.ImageControl is ISingleImageControl)
+                if (this.SelectedDataSource != null)
                 {
-                    ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged += this.ISingleImageControlFileChanged;
+                    if (this.SelectedDataSource.ImageControl is ISingleImageControl)
+                    {
+                        ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged += this.ISingleImageControlFileChanged;
+                    }
+
+                    if (this.SelectedDataSource is IMultiImageDataSource)
+                    {
+                        (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
+                    }
                 }
 
                 this.SelectedDataSource.ContainerControl.OnContainerChanged += this.IContainerControlContainerChanged;
@@ -99,6 +113,10 @@ namespace ImageClassifier
             }
         }
 
+        private void MultiImageSourceContainerLabelsChanged(IEnumerable<string> labels)
+        {
+            int x = 9;
+        }
         #endregion
 
         #region Classification Tab

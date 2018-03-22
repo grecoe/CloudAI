@@ -67,13 +67,23 @@
     </ApplicationDefinition>
     <Compile Include="Configuration\ClassificationContext.cs" />
     <Compile Include="Interfaces\DataSourceType.cs" />
+    <Compile Include="Interfaces\GenericUI\ElementCreation.cs" />
     <Compile Include="Interfaces\GenericUI\GenericContainerControl.xaml.cs">
       <DependentUpon>GenericContainerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\GenericUI\MultiImageControl.xaml.cs">
+      <DependentUpon>MultiImageControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\GenericUI\MultiImageInstance.xaml.cs">
+      <DependentUpon>MultiImageInstance.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\GenericUI\MultiInstanceDetailWindow.xaml.cs">
+      <DependentUpon>MultiInstanceDetailWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\GenericUI\SingleImageControl.xaml.cs">
       <DependentUpon>SingleImageControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\GlobalUtils\ConfigurationBase.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationBase.cs" />
     <Compile Include="Interfaces\DataSourceFactory.cs" />
     <Compile Include="Interfaces\GlobalUtils\FileUtils.cs" />
     <Compile Include="Interfaces\GlobalUtils\GenericCsvLogger.cs" />
@@ -82,22 +92,27 @@
     <Compile Include="Interfaces\IDataSink.cs" />
     <Compile Include="Interfaces\IDataSource.cs" />
     <Compile Include="Interfaces\IImageControl.cs" />
+    <Compile Include="Interfaces\IMultiImageControl.cs" />
+    <Compile Include="Interfaces\IMultiImageDataSource.cs" />
     <Compile Include="Interfaces\ISingleImageControl.cs" />
+    <Compile Include="Interfaces\ISingleImageDataSource.cs" />
     <Compile Include="Interfaces\ScoredItem.cs" />
     <Compile Include="Interfaces\Sink\Catalog\CatalogSink.cs" />
     <Compile Include="Interfaces\SourceFile.cs" />
     <Compile Include="Interfaces\Source\BlobSource\AzureBlobSource.cs" />
-    <Compile Include="Interfaces\Source\BlobSource\AzureStorage\StorageUtility.cs" />
-    <Compile Include="Interfaces\Source\BlobSource\Configuration\AzureBlobStorageConfiguration.cs" />
+    <Compile Include="Interfaces\GlobalUtils\AzureStorage\StorageUtility.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Configuration\AzureBlobStorageConfiguration.cs" />
     <Compile Include="Interfaces\Source\BlobSource\Persistence\BlobPersistenceLogger.cs" />
-    <Compile Include="Interfaces\Source\BlobSource\Persistence\ScoringImage.cs" />
+    <Compile Include="Interfaces\GlobalUtils\AzureStorage\ScoringImage.cs" />
     <Compile Include="Interfaces\Source\BlobSource\UI\AcquireContentWindow.xaml.cs">
       <DependentUpon>AcquireContentWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\Source\BlobSource\UI\AzureStorageConfigurationUi.xaml.cs">
       <DependentUpon>AzureStorageConfigurationUi.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\GlobalUtils\ConfigurationControlImplementation.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationControlImplementation.cs" />
+    <Compile Include="Interfaces\Source\LabeldBlobSource\LabeledAzureBlobSource.cs" />
+    <Compile Include="Interfaces\Source\LabeldBlobSource\Persistence\LabelledBlobPersisteceLogger.cs" />
     <Compile Include="Interfaces\Source\LocalDisk\Configuration\LocalDiskSourceConfiguration.cs" />
     <Compile Include="Interfaces\Source\LocalDisk\LocalDiskSource.cs" />
     <Compile Include="Interfaces\Source\LocalDisk\UI\LocalSourceConfigurationUi.xaml.cs">
@@ -114,6 +129,18 @@
     <Compile Include="Interfaces\GenericUI\ContainerComboItem.cs" />
     <Compile Include="UIUtils\ImageChangeCommand.cs" />
     <Page Include="Interfaces\GenericUI\GenericContainerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\GenericUI\MultiImageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\GenericUI\MultiImageInstance.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\GenericUI\MultiInstanceDetailWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -160,6 +187,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\back.png" />
+    <Resource Include="Resources\forward.png" />
+    <Resource Include="Resources\zoomminus.png" />
+    <Resource Include="Resources\zoomplus.png" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -168,6 +199,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="LocalStorageConfiguration.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LabeledAzureStorageConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />

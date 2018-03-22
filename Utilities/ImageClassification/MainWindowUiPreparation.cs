@@ -23,6 +23,7 @@ using ImageClassifier.UIUtils;
 using System.Windows.Input;
 using System.Collections.Generic;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces;
 
 namespace ImageClassifier
 {
@@ -59,10 +60,17 @@ namespace ImageClassifier
             // Multiclass by default
             bool multiClass = !(this.SelectedDataSource != null && !this.SelectedDataSource.MultiClass);
 
+            // The classifications
+            List<String> classifications = new List<string>(this.ConfigurationContext.Classifications);
+            if(this.SelectedDataSource is IMultiImageDataSource)
+            {
+                classifications.AddRange((this.SelectedDataSource as IMultiImageDataSource).GetContainerLabels());
+            }
+
             // Set up the controls on the panel
             this.ClassificationTabSelectionPanel.Children.Clear();
             List<System.Windows.Controls.Primitives.ToggleButton> boxes = new List<System.Windows.Controls.Primitives.ToggleButton>();
-            foreach (String annotation in this.ConfigurationContext.Classifications)
+            foreach (String annotation in classifications)
             {
                 System.Windows.Controls.Primitives.ToggleButton buttonX = null;
                 if(multiClass)

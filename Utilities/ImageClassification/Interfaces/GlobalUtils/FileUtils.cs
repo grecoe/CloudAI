@@ -90,6 +90,19 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             }
         }
 
+        public static System.IO.MemoryStream GetFileStream(string fileLocation)
+        {
+            System.IO.MemoryStream returnStream = null;
+            using (System.IO.FileStream stream = new System.IO.FileStream(fileLocation, System.IO.FileMode.Open))
+            {
+                returnStream = new System.IO.MemoryStream();
+                stream.CopyTo(returnStream);
+            }
+
+            returnStream.Position = 0;
+            return returnStream;
+        }
+
         private static String GetUsableExtension(string extension)
         {
             String usableExtension = extension;

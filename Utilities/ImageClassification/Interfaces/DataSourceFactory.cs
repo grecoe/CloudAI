@@ -20,6 +20,7 @@
 
 using ImageClassifier.Interfaces.Sink.Catalog;
 using ImageClassifier.Interfaces.Source.BlobSource;
+using ImageClassifier.Interfaces.Source.LabeldBlobSource;
 using ImageClassifier.Interfaces.Source.LocalDisk;
 
 namespace ImageClassifier.Interfaces
@@ -30,6 +31,7 @@ namespace ImageClassifier.Interfaces
     public enum DataSourceProvider
     {
         AzureBlob,
+        LabeledAzureBlob,
         LocalDisk
     };
 
@@ -59,6 +61,9 @@ namespace ImageClassifier.Interfaces
             {
                 case DataSourceProvider.AzureBlob:
                     returnSource = new AzureBlobSource();
+                    break;
+                case DataSourceProvider.LabeledAzureBlob:
+                    returnSource = new LabeledAzureBlobSource();
                     break;
                 case DataSourceProvider.LocalDisk:
                     returnSource = new LocalDiskSource();

@@ -10,7 +10,7 @@ namespace ImageClassifier
         {
             if(this.SelectedDataSource == null || this.SelectedDataSource.ImageControl == null)
             {
-                return; // throw??
+                return; 
             }
 
             this.SelectedDataSource.ImageControl.Clear();
@@ -32,27 +32,6 @@ namespace ImageClassifier
 
             // Move to the first un-tagged item
             this.SelectedDataSource.ImageControl.FastForward();
-
-            /*
-            // Now fast forward to find something that isn't already classified.
-            if (this.SelectedDataSource.Sink != null &&
-                this.SelectedDataSource.CurrentContainerCollectionCount > 0)
-            {
-                int imageIdx = 1;
-                this.SelectedDataSource.JumpToSourceFile(imageIdx);
-                foreach (String itemName in this.SelectedDataSource.CurrentContainerCollectionNames)
-                {
-                    if (!this.SelectedDataSource.Sink.ItemHasBeenScored(this.SelectedDataSource.CurrentContainer, itemName))
-                    {
-                        break;
-                    }
-                    imageIdx++;
-                }
-                this.SelectedDataSource.JumpToSourceFile(imageIdx);
-            }
-
-            this.SelectedDataSource.ImageControl.ShowNext();
-            */
         }
     }
 }

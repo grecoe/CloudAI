@@ -20,6 +20,7 @@
 
 using ImageClassifier.Interfaces.GenericUI;
 using ImageClassifier.Interfaces.GlobalUtils;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using ImageClassifier.Interfaces.Source.LocalDisk.Configuration;
 using ImageClassifier.Interfaces.Source.LocalDisk.UI;
 using System;
@@ -32,7 +33,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
     /// <summary>
     /// An IDataSource implementation for local disk.
     /// </summary>
-    class LocalDiskSource : ConfigurationBase<LocalDiskSourceConfiguration>, IDataSource
+    class LocalDiskSource : ConfigurationBase<LocalDiskSourceConfiguration>, ISingleImageDataSource
     {
         #region Private Members
         /// <summary>
@@ -84,6 +85,15 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         public DataSourceType SourceType { get; private set; }
         public bool MultiClass { get { return false; } }
         public bool DeleteSourceFilesWhenComplete { get { return false; } }
+
+        public void ClearSourceFiles()
+        {
+            if (this.DeleteSourceFilesWhenComplete)
+            {
+                // We are not cleaning up anything at the moment
+            }
+        }
+
         #endregion
 
         #region Interfaces

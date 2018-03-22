@@ -21,12 +21,9 @@ using ImageClassifier.UIUtils;
 
 namespace ImageClassifier.Interfaces
 {
-    public delegate void OnImageChanged(SourceFile file);
 
     public interface ISingleImageControl : IImageControl
     {
-        event OnImageChanged ImageChanged;
-
         CurrentItem CurrentSourceFile { get; }
     }
 }

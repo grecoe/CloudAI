@@ -25,6 +25,7 @@ namespace ImageClassifier.Interfaces
     public enum DataSourceType
     {
         Blob,
+        LabelledBlob,
         Disk
     };
 }

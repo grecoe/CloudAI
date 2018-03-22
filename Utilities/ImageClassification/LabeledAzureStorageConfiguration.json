@@ -1,0 +1,15 @@
+﻿{
+  "storageAccount_1": "dangreadystgshare",
+  "storageKey_1": "VeVsh/GD35JkIKaw6zqIdpOwZnIwnAufZEPY/krcAaMWJIEMLKkvDSoPHlYcfaC7EcF9ngAPkujKxnHpVwv0ig==",
+  "storageContainer_1": "categories",
+  "blobPrefix_1": "images/",
+
+  "storageAccount": "jabiltempstorage",
+  "storageKey": "nGrXLAsAo4+rMjQ680TtkKDuI/wzOT/iJxxdtX7oi9zy63bdhrT38J6zdVDf2LRtJq6vJS+3IUrKRHfjGUzilw==",
+  "storageContainer": "tests",
+  "blobPrefix": "",
+
+  "fileType": ".jpg",
+  "fileCount": 100,
+  "recordLocation": "C:\\ImageClassify_Labelled_RECORDS"
+}

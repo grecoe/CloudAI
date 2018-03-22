@@ -24,10 +24,15 @@ using System.Windows.Input;
 
 namespace ImageClassifier.Interfaces
 {
+    public delegate void OnImageChanged(SourceFile file);
+
     public delegate void OnClassificationsChanged(List<string> classifications);
 
     public interface IImageControl
     {
+        event OnImageChanged ImageChanged;
+
+
         /// <summary>
         /// Parent control for sizing information
         /// </summary>

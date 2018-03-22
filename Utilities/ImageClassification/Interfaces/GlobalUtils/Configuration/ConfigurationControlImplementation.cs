@@ -18,26 +18,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
+using System.Windows;
 
-namespace ImageClassifier.Interfaces.Source.BlobSource.Configuration
+namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
-    public class AzureBlobStorageConfiguration
+    class ConfigurationControlImpl : IConfigurationControl
     {
-        [Newtonsoft.Json.JsonProperty(PropertyName = "storageAccount")]
-        public String StorageAccount { get; set; }
-        [Newtonsoft.Json.JsonProperty(PropertyName = "storageKey")]
-        public String StorageAccountKey { get; set; }
-        [Newtonsoft.Json.JsonProperty(PropertyName = "storageContainer")]
-        public String StorageContainer { get; set; }
-        [Newtonsoft.Json.JsonProperty(PropertyName = "blobPrefix")]
-        public String BlobPrefix { get; set; }
-        [Newtonsoft.Json.JsonProperty(PropertyName = "fileType")]
-        public String FileType { get; set; }
-        [Newtonsoft.Json.JsonProperty(PropertyName = "fileCount")]
-        public int FileCount { get; set; }
-        [Newtonsoft.Json.JsonProperty(PropertyName = "recordLocation")]
-        public string RecordLocation { get; set; }
-        
+        public OnUpdateSourceData OnSourceDataUpdated { get; set; }
+        public OnConfigurationUpdatedHandler OnConfigurationUdpated { get; set; }
+        public Window Parent { get; set; }
+        public string Title { get; private set; }
+        public UIElement Control { get; private set; }
+
+        public ConfigurationControlImpl(string title, UIElement config)
+        {
+            this.Title = title;
+            this.Control = config;
+        }
     }
 }

@@ -18,8 +18,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.Source.BlobSource.Configuration;
 using System;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System.Windows.Controls;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource.UI
@@ -33,6 +33,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource.UI
         public event OnUpdateSourceData OnSourceDataUpdated;
 
         public IDataSource Provider { get; private set; }
+
         public AzureBlobStorageConfiguration Configuration { get; private set; }
 
         public AzureStorageConfigurationUi(IDataSource source, AzureBlobStorageConfiguration config)

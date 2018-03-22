@@ -18,15 +18,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.Source.BlobSource.Configuration;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 
-namespace ImageClassifier.Interfaces.Source.BlobSource.AzureStorage
+namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
     class StorageUtility
     {
@@ -81,6 +81,55 @@ namespace ImageClassifier.Interfaces.Source.BlobSource.AzureStorage
                 this.Context.FileType,
                 includeToken);
         }
+
+        public List<String> ListDirectories(String container, String prefix, bool recurse)
+        {
+            List<String> directories = new List<string>();
+            this.Connect();
+
+            if (String.IsNullOrEmpty(container))
+            {
+                container = this.Context.StorageContainer;
+            }
+
+            CloudBlobContainer blobContainer = this.BlobClient.GetContainerReference(container);
+
+            return ListDirectoriesRecurse(blobContainer, prefix, recurse);
+            /*
+            foreach (IListBlobItem item in blobContainer.ListBlobs(prefix, false))
+            {
+                if (item.GetType() == typeof(CloudBlobDirectory))
+                {
+                    CloudBlobDirectory blob = (CloudBlobDirectory)item;
+
+                    directories.Add(blob.Prefix);
+                }
+            }
+
+            return directories;
+            */
+        }
+
+        private List<String> ListDirectoriesRecurse(CloudBlobContainer container, string prefix, bool recurse)
+        {
+            List<String> directories = new List<string>();
+            foreach (IListBlobItem item in container.ListBlobs(prefix, false))
+            {
+                if (item.GetType() == typeof(CloudBlobDirectory))
+                {
+                    CloudBlobDirectory blob = (CloudBlobDirectory)item;
+                    directories.Add(blob.Prefix);
+
+                    if (recurse)
+                    {
+                        directories.AddRange(this.ListDirectoriesRecurse(container, blob.Prefix, recurse));
+                    }
+                }
+            }
+            return directories;
+        }
+
+
 
         public IEnumerable<KeyValuePair<String, String>> ListBlobs(String container, String prefix, String fileType, bool includeToken)
         {

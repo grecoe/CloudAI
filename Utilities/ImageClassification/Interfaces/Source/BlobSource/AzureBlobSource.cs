@@ -17,23 +17,23 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-using ImageClassifier.Interfaces.Source.BlobSource.AzureStorage;
-using ImageClassifier.Interfaces.Source.BlobSource.Configuration;
 using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
 using ImageClassifier.Interfaces.Source.BlobSource.UI;
 using ImageClassifier.Interfaces.GlobalUtils;
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource
 {
     /// <summary>
     /// An IDataSource implementation for Azure Blob Storage.
     /// </summary>
-    class AzureBlobSource : ConfigurationBase<AzureBlobStorageConfiguration>, IDataSource
+    class AzureBlobSource : ConfigurationBase<AzureBlobStorageConfiguration>, ISingleImageDataSource
     {
         #region IDataSource
         public IDataSink Sink { get; set; }
@@ -43,6 +43,15 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         public DataSourceType SourceType { get; private set; }
 
         public bool DeleteSourceFilesWhenComplete { get { return true; } }
+
+        public void ClearSourceFiles()
+        {
+            if (this.DeleteSourceFilesWhenComplete)
+            {
+                String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
+                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
+            }
+        }
 
         public IContainerControl ContainerControl { get; private set; }
 
@@ -269,6 +278,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             // Clean up current catalog data
             FileUtils.DeleteFiles(this.Configuration.RecordLocation, new string[] { "*.csv" });
 
+
             // Load data from storage
             int fileLabel = 1;
             int recordCount = 0;
@@ -363,10 +373,8 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         private String DownloadStorageFile(string imageUrl)
         {
             String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
-            if (!System.IO.Directory.Exists(downloadDirectory))
-            {
-                System.IO.Directory.CreateDirectory(downloadDirectory);
-            }
+            FileUtils.EnsureDirectoryExists(downloadDirectory);
+
             string downloadFile = System.IO.Path.Combine(downloadDirectory, String.Format("{0}.jpg", (Guid.NewGuid().ToString("N"))));
 
             this.AzureStorageUtils.DownloadBlob(imageUrl, downloadFile);
