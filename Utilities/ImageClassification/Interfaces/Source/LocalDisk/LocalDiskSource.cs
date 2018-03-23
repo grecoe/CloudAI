@@ -19,7 +19,6 @@
 //
 
 using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using ImageClassifier.Interfaces.Source.LocalDisk.Configuration;
 using ImageClassifier.Interfaces.Source.LocalDisk.UI;
@@ -33,7 +32,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
     /// <summary>
     /// An IDataSource implementation for local disk.
     /// </summary>
-    class LocalDiskSource : ConfigurationBase<LocalDiskSourceConfiguration>, ISingleImageDataSource
+    class LocalDiskSource : DataSourceBase<LocalDiskSourceConfiguration>, ISingleImageDataSource 
     {
         #region Private Members
         /// <summary>
@@ -59,6 +58,8 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         {
             this.Name = "LocalStorageService";
             this.SourceType = DataSourceType.Disk;
+            this.MultiClass = false;
+            this.DeleteSourceFilesWhenComplete = false;
 
             // Get the configuration specific to this instance
             this.Configuration = this.LoadConfiguration();
@@ -67,6 +68,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             LocalSourceConfigurationUi configUi = new LocalSourceConfigurationUi(this, this.Configuration);
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
+
 
             this.ConfigurationControl = new ConfigurationControlImpl("Local Storage Service",
                 configUi);
@@ -78,37 +80,62 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.ImageControl = new SingleImageControl(this);
         }
 
-        #region IDataSource
+        #region ISingleImageDataSource
+        public SourceFile NextSourceFile()
+        {
+            SourceFile returnFile = null;
+            if (this.CanMoveNext)
+            {
+                if (this.CurrentImage <= -1)
+                {
+                    this.CurrentImage = -1;
+                }
 
-        #region General
-        public string Name { get; private set; }
-        public DataSourceType SourceType { get; private set; }
-        public bool MultiClass { get { return false; } }
-        public bool DeleteSourceFilesWhenComplete { get { return false; } }
+                string file = this.CurrentImageList[++this.CurrentImage];
 
-        public void ClearSourceFiles()
+                returnFile = new SourceFile();
+                returnFile.Name = System.IO.Path.GetFileName(file);
+                returnFile.Classifications = new List<String>();
+                returnFile.DiskLocation = file;
+
+                // Is it cataloged?
+                if (this.Sink != null)
+                {
+                    ScoredItem found = this.Sink.Find(this.CurrentContainer, returnFile.DiskLocation);
+                    if (found != null)
+                    {
+                        returnFile.Classifications = found.Classifications;
+                    }
+                }
+
+
+            }
+            return returnFile;
+        }
+        public SourceFile PreviousSourceFile()
+        {
+            SourceFile returnFile = null;
+            if (this.CanMovePrevious)
+            {
+                this.CurrentImage -= 2;
+                returnFile = this.NextSourceFile();
+            }
+            return returnFile;
+        }
+        #endregion
+
+        #region IDataSource abstract overrides
+        public override void ClearSourceFiles()
         {
             if (this.DeleteSourceFilesWhenComplete)
             {
                 // We are not cleaning up anything at the moment
             }
         }
-
-        #endregion
-
-        #region Interfaces
-        public IDataSink Sink { get; set; }
-        public IConfigurationControl ConfigurationControl { get; private set; }
-        public IContainerControl ContainerControl { get; private set; }
-        public IImageControl ImageControl { get; set; }
-        #endregion
-
-        public string CurrentContainer { get; private set; }
-        public IEnumerable<string> Containers { get { return this.DirectoryListings; } }
-        public int CurrentContainerIndex { get { return this.CurrentImage; } }
-        public int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
-
-        public IEnumerable<string> CurrentContainerCollectionNames
+        public override IEnumerable<string> Containers { get { return this.DirectoryListings; } }
+        public override int CurrentContainerIndex { get { return this.CurrentImage; } }
+        public override int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
+        public override IEnumerable<string> CurrentContainerCollectionNames
         {
             get
             {
@@ -121,21 +148,21 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             }
 
         }
-        public bool CanMoveNext
+        public override bool CanMoveNext
         {
             get
             {
                 return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
             }
         }
-        public bool CanMovePrevious
+        public override bool CanMovePrevious
         {
             get
             {
                 return !(this.CurrentImage <= 0);
             }
         }
-        public bool JumpToSourceFile(int index)
+        public override bool JumpToSourceFile(int index)
         {
             bool returnValue = true;
             String error = String.Empty;
@@ -161,49 +188,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             return returnValue;
         }
-        public SourceFile NextSourceFile()
-        {
-            SourceFile returnFile = null;
-            if (this.CanMoveNext)
-            {
-                if (this.CurrentImage <= -1)
-                {
-                    this.CurrentImage = -1;
-                }
-
-                string file = this.CurrentImageList[++this.CurrentImage];
-
-                returnFile = new SourceFile();
-                returnFile.Name = System.IO.Path.GetFileName(file);
-                returnFile.Classifications = new List<String>();
-                returnFile.DiskLocation = file;
-
-                // Is it cataloged?
-                if(this.Sink != null)
-                {
-                    ScoredItem found = this.Sink.Find(this.CurrentContainer, returnFile.DiskLocation);
-                    if(found != null)
-                    {
-                        returnFile.Classifications = found.Classifications;
-                    }
-                }
-
-
-            }
-            return returnFile;
-        }
-        public SourceFile PreviousSourceFile()
-        {
-            SourceFile returnFile = null;
-            if (this.CanMovePrevious)
-            {
-                this.CurrentImage -= 2;
-                returnFile = this.NextSourceFile();
-            }
-            return returnFile;
-        }
-
-        public void SetContainer(string container)
+        public override void SetContainer(string container)
         {
             if (this.DirectoryListings.Contains(container) &&
                 String.Compare(this.CurrentContainer, container) != 0)
@@ -213,7 +198,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             }
         }
 
-        public void UpdateSourceFile(SourceFile file)
+        public override void UpdateSourceFile(SourceFile file)
         {
             //throw new NotImplementedException();
             if (this.Sink != null)

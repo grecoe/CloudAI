@@ -18,7 +18,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
-using ImageClassifier.Interfaces.Source.BlobSource.UI;
 using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using System;
@@ -33,76 +32,60 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
     /// <summary>
     /// An IDataSource implementation for Azure Blob Storage.
     /// </summary>
-    class AzureBlobSource : ConfigurationBase<AzureBlobStorageConfiguration>, ISingleImageDataSource
+    class AzureBlobSource : DataSourceBase<AzureBlobStorageConfiguration>, ISingleImageDataSource 
     {
-        #region IDataSource
-        public IDataSink Sink { get; set; }
+        #region PrivateMembers
+        private AzureBlobStorageConfiguration Configuration { get; set; }
 
-        public string Name { get; private set; }
+        /// <summary>
+        /// Index into CurrentImageList
+        /// </summary>
+        private int CurrentImage { get; set; }
+        /// <summary>
+        /// List of files from the currently selected catalog file
+        /// </summary>
+        private List<ScoringImage> CurrentImageList { get; set; }
 
-        public DataSourceType SourceType { get; private set; }
+        private List<string> CatalogFiles { get; set; }
 
-        public bool DeleteSourceFilesWhenComplete { get { return true; } }
+        private StorageUtility AzureStorageUtils { get; set; }
+        #endregion
 
-        public void ClearSourceFiles()
+        public AzureBlobSource()
+            :base("AzureStorageConfiguration.json")
         {
-            if (this.DeleteSourceFilesWhenComplete)
-            {
-                String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
-                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
-            }
+            this.Name = "AzureStorageSource";
+            this.SourceType = DataSourceType.Blob;
+            this.DeleteSourceFilesWhenComplete = true;
+            this.MultiClass = true;
+
+            this.CurrentImage = -1;
+
+            // Get the configuration specific to this instance
+            this.Configuration = this.LoadConfiguration();
+
+            // Create the storage utils
+            this.AzureStorageUtils = new StorageUtility(this.Configuration);
+
+            // Prepare the UI control with the right hooks.
+            AzureStorageConfigurationUi configUi = new AzureStorageConfigurationUi(this,this.Configuration);
+            configUi.OnConfigurationSaved += ConfigurationSaved;
+            configUi.OnSourceDataUpdated += UpdateInformationRequested;
+
+            this.ConfigurationControl = 
+                new ConfigurationControlImpl("Azure Storage Service",
+                configUi);
+
+            // Load the catalogs and initialize if already configured
+            this.CatalogFiles = new List<string>(BlobPersistenceLogger.GetAcquisitionFiles(this.Configuration));
+            this.CurrentContainer = this.CatalogFiles.FirstOrDefault();
+            this.InitializeOnNewContainer();
+
+            this.ContainerControl = new GenericContainerControl(this);
+            this.ImageControl = new SingleImageControl(this);
         }
 
-        public IContainerControl ContainerControl { get; private set; }
-
-        public IConfigurationControl ConfigurationControl { get; private set; }
-
-        public IImageControl ImageControl { get; set; }
-
-        public string CurrentContainer { get; private set; }
-
-        public IEnumerable<string> Containers { get { return this.CatalogFiles; } }
-        public void SetContainer(string container)
-        {
-            if (this.CatalogFiles.Contains(container) && 
-                String.Compare(this.CurrentContainer,container) !=0)
-            {
-                this.CurrentContainer = container;
-                this.InitializeOnNewContainer();
-            }
-        }
-        public bool CanMoveNext
-        {
-            get
-            {
-                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
-            }
-        }
-        public bool CanMovePrevious
-        {
-            get
-            {
-                return !(this.CurrentImage < 0);
-            }
-        }
-        public bool MultiClass { get { return true; } }
-        public int CurrentContainerIndex { get { return this.CurrentImage; } }
-        public int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
-
-        public IEnumerable<string> CurrentContainerCollectionNames
-        {
-            get
-            {
-                List<string> itemNames = new List<string>();
-                foreach(ScoringImage item in this.CurrentImageList)
-                {
-                    itemNames.Add(item.Url);
-                }
-                return itemNames;
-            }
-
-        }
-
+        #region ISingleImageSource
         public SourceFile PreviousSourceFile()
         {
             SourceFile returnFile = null;
@@ -145,8 +128,57 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             }
             return returnFile;
         }
+        #endregion
 
-        public bool JumpToSourceFile(int index)
+        #region IDataSource abstract overrides
+        public override void ClearSourceFiles()
+        {
+            if (this.DeleteSourceFilesWhenComplete)
+            {
+                String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
+                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
+            }
+        }
+        public override IEnumerable<string> Containers { get { return this.CatalogFiles; } }
+        public override void SetContainer(string container)
+        {
+            if (this.CatalogFiles.Contains(container) &&
+                String.Compare(this.CurrentContainer, container) != 0)
+            {
+                this.CurrentContainer = container;
+                this.InitializeOnNewContainer();
+            }
+        }
+        public override bool CanMoveNext
+        {
+            get
+            {
+                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
+            }
+        }
+        public override bool CanMovePrevious
+        {
+            get
+            {
+                return !(this.CurrentImage < 0);
+            }
+        }
+        public override int CurrentContainerIndex { get { return this.CurrentImage; } }
+        public override int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
+        public override IEnumerable<string> CurrentContainerCollectionNames
+        {
+            get
+            {
+                List<string> itemNames = new List<string>();
+                foreach (ScoringImage item in this.CurrentImageList)
+                {
+                    itemNames.Add(item.Url);
+                }
+                return itemNames;
+            }
+
+        }
+        public override bool JumpToSourceFile(int index)
         {
             bool returnValue = true;
             String error = String.Empty;
@@ -172,8 +204,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
 
             return returnValue;
         }
-
-        public void UpdateSourceFile(SourceFile file)
+        public override void UpdateSourceFile(SourceFile file)
         {
             ScoringImage image = this.CurrentImageList.FirstOrDefault(x => String.Compare(System.IO.Path.GetFileName(x.Url), file.Name, true) == 0);
             if (image != null && this.Sink != null)
@@ -187,57 +218,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 this.Sink.Record(item);
             }
         }
-
         #endregion
-
-        #region PrivateMembers
-        private AzureBlobStorageConfiguration Configuration { get; set; }
-
-        /// <summary>
-        /// Index into CurrentImageList
-        /// </summary>
-        private int CurrentImage { get; set; }
-        /// <summary>
-        /// List of files from the currently selected catalog file
-        /// </summary>
-        private List<ScoringImage> CurrentImageList { get; set; }
-
-        private List<string> CatalogFiles { get; set; }
-
-        private StorageUtility AzureStorageUtils { get; set; }
-        #endregion
-
-        public AzureBlobSource()
-            :base("AzureStorageConfiguration.json")
-        {
-            this.Name = "AzureStorageSource";
-            this.SourceType = DataSourceType.Blob;
-
-            this.CurrentImage = -1;
-
-            // Get the configuration specific to this instance
-            this.Configuration = this.LoadConfiguration();
-
-            // Create the storage utils
-            this.AzureStorageUtils = new StorageUtility(this.Configuration);
-
-            // Prepare the UI control with the right hooks.
-            AzureStorageConfigurationUi configUi = new AzureStorageConfigurationUi(this,this.Configuration);
-            configUi.OnConfigurationSaved += ConfigurationSaved;
-            configUi.OnSourceDataUpdated += UpdateInformationRequested;
-
-            this.ConfigurationControl = 
-                new ConfigurationControlImpl("Azure Storage Service",
-                configUi);
-
-            // Load the catalogs and initialize if already configured
-            this.CatalogFiles = new List<string>(BlobPersistenceLogger.GetAcquisitionFiles(this.Configuration));
-            this.CurrentContainer = this.CatalogFiles.FirstOrDefault();
-            this.InitializeOnNewContainer();
-
-            this.ContainerControl = new GenericContainerControl(this);
-            this.ImageControl = new SingleImageControl(this);
-        }
 
         #region Support Methods
         /// <summary>

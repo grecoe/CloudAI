@@ -20,7 +20,7 @@
 using System;
 using System.Windows;
 
-namespace ImageClassifier.Interfaces.Source.BlobSource.UI
+namespace ImageClassifier.Interfaces.GenericUI
 {
     /// <summary>
     /// Interaction logic for AcquireContentWindow.xaml

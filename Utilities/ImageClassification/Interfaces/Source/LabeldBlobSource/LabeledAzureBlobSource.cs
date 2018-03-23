@@ -1,4 +1,24 @@
-﻿using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
+﻿//
+// Copyright  Microsoft Corporation ("Microsoft").
+//
+// Microsoft grants you the right to use this software in accordance with your subscription agreement, if any, to use software 
+// provided for use with Microsoft Azure ("Subscription Agreement").  All software is licensed, not sold.  
+// 
+// If you do not have a Subscription Agreement, or at your option if you so choose, Microsoft grants you a nonexclusive, perpetual, 
+// royalty-free right to use and modify this software solely for your internal business purposes in connection with Microsoft Azure 
+// and other Microsoft products, including but not limited to, Microsoft R Open, Microsoft R Server, and Microsoft SQL Server.  
+// 
+// Unless otherwise stated in your Subscription Agreement, the following applies.  THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT 
+// WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL MICROSOFT OR ITS LICENSORS BE LIABLE 
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
+// TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence;
 using System;
@@ -6,13 +26,11 @@ using System.Linq;
 using System.Collections.Generic;
 using ImageClassifier.Interfaces.GlobalUtils;
 using System.Windows;
-using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
-using ImageClassifier.Interfaces.Source.BlobSource.UI;
 using ImageClassifier.Interfaces.GenericUI;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 {
-    class LabeledAzureBlobSource : ConfigurationBase<AzureBlobStorageConfiguration>, IMultiImageDataSource
+    class LabeledAzureBlobSource : DataSourceBase<AzureBlobStorageConfiguration>, IMultiImageDataSource 
     {
         #region PrivateMembers
         private const int BATCH_SIZE = 6;
@@ -67,106 +85,6 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         #region IMultiImageDataSource
 
         public event OnContainerLabelsAcquired OnLabelsAcquired;
-
-        public string Name { get; private set; }
-
-        public DataSourceType SourceType { get; private set; }
-
-        public bool DeleteSourceFilesWhenComplete { get; private set; }
-
-        public bool MultiClass { get; private set; }
-
-        public string CurrentContainer { get; private set; }
-
-        public void ClearSourceFiles()
-        {
-            if(this.DeleteSourceFilesWhenComplete)
-            {
-                String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
-                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
-            }
-        }
-
-        public IEnumerable<string> Containers { get { return this.PersistenceLogger.LabelMap.Keys; } }
-
-        public IDataSink Sink { get; set; }
-
-        public IConfigurationControl ConfigurationControl { get; private set; }
-
-        public IContainerControl ContainerControl { get; private set; }
-
-        public IImageControl ImageControl { get; private set; }
-
-        public void SetContainer(string container)
-        {
-            if (this.Containers.Contains(container) &&
-                String.Compare(this.CurrentContainer, container) != 0)
-            {
-                this.CurrentContainer = container;
-                this.InitializeOnNewContainer();
-            }
-        }
-
-        public int CurrentContainerIndex { get { return this.CurrentImage; } }
-
-        public int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
-
-        public IEnumerable<string> CurrentContainerCollectionNames
-        {
-            get
-            {
-                List<string> itemNames = new List<string>();
-                foreach (ScoringImage item in this.CurrentImageList)
-                {
-                    itemNames.Add(item.Url);
-                }
-                return itemNames;
-            }
-        }
-
-        public bool CanMoveNext
-        {
-            get
-            {
-                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
-            }
-        }
-
-        public bool CanMovePrevious
-        {
-            get
-            {
-                return !(this.CurrentImage < 0);
-            }
-        }
-
-        public bool JumpToSourceFile(int index)
-        {
-            bool returnValue = true;
-            String error = String.Empty;
-
-            if (this.CurrentImageList == null || this.CurrentImageList.Count == 0)
-            {
-                error = "A colleciton must be present to use the Jump To function.";
-            }
-            else if (index > this.CurrentImageList.Count || index < 1)
-            {
-                error = String.Format("Jump to index must be within the collection size :: 1-{0}", this.CurrentImageList.Count);
-            }
-            else
-            {
-                this.CurrentImage = index - 2; // Have to move past the one before because next increments by 1
-            }
-
-            if (!String.IsNullOrEmpty(error))
-            {
-                System.Windows.MessageBox.Show(error, "Jump To Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                returnValue = false;
-            }
-
-            return returnValue;
-        }
-
         public IEnumerable<SourceFile> NextSourceGroup()
         {
             List<SourceFile> returnFiles = new List<SourceFile>();
@@ -199,25 +117,114 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                         }
                     }
 
+                    if (returnFile.Classifications.Count == 0)
+                    {
+                        returnFile.Classifications.Add(this.CurrentContainerAsClassification);
+                        this.UpdateSourceFile(returnFile);
+                    }
+
                     returnFiles.Add(returnFile);
                 }
             }
             return returnFiles;
         }
-
         public IEnumerable<SourceFile> PreviousSourceGroup()
         {
             List<SourceFile> returnFiles = new List<SourceFile>();
             if (this.CanMovePrevious)
             {
-                this.CurrentImage -= ( (2*LabeledAzureBlobSource.BATCH_SIZE) + 1);
+                this.CurrentImage -= ((2 * LabeledAzureBlobSource.BATCH_SIZE) + 1);
                 returnFiles.AddRange(this.NextSourceGroup());
             }
             return returnFiles;
 
         }
 
-        public void UpdateSourceFile(SourceFile file)
+        #endregion
+
+        #region IDataSource abstract overrides
+        public override void ClearSourceFiles()
+        {
+            if(this.DeleteSourceFilesWhenComplete)
+            {
+                String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
+                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
+            }
+        }
+
+        public override IEnumerable<string> Containers { get { return this.PersistenceLogger.LabelMap.Keys; } }
+
+        public override void SetContainer(string container)
+        {
+            if (this.Containers.Contains(container) &&
+                String.Compare(this.CurrentContainer, container) != 0)
+            {
+                this.CurrentContainer = container;
+                this.InitializeOnNewContainer();
+            }
+        }
+
+        public override int CurrentContainerIndex { get { return this.CurrentImage; } }
+
+        public override int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
+
+        public override IEnumerable<string> CurrentContainerCollectionNames
+        {
+            get
+            {
+                List<string> itemNames = new List<string>();
+                foreach (ScoringImage item in this.CurrentImageList)
+                {
+                    itemNames.Add(item.Url);
+                }
+                return itemNames;
+            }
+        }
+
+        public override bool CanMoveNext
+        {
+            get
+            {
+                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
+            }
+        }
+
+        public override bool CanMovePrevious
+        {
+            get
+            {
+                return !(this.CurrentImage < 0);
+            }
+        }
+
+        public override bool JumpToSourceFile(int index)
+        {
+            bool returnValue = true;
+            String error = String.Empty;
+
+            if (this.CurrentImageList == null || this.CurrentImageList.Count == 0)
+            {
+                error = "A colleciton must be present to use the Jump To function.";
+            }
+            else if (index > this.CurrentImageList.Count || index < 1)
+            {
+                error = String.Format("Jump to index must be within the collection size :: 1-{0}", this.CurrentImageList.Count);
+            }
+            else
+            {
+                this.CurrentImage = index - 2; // Have to move past the one before because next increments by 1
+            }
+
+            if (!String.IsNullOrEmpty(error))
+            {
+                System.Windows.MessageBox.Show(error, "Jump To Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                returnValue = false;
+            }
+
+            return returnValue;
+        }
+
+        public override void UpdateSourceFile(SourceFile file)
         {
             ScoringImage image = this.CurrentImageList.FirstOrDefault(x => String.Compare(System.IO.Path.GetFileName(x.Url), file.Name, true) == 0);
             if (image != null && this.Sink != null)
@@ -259,22 +266,33 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
         }
 
+        public string CurrentContainerAsClassification
+        {
+            get { return this.CleanContainerForClassification(this.CurrentContainer); }
+        }
+
+        private String CleanContainerForClassification(string container)
+        {
+            string returnValue = String.Empty;
+            string cont = container.Trim(new char[] { '/' });
+
+            int idx = cont.LastIndexOf('/');
+            if (idx > 0)
+            {
+                returnValue = cont.Substring(idx + 1);
+            }
+            else
+            {
+                returnValue = cont;
+            }
+            return returnValue;
+        }
         public IEnumerable<string> GetContainerLabels()
         {
             List<string> returnLabels = new List<string>();
             foreach(String container in this.Containers)
             {
-                string cont = container.Trim(new char[] { '/' });
-
-                int idx = cont.LastIndexOf('/');
-                if(idx > 0)
-                {
-                    returnLabels.Add(cont.Substring(idx+1));
-                }
-                else
-                {
-                    returnLabels.Add(cont);
-                }
+                returnLabels.Add(this.CleanContainerForClassification(container));
             }
             return returnLabels;
         }
@@ -300,7 +318,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
             // add in the window to let them know we're working, see AzureBlobSource:260
             AcquireContentWindow contentWindow = new AcquireContentWindow();
-            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}", this.Configuration.FileCount, this.Configuration.StorageAccount);
+            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}", /*this.Configuration.FileCount*/ "all", this.Configuration.StorageAccount);
             if (this.ConfigurationControl.Parent != null)
             {
                 contentWindow.Top = this.ConfigurationControl.Parent.Top + (this.ConfigurationControl.Parent.Height - contentWindow.Height) / 2;

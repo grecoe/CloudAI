@@ -20,6 +20,7 @@
 
 using ImageClassifier.Configuration;
 using ImageClassifier.Interfaces;
+using ImageClassifier.Interfaces.GenericUI;
 using ImageClassifier.Interfaces.Source.LabeldBlobSource;
 using ImageClassifier.UIUtils;
 using System;
@@ -159,7 +160,9 @@ namespace ImageClassifier
         {
             if (this.SelectedDataSource != null && this.SelectedDataSource.ImageControl != null)
             {
-                this.SelectedDataSource.ImageControl.UpdateClassifications(this.ClassificationPanelCollectSelections());
+                this.SelectedDataSource.ImageControl.UpdateClassifications(
+                    ClassificationCheckboxPanelHelper.CollectSelections(this.ClassificationTabSelectionPanel)
+                    );
             }
         }
     }

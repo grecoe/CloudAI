@@ -1,18 +1,28 @@
-﻿using System;
+﻿//
+// Copyright  Microsoft Corporation ("Microsoft").
+//
+// Microsoft grants you the right to use this software in accordance with your subscription agreement, if any, to use software 
+// provided for use with Microsoft Azure ("Subscription Agreement").  All software is licensed, not sold.  
+// 
+// If you do not have a Subscription Agreement, or at your option if you so choose, Microsoft grants you a nonexclusive, perpetual, 
+// royalty-free right to use and modify this software solely for your internal business purposes in connection with Microsoft Azure 
+// and other Microsoft products, including but not limited to, Microsoft R Open, Microsoft R Server, and Microsoft SQL Server.  
+// 
+// Unless otherwise stated in your Subscription Agreement, the following applies.  THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT 
+// WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL MICROSOFT OR ITS LICENSORS BE LIABLE 
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
+// TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.UIUtils;
 
 namespace ImageClassifier.Interfaces.GenericUI
@@ -22,18 +32,25 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// </summary>
     public partial class MultiImageControl : UserControl, IMultiImageControl
     {
+        private IMultiImageDataSource MultiImageDataSource { get; set; }
+
         public MultiImageControl(IDataSource source)
         {
             InitializeComponent();
 
             this.CurrentSourceBatch = new List<CurrentItem>();
             this.DataSource = source;
+            this.MultiImageDataSource = this.DataSource as IMultiImageDataSource;
             this.ButtonNext.Click += (o, e) => NextBatch();
             this.ButtonPrevious.Click += (o, e) => PreviousBatch();
+
+            this.Classifications = new List<string>();
         }
 
         #region IMultiImageControl
         public event OnImageChanged ImageChanged;
+
+        public List<String> Classifications { get; set; }
 
         public List<CurrentItem> CurrentSourceBatch { get; private set; }
 
@@ -67,13 +84,11 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         public void Clear()
         {
-            // TODO: Clean up whatever needs doing
             this.ImagePanel.Children.Clear();
         }
 
         public void FastForward()
         {
-            // TODO: Does fast forward in this sense make sense?
             this.ShowNext();
         }
 
@@ -85,9 +100,13 @@ namespace ImageClassifier.Interfaces.GenericUI
         public void UpdateClassifications(List<string> classifications)
         {
             // TODO: Does this mke sense for multi image?
+            // A check was made on the main window. This is going to be the default
+            // for all of them or to be added to all of them.
+            int x = 9;
 
-            // Update the batch with the new ones, but have to make sure
-            // that if they were manually changed, they stay that way :)
+            // 1. Get what the default is from the data source
+            // 2. Set all of them to the new settings ONLY unless they have been
+            //    manually modified already. 
         }
         #endregion
 
@@ -101,7 +120,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.Clear();
 
             this.CurrentSourceBatch.Clear();
-            foreach(SourceFile sFile in files)
+            foreach (SourceFile sFile in files)
             {
                 this.CurrentSourceBatch.Add(new CurrentItem() { CurrentSource = sFile });
             }
@@ -125,13 +144,13 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             int curRow = 0;
             int curCol = 0;
-            foreach(CurrentItem item in this.CurrentSourceBatch)
+            foreach (CurrentItem item in this.CurrentSourceBatch)
             {
-                MultiImageInstance instance = new MultiImageInstance(item, parentHeight, parentWidth);
+                MultiImageInstance instance = new MultiImageInstance(this.MultiImageDataSource, item, parentHeight, parentWidth, this.Classifications);
 
                 int thisRow = curRow % maxRows;
                 int thisCol = curCol++ % maxCols;
-                if((curCol % maxCols) == 0)
+                if ((curCol % maxCols) == 0)
                 {
                     curRow++;
                 }
@@ -141,13 +160,17 @@ namespace ImageClassifier.Interfaces.GenericUI
 
                 imageGrid.Children.Add(instance);
             }
+
             this.ImagePanel.Children.Add(imageGrid);
 
-
+            
+            SourceFile newFile = new SourceFile();
+            newFile.Classifications.Add(this.MultiImageDataSource.CurrentContainerAsClassification);
+            this.ImageChanged?.Invoke(newFile);                
 
             // Update the navigation buttons
-            this.ButtonNext.IsEnabled = this.DataSource.CanMoveNext;
-            this.ButtonPrevious.IsEnabled = this.DataSource.CanMovePrevious;
+            this.ButtonNext.IsEnabled = this.MultiImageDataSource.CanMoveNext;
+            this.ButtonPrevious.IsEnabled = this.MultiImageDataSource.CanMovePrevious;
         }
 
         private Grid BuildGrid(int rows, int columns)
@@ -169,23 +192,21 @@ namespace ImageClassifier.Interfaces.GenericUI
         
         private void NextBatch()
         {
-            this.DataSource.ClearSourceFiles();
-            if (this.DataSource != null &&
-                this.DataSource.CanMoveNext &&
-                this.DataSource is IMultiImageDataSource)
+            this.MultiImageDataSource.ClearSourceFiles();
+            if (this.MultiImageDataSource != null &&
+                this.MultiImageDataSource.CanMoveNext )
             {
-                this.DisplayImages((this.DataSource as IMultiImageDataSource).NextSourceGroup());
+                this.DisplayImages(this.MultiImageDataSource.NextSourceGroup());
             }
         }
 
         private void PreviousBatch()
         {
             this.DataSource.ClearSourceFiles();
-            if (this.DataSource != null &&
-                this.DataSource.CanMovePrevious &&
-                this.DataSource is IMultiImageDataSource)
+            if (this.MultiImageDataSource != null &&
+                this.MultiImageDataSource.CanMovePrevious)
             {
-                this.DisplayImages((this.DataSource as IMultiImageDataSource).PreviousSourceGroup());
+                this.DisplayImages(this.MultiImageDataSource.PreviousSourceGroup());
             }
         }
         #endregion

@@ -17,8 +17,7 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-using System;
-using System.Windows;
+
 using ImageClassifier.UIUtils;
 using System.Windows.Input;
 using System.Collections.Generic;
@@ -45,6 +44,11 @@ namespace ImageClassifier
                     // Set up the IContainerControl 
                     this.ContainerPanel.Children.Clear();
                     this.ContainerPanel.Children.Add(this.SelectedDataSource.ContainerControl.Control);
+
+                    if(this.SelectedDataSource is IMultiImageDataSource)
+                    {
+                        this.IMultiImageControlGroupChanged(null);
+                    }
                 }
             }
         }
@@ -55,41 +59,15 @@ namespace ImageClassifier
         /// </summary>
         private void PopulateAnnotationsTabAnnotationsPanel()
         {
+            // Clear current bindings
             this.InputBindings.Clear();
 
-            // Multiclass by default
-            bool multiClass = !(this.SelectedDataSource != null && !this.SelectedDataSource.MultiClass);
-
-            // The classifications
-            List<String> classifications = new List<string>(this.ConfigurationContext.Classifications);
-            if(this.SelectedDataSource is IMultiImageDataSource)
-            {
-                classifications.AddRange((this.SelectedDataSource as IMultiImageDataSource).GetContainerLabels());
-            }
-
-            // Set up the controls on the panel
-            this.ClassificationTabSelectionPanel.Children.Clear();
-            List<System.Windows.Controls.Primitives.ToggleButton> boxes = new List<System.Windows.Controls.Primitives.ToggleButton>();
-            foreach (String annotation in classifications)
-            {
-                System.Windows.Controls.Primitives.ToggleButton buttonX = null;
-                if(multiClass)
-                {
-                    buttonX = new System.Windows.Controls.CheckBox();
-                }
-                else
-                {
-                    buttonX = new System.Windows.Controls.RadioButton() { GroupName = "Classifications" };
-                }
-
-                // Set up click so we can force change 
-                buttonX.Click += (o, e) => this.ForceClassificationUpdate(); 
-                buttonX.Content = annotation;
-                buttonX.Margin = new Thickness(5, 10, 5, 10);
-
-                this.ClassificationTabSelectionPanel.Children.Add(buttonX);
-                boxes.Add(buttonX);
-            }
+            // Set up all the boxes
+            List<System.Windows.Controls.Primitives.ToggleButton> boxes = ClassificationCheckboxPanelHelper.PopulateSelectionPanel(
+                this.SelectedDataSource,
+                this.ClassificationTabSelectionPanel,
+                this.ConfigurationContext.Classifications,
+                this.ForceClassificationUpdate);
 
             // Now set up all of the key bindings 
             this.PrepareAllInputBindings(boxes);

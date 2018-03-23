@@ -45,13 +45,10 @@ namespace ImageClassifier.Interfaces
         /// be deleted when complted
         /// </summary>
         bool DeleteSourceFilesWhenComplete { get; }
-        void ClearSourceFiles();
-
         /// <summary>
         /// Flag indicating if multi class is supported for items
         /// </summary>
         bool MultiClass { get; }
-
         /// <summary>
         /// Configuration UI with delegates for notifying
         /// parent when changes occur
@@ -69,6 +66,11 @@ namespace ImageClassifier.Interfaces
         /// Sink for outputting data
         /// </summary>
         IDataSink Sink { get; set; }
+
+        /// <summary>
+        /// Clears all currently source files IF DeleteSourceFilesWhenComplete is tru
+        /// </summary>
+        void ClearSourceFiles();
         #endregion
 
         #region Containers
@@ -81,10 +83,9 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         IEnumerable<string> Containers { get; }
         /// <summary>
-        /// Set a specific container as active
+        /// Returns the names of all items in the current collection
         /// </summary>
-        /// <param name="container">Name of existing container to set active</param>
-        void SetContainer(string container);
+        IEnumerable<string> CurrentContainerCollectionNames { get; }
         /// <summary>
         /// Current index into the current container collection
         /// </summary>
@@ -93,8 +94,12 @@ namespace ImageClassifier.Interfaces
         /// Count of items in the current container selection
         /// </summary>
         int CurrentContainerCollectionCount { get; }
+        /// <summary>
+        /// Set a specific container as active
+        /// </summary>
+        /// <param name="container">Name of existing container to set active</param>
+        void SetContainer(string container);
 
-        IEnumerable<string> CurrentContainerCollectionNames { get; }
         #endregion
 
         #region Items

@@ -83,6 +83,7 @@ namespace ImageClassifier
 
                     if(this.SelectedDataSource is IMultiImageDataSource)
                     {
+                        ((IMultiImageControl)this.SelectedDataSource.ImageControl).ImageChanged -= this.IMultiImageControlGroupChanged;
                         (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired -= this.MultiImageSourceContainerLabelsChanged;
                     }
                 }
@@ -104,6 +105,9 @@ namespace ImageClassifier
 
                     if (this.SelectedDataSource is IMultiImageDataSource)
                     {
+                        
+                        ((IMultiImageControl)this.SelectedDataSource.ImageControl).ImageChanged += this.IMultiImageControlGroupChanged;
+                        ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = this.ConfigurationContext.Classifications;
                         (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
                     }
                 }
@@ -120,6 +124,7 @@ namespace ImageClassifier
         #endregion
 
         #region Classification Tab
+        /*
         private List<String> ClassificationPanelCollectSelections()
         {
             List<String> annotations = new List<string>();
@@ -139,6 +144,18 @@ namespace ImageClassifier
             return annotations;
         }
 
+        private void ClassificationPanelMakeSelections(string classification)
+        {
+            foreach (UIElement ui in this.ClassificationTabSelectionPanel.Children)
+            {
+                System.Windows.Controls.Primitives.ToggleButton childBox = null;
+                if ((childBox = ui as System.Windows.Controls.Primitives.ToggleButton) != null)
+                {
+                    childBox.IsChecked = String.Compare(childBox.Content.ToString(), classification) == 0;
+                }
+            }
+        }
+
         private void ClassificationPanelMakeSelections(SourceFile image)
         {
             foreach (UIElement ui in this.ClassificationTabSelectionPanel.Children)
@@ -150,6 +167,7 @@ namespace ImageClassifier
                 }
             }
         }
+        */
         #endregion Annotation Tab Events
     }
 }

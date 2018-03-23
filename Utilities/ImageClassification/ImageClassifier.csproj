@@ -66,7 +66,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Configuration\ClassificationContext.cs" />
+    <Compile Include="Interfaces\DataSourceBase.cs" />
     <Compile Include="Interfaces\DataSourceType.cs" />
+    <Compile Include="Interfaces\GenericUI\ClassificationCheckboxPanelHelper.cs" />
     <Compile Include="Interfaces\GenericUI\ElementCreation.cs" />
     <Compile Include="Interfaces\GenericUI\GenericContainerControl.xaml.cs">
       <DependentUpon>GenericContainerControl.xaml</DependentUpon>
@@ -104,10 +106,10 @@
     <Compile Include="Interfaces\GlobalUtils\Configuration\AzureBlobStorageConfiguration.cs" />
     <Compile Include="Interfaces\Source\BlobSource\Persistence\BlobPersistenceLogger.cs" />
     <Compile Include="Interfaces\GlobalUtils\AzureStorage\ScoringImage.cs" />
-    <Compile Include="Interfaces\Source\BlobSource\UI\AcquireContentWindow.xaml.cs">
+    <Compile Include="Interfaces\GenericUI\AcquireContentWindow.xaml.cs">
       <DependentUpon>AcquireContentWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Source\BlobSource\UI\AzureStorageConfigurationUi.xaml.cs">
+    <Compile Include="Interfaces\GenericUI\AzureStorageConfigurationUi.xaml.cs">
       <DependentUpon>AzureStorageConfigurationUi.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationControlImplementation.cs" />
@@ -148,11 +150,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Source\BlobSource\UI\AcquireContentWindow.xaml">
+    <Page Include="Interfaces\GenericUI\AcquireContentWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Interfaces\Source\BlobSource\UI\AzureStorageConfigurationUi.xaml">
+    <Page Include="Interfaces\GenericUI\AzureStorageConfigurationUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

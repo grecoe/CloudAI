@@ -22,7 +22,7 @@ using System;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System.Windows.Controls;
 
-namespace ImageClassifier.Interfaces.Source.BlobSource.UI
+namespace ImageClassifier.Interfaces.GenericUI
 {
     /// <summary>
     /// Interaction logic for AzureStorageConfigurationUi.xaml
