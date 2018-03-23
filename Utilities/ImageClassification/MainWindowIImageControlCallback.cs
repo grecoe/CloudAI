@@ -50,14 +50,20 @@ namespace ImageClassifier
             if (this.SelectedDataSource != null)
             {
                 String classification = (this.SelectedDataSource as IMultiImageDataSource).CurrentContainerAsClassification;
+                int groupSize = (this.SelectedDataSource as IMultiImageDataSource).ItemsPerGroup;
+
+                int currentIndex = this.SelectedDataSource.CurrentContainerIndex+1;
+                int totalGroups = this.SelectedDataSource.CurrentContainerCollectionCount / groupSize;
+                int currentGroup = (currentIndex > 0) ? currentIndex / groupSize : 1;
 
                 ClassificationCheckboxPanelHelper.MakeSelection(
                     this.ClassificationTabSelectionPanel,
                     classification);
 
                 this.StatusBarLocationStatus.Text =
-                    String.Format("Viewing Group :  {0}",
-                    classification);
+                    String.Format("Viewing Group :  {0} of {1}",
+                    currentGroup,
+                    totalGroups);
             }
         }
 

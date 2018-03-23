@@ -23,7 +23,7 @@
             Grid.Column="0"
             Grid.ColumnSpan="2"
             x:Name="ImageName"
-            FontSize="10"
+            FontSize="14"
             Margin="5,5,5,5"
             FontWeight="Bold">
             Name
@@ -38,7 +38,7 @@
         <TextBlock
             Grid.Row="2"
             Grid.Column="0"
-            FontSize="10"
+            FontSize="13"
             Margin="5,5,5,5"
             FontWeight="Bold">
             Size
@@ -48,7 +48,7 @@
             Grid.Row="2"
             Grid.Column="1"
             x:Name="ImageSize"
-            FontSize="10"
+            FontSize="13"
             Margin="5,5,5,5"
             FontWeight="Bold">
             sz
@@ -57,7 +57,7 @@
         <TextBlock
             Grid.Row="3"
             Grid.Column="0"
-            FontSize="10"
+            FontSize="13"
             Margin="5,5,5,5"
             FontWeight="Bold">
             Labels
@@ -66,7 +66,7 @@
             Grid.Row="3"
             Grid.Column="1"
             x:Name="ImageLabels"
-            FontSize="10"
+            FontSize="13"
             Margin="5,5,5,5"
             FontWeight="Bold">
             lbl

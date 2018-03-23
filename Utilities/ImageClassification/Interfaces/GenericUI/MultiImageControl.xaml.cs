@@ -32,6 +32,7 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// </summary>
     public partial class MultiImageControl : UserControl, IMultiImageControl
     {
+        private const int MAX_COLUMNS = 3;
         private IMultiImageDataSource MultiImageDataSource { get; set; }
 
         public MultiImageControl(IDataSource source)
@@ -81,7 +82,6 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
-
         public void Clear()
         {
             this.ImagePanel.Children.Clear();
@@ -114,22 +114,21 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void DisplayImages(IEnumerable<SourceFile> files)
         {
-            // Move this delete off to the container changed 
-            // and then wipe out any files that match teh pattern.
-            // Could cause memory issues, but right now it's SUPER slow
             this.Clear();
 
+            // Items are saved as they are modified, so just need to clear out 
+            // what we already have and get the next batch.
             this.CurrentSourceBatch.Clear();
             foreach (SourceFile sFile in files)
             {
                 this.CurrentSourceBatch.Add(new CurrentItem() { CurrentSource = sFile });
             }
 
-            // Get the size of the parent
+            // Get the size of the parent, default it to 300
             double parentHeight = 300;
             double parentWidth = 300;
-            int maxRows = this.CurrentSourceBatch.Count / 3;
-            int maxCols = 3;
+            int maxRows = this.CurrentSourceBatch.Count / MultiImageControl.MAX_COLUMNS;
+            int maxCols = MultiImageControl.MAX_COLUMNS;
 
             FrameworkElement fe = this.Parent as FrameworkElement;
             if (fe != null)
@@ -146,18 +145,25 @@ namespace ImageClassifier.Interfaces.GenericUI
             int curCol = 0;
             foreach (CurrentItem item in this.CurrentSourceBatch)
             {
-                MultiImageInstance instance = new MultiImageInstance(this.MultiImageDataSource, item, parentHeight, parentWidth, this.Classifications);
+                MultiImageInstance instance = 
+                    new MultiImageInstance(
+                        this.MultiImageDataSource, 
+                        item, 
+                        parentHeight, 
+                        parentWidth, 
+                        this.Classifications);
 
+                // Place it in the grid
                 int thisRow = curRow % maxRows;
                 int thisCol = curCol++ % maxCols;
                 if ((curCol % maxCols) == 0)
                 {
                     curRow++;
                 }
-
                 Grid.SetColumn(instance, thisCol);
                 Grid.SetRow(instance, thisRow);
 
+                // Add it to the grid
                 imageGrid.Children.Add(instance);
             }
 

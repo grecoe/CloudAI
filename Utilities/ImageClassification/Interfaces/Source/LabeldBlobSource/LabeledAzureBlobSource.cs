@@ -85,6 +85,8 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         #region IMultiImageDataSource
 
         public event OnContainerLabelsAcquired OnLabelsAcquired;
+        public int ItemsPerGroup { get { return LabeledAzureBlobSource.BATCH_SIZE; } }
+
         public IEnumerable<SourceFile> NextSourceGroup()
         {
             List<SourceFile> returnFiles = new List<SourceFile>();
@@ -96,7 +98,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                 }
 
                 int count = 0;
-                while (this.CanMoveNext && count++ < LabeledAzureBlobSource.BATCH_SIZE)
+                while (this.CanMoveNext && count++ < this.ItemsPerGroup)
                 {
                     ScoringImage image = this.CurrentImageList[++this.CurrentImage];
 
@@ -133,7 +135,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             List<SourceFile> returnFiles = new List<SourceFile>();
             if (this.CanMovePrevious)
             {
-                this.CurrentImage -= ((2 * LabeledAzureBlobSource.BATCH_SIZE) + 1);
+                this.CurrentImage -= ((2 * this.ItemsPerGroup) + 1);
                 returnFiles.AddRange(this.NextSourceGroup());
             }
             return returnFiles;

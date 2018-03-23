@@ -86,8 +86,8 @@ namespace ImageClassifier.Interfaces.GenericUI
         private void ThreadCollectImage(object unused)
         {
             // Give up 30% of the height to the text boxes
-            double height = this.ParentHeight * .7;
-            double width = this.ParentWidth * .7;
+            double height = this.ParentHeight * .75;
+            double width = this.ParentWidth * .75;
 
             this.ImagePanel.Dispatcher.Invoke(() => {
                 System.IO.MemoryStream downloadFile = FileUtils.GetFileStream(this.Item.CurrentSource.DiskLocation);
