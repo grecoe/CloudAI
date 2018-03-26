@@ -27,16 +27,27 @@ using System.Collections.Generic;
 using ImageClassifier.Interfaces.GlobalUtils;
 using System.Windows;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.Source.LabeldBlobSource.Configuration;
+using ImageClassifier.Interfaces.Source.LabeldBlobSource.UI;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 {
-    class LabeledAzureBlobSource : DataSourceBase<AzureBlobStorageConfiguration>, IMultiImageDataSource 
+    class LabeledAzureBlobSource : DataSourceBase<LabelledBlobSourceConfiguration>, IMultiImageDataSource 
     {
         #region PrivateMembers
-        private const int BATCH_SIZE = 6;
+        private const int DEFAULT_BATCH_SIZE = 6;
 
-        private AzureBlobStorageConfiguration Configuration { get; set; }
+        /// <summary>
+        /// Custom Configuration that includes additional settings over and above the AzureStorageConfiguration
+        /// </summary>
+        private LabelledBlobSourceConfiguration Configuration { get; set; }
+        /// <summary>
+        /// Utility to read Azure Storage account
+        /// </summary>
         private StorageUtility AzureStorageUtils { get; set; }
+        /// <summary>
+        /// Persists storage information account information
+        /// </summary>
         private LabelledBlobPersisteceLogger PersistenceLogger { get; set; }
         /// <summary>
         /// Index into CurrentImageList
@@ -61,11 +72,22 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             // Get the configuration specific to this instance
             this.Configuration = this.LoadConfiguration();
 
+            if(this.Configuration.BatchSize <= 0 || this.Configuration.BatchSize > 9)
+            {
+                this.Configuration.BatchSize = LabeledAzureBlobSource.DEFAULT_BATCH_SIZE;
+                this.SaveConfiguration(this.Configuration);
+            }
+
             // Create the storage utils
-            this.AzureStorageUtils = new StorageUtility(this.Configuration);
+            this.AzureStorageUtils = new StorageUtility(this.Configuration.StorageConfiguration);
 
             // Prepare the UI control with the right hooks.
+            /*
             AzureStorageConfigurationUi configUi = new AzureStorageConfigurationUi(this, this.Configuration);
+            configUi.OnConfigurationSaved += ConfigurationSaved;
+            configUi.OnSourceDataUpdated += AcquireContent;
+            */
+            CustomStorageConfiguration configUi = new CustomStorageConfiguration(this, this.Configuration);
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += AcquireContent;
 
@@ -74,7 +96,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                 configUi);
 
             // Get a list of containers through the persistence logger 
-            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration);
+            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
             this.CurrentContainer = this.Containers.FirstOrDefault();
             this.InitializeOnNewContainer();
 
@@ -85,7 +107,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         #region IMultiImageDataSource
 
         public event OnContainerLabelsAcquired OnLabelsAcquired;
-        public int ItemsPerGroup { get { return LabeledAzureBlobSource.BATCH_SIZE; } }
+        public int BatchSize { get { return this.Configuration.BatchSize; } }
 
         public IEnumerable<SourceFile> NextSourceGroup()
         {
@@ -98,12 +120,12 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                 }
 
                 int count = 0;
-                while (this.CanMoveNext && count++ < this.ItemsPerGroup)
+                while (this.CanMoveNext && count++ < this.BatchSize)
                 {
                     ScoringImage image = this.CurrentImageList[++this.CurrentImage];
 
                     // Download blah blah
-                    String token = this.AzureStorageUtils.GetSasToken(this.Configuration.StorageContainer);
+                    String token = this.AzureStorageUtils.GetSasToken(this.Configuration.StorageConfiguration.StorageContainer);
                     String imageUrl = String.Format("{0}{1}", image.Url, token);
 
                     SourceFile returnFile = new SourceFile();
@@ -135,13 +157,12 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             List<SourceFile> returnFiles = new List<SourceFile>();
             if (this.CanMovePrevious)
             {
-                this.CurrentImage -= ((2 * this.ItemsPerGroup) + 1);
+                this.CurrentImage -= ((2 * this.BatchSize) + 1);
                 returnFiles.AddRange(this.NextSourceGroup());
             }
             return returnFiles;
 
         }
-
         #endregion
 
         #region IDataSource abstract overrides
@@ -149,8 +170,8 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         {
             if(this.DeleteSourceFilesWhenComplete)
             {
-                String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
-                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
+                String downloadDirectory = System.IO.Path.Combine(this.Configuration.StorageConfiguration.RecordLocation, "temp");
+                FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.StorageConfiguration.FileType });
             }
         }
 
@@ -195,7 +216,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         {
             get
             {
-                return !(this.CurrentImage < 0);
+                return !((this.CurrentImage - this.BatchSize) < 0);
             }
         }
 
@@ -261,7 +282,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
             // Update the storage utils
-            this.AzureStorageUtils = new StorageUtility(this.Configuration);
+            this.AzureStorageUtils = new StorageUtility(this.Configuration.StorageConfiguration);
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
             this.OnLabelsAcquired?.Invoke(this.GetContainerLabels());
@@ -304,7 +325,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             // Update the data source
             if (System.Windows.MessageBox.Show(
                 String.Format("This action will delete all files in : {0}{1}Further, the configuation will be updated.{1}Would you like to continue?",
-                    this.Configuration.RecordLocation,
+                    this.Configuration.StorageConfiguration.RecordLocation,
                     Environment.NewLine),
                 "Acquire Storage File List",
                 MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
@@ -320,7 +341,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
             // add in the window to let them know we're working, see AzureBlobSource:260
             AcquireContentWindow contentWindow = new AcquireContentWindow();
-            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}", /*this.Configuration.FileCount*/ "all", this.Configuration.StorageAccount);
+            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}", /*this.Configuration.FileCount*/ "all", this.Configuration.StorageConfiguration.StorageAccount);
             if (this.ConfigurationControl.Parent != null)
             {
                 contentWindow.Top = this.ConfigurationControl.Parent.Top + (this.ConfigurationControl.Parent.Height - contentWindow.Height) / 2;
@@ -329,20 +350,20 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             contentWindow.Show();
              
             // Clean up current catalog data and reget the persistence logger
-            FileUtils.DeleteFiles(this.Configuration.RecordLocation, new string[] { "*.csv" });
-            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration);
+            FileUtils.DeleteFiles(this.Configuration.StorageConfiguration.RecordLocation, new string[] { "*.csv" });
+            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
 
             List<String> directories = new List<string>();
-            foreach (String dir in this.AzureStorageUtils.ListDirectories(this.Configuration.StorageContainer, this.Configuration.BlobPrefix, false))
+            foreach (String dir in this.AzureStorageUtils.ListDirectories(this.Configuration.StorageConfiguration.StorageContainer, this.Configuration.StorageConfiguration.BlobPrefix, false))
             {
                 directories.Add(dir);
             }
 
             foreach(string directory in directories)
             {
-                foreach (KeyValuePair<string, string> kvp in this.AzureStorageUtils.ListBlobs(this.Configuration.StorageContainer,
+                foreach (KeyValuePair<string, string> kvp in this.AzureStorageUtils.ListBlobs(this.Configuration.StorageConfiguration.StorageContainer,
                     directory,
-                    this.Configuration.FileType,
+                    this.Configuration.StorageConfiguration.FileType,
                     false))
                 {
                     this.PersistenceLogger.RecordLabelledImage(directory, kvp.Value);
@@ -364,7 +385,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
         private String DownloadStorageFile(string imageUrl)
         {
-            String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
+            String downloadDirectory = System.IO.Path.Combine(this.Configuration.StorageConfiguration.RecordLocation, "temp");
             FileUtils.EnsureDirectoryExists(downloadDirectory);
 
             string downloadFile = System.IO.Path.Combine(downloadDirectory, String.Format("{0}.jpg", (Guid.NewGuid().ToString("N"))));

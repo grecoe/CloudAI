@@ -36,6 +36,11 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         public AzureBlobStorageConfiguration Configuration { get; private set; }
 
+        public AzureStorageConfigurationUi()
+        {
+            InitializeComponent();
+        }
+
         public AzureStorageConfigurationUi(IDataSource source, AzureBlobStorageConfiguration config)
         {
             InitializeComponent();

@@ -113,8 +113,12 @@
       <DependentUpon>AzureStorageConfigurationUi.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationControlImplementation.cs" />
+    <Compile Include="Interfaces\Source\LabeldBlobSource\Configuration\LabelledBlobSourceConfiguration.cs" />
     <Compile Include="Interfaces\Source\LabeldBlobSource\LabeledAzureBlobSource.cs" />
     <Compile Include="Interfaces\Source\LabeldBlobSource\Persistence\LabelledBlobPersisteceLogger.cs" />
+    <Compile Include="Interfaces\Source\LabeldBlobSource\UI\CustomStorageConfiguration.xaml.cs">
+      <DependentUpon>CustomStorageConfiguration.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\Source\LocalDisk\Configuration\LocalDiskSourceConfiguration.cs" />
     <Compile Include="Interfaces\Source\LocalDisk\LocalDiskSource.cs" />
     <Compile Include="Interfaces\Source\LocalDisk\UI\LocalSourceConfigurationUi.xaml.cs">
@@ -155,6 +159,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Interfaces\GenericUI\AzureStorageConfigurationUi.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Source\LabeldBlobSource\UI\CustomStorageConfiguration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

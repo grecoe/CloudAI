@@ -27,7 +27,7 @@ namespace ImageClassifier
     public partial class MainWindow
     {
         /// <summary>
-        /// Called from teh ISingleImageControl control
+        /// Called from the ISingleImageControl control when the displayed image changes
         /// </summary>
         /// <param name="file"></param>
         private void ISingleImageControlFileChanged(SourceFile file)
@@ -45,16 +45,20 @@ namespace ImageClassifier
             }
         }
 
+        /// <summary>
+        /// Called from the IMultiImageControl control when the group of images changes.
+        /// </summary>
+        /// <param name="file"></param>
         private void IMultiImageControlGroupChanged(SourceFile file)
         {
             if (this.SelectedDataSource != null)
             {
                 String classification = (this.SelectedDataSource as IMultiImageDataSource).CurrentContainerAsClassification;
-                int groupSize = (this.SelectedDataSource as IMultiImageDataSource).ItemsPerGroup;
+                int groupSize = (this.SelectedDataSource as IMultiImageDataSource).BatchSize;
 
                 int currentIndex = this.SelectedDataSource.CurrentContainerIndex+1;
                 int totalGroups = this.SelectedDataSource.CurrentContainerCollectionCount / groupSize;
-                int currentGroup = (currentIndex > 0) ? currentIndex / groupSize : 1;
+                int currentGroup = (currentIndex > 0) ? (int)Math.Round((decimal)currentIndex / (decimal)groupSize) : 1;
 
                 ClassificationCheckboxPanelHelper.MakeSelection(
                     this.ClassificationTabSelectionPanel,

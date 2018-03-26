@@ -42,7 +42,8 @@ namespace ImageClassifier.Interfaces
         /// <returns></returns>
         IEnumerable<string> GetContainerLabels();
 
-        int ItemsPerGroup { get; }
+        int BatchSize { get; }
+
         /// <summary>
         /// Request the next item in the current container
         /// collection.

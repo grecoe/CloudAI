@@ -32,8 +32,11 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// </summary>
     public partial class MultiImageControl : UserControl, IMultiImageControl
     {
+        #region Private Members
         private const int MAX_COLUMNS = 3;
         private IMultiImageDataSource MultiImageDataSource { get; set; }
+        private List<MultiImageInstance> MultiImageInstanceList { get; set; }
+        #endregion
 
         public MultiImageControl(IDataSource source)
         {
@@ -45,6 +48,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ButtonNext.Click += (o, e) => NextBatch();
             this.ButtonPrevious.Click += (o, e) => PreviousBatch();
 
+            this.MultiImageInstanceList = new List<MultiImageInstance>();
             this.Classifications = new List<string>();
         }
 
@@ -84,11 +88,28 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         public void Clear()
         {
+            this.MultiImageInstanceList.Clear();
             this.ImagePanel.Children.Clear();
         }
 
         public void FastForward()
         {
+            if (this.DataSource.Sink != null &&
+                this.DataSource.CurrentContainerCollectionCount > 0)
+            {
+                int imageIdx = 1;
+                this.DataSource.JumpToSourceFile(imageIdx);
+                foreach (String itemName in this.DataSource.CurrentContainerCollectionNames)
+                {
+                    if (!this.DataSource.Sink.ItemHasBeenScored(this.DataSource.CurrentContainer, itemName))
+                    {
+                        break;
+                    }
+                    imageIdx++;
+                }
+                this.DataSource.JumpToSourceFile(imageIdx);
+            }
+
             this.ShowNext();
         }
 
@@ -99,14 +120,29 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         public void UpdateClassifications(List<string> classifications)
         {
-            // TODO: Does this mke sense for multi image?
-            // A check was made on the main window. This is going to be the default
-            // for all of them or to be added to all of them.
-            int x = 9;
+            // If there is only 1 classificaiton and it's the one of the current folder, then ignore it
+            // otherwise we'll be updating them all the time.
+            // If it's 0 make sure we aren't updating it to nothing.
+            if(classifications.Count == 0 ||
+                (classifications.Count == 1 && String.Compare(classifications[0], this.MultiImageDataSource.CurrentContainerAsClassification) == 0))
+            {
+                return;
+            }
 
-            // 1. Get what the default is from the data source
-            // 2. Set all of them to the new settings ONLY unless they have been
-            //    manually modified already. 
+            // Otherwise, update EVERYTHING and save it.
+            foreach(CurrentItem item in this.CurrentSourceBatch)
+            {
+                item.CurrentSource.Classifications.Clear();
+                item.CurrentSource.Classifications.AddRange(classifications);
+
+                this.MultiImageDataSource.UpdateSourceFile(item.CurrentSource);
+            }
+
+            // Now force all of the instances to update
+            foreach(MultiImageInstance instance in this.MultiImageInstanceList)
+            {
+                instance.UpdateLabels();
+            }
         }
         #endregion
 
@@ -137,7 +173,6 @@ namespace ImageClassifier.Interfaces.GenericUI
                 parentWidth = fe.ActualWidth / maxCols;
             }
 
-
             // Geneerate a grid
             Grid imageGrid = this.BuildGrid(maxRows, maxCols);
 
@@ -165,14 +200,15 @@ namespace ImageClassifier.Interfaces.GenericUI
 
                 // Add it to the grid
                 imageGrid.Children.Add(instance);
+
+                this.MultiImageInstanceList.Add(instance);
             }
 
             this.ImagePanel.Children.Add(imageGrid);
 
-            
             SourceFile newFile = new SourceFile();
             newFile.Classifications.Add(this.MultiImageDataSource.CurrentContainerAsClassification);
-            this.ImageChanged?.Invoke(newFile);                
+            this.ImageChanged?.Invoke(newFile);
 
             // Update the navigation buttons
             this.ButtonNext.IsEnabled = this.MultiImageDataSource.CanMoveNext;
@@ -198,22 +234,53 @@ namespace ImageClassifier.Interfaces.GenericUI
         
         private void NextBatch()
         {
+            // Open wait window
+            AcquireContentWindow acqWindow = this.LaunchAcquisitionWindow();
+
             this.MultiImageDataSource.ClearSourceFiles();
+
             if (this.MultiImageDataSource != null &&
                 this.MultiImageDataSource.CanMoveNext )
             {
                 this.DisplayImages(this.MultiImageDataSource.NextSourceGroup());
             }
+
+            // Close wait window
+            acqWindow.Close();
         }
 
         private void PreviousBatch()
         {
+            // Open wait window
+            AcquireContentWindow acqWindow = this.LaunchAcquisitionWindow();
+
             this.DataSource.ClearSourceFiles();
             if (this.MultiImageDataSource != null &&
                 this.MultiImageDataSource.CanMovePrevious)
             {
                 this.DisplayImages(this.MultiImageDataSource.PreviousSourceGroup());
             }
+
+            // Close wait window
+            acqWindow.Close();
+        }
+
+        private AcquireContentWindow LaunchAcquisitionWindow()
+        {
+            AcquireContentWindow contentWindow = new AcquireContentWindow();
+
+            contentWindow.DisplayContent = String.Format("Acquiring next batch.....");
+
+            Window parentWindow = Window.GetWindow(this);
+            if (parentWindow != null)
+            {
+                contentWindow.Top = parentWindow.Top + (parentWindow.Height - contentWindow.Height) / 2;
+                contentWindow.Left = parentWindow.Left + (parentWindow.Width - contentWindow.Width) / 2;
+            }
+            contentWindow.Show();
+
+            return contentWindow;
+
         }
         #endregion
     }

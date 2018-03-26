@@ -119,6 +119,7 @@ namespace ImageClassifier
 
         private void MultiImageSourceContainerLabelsChanged(IEnumerable<string> labels)
         {
+            // TODO: What do we do here? I think we might actually just ignore it....
             int x = 9;
         }
         #endregion
