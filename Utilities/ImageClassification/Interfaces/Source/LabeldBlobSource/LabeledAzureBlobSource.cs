@@ -82,11 +82,6 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             this.AzureStorageUtils = new StorageUtility(this.Configuration.StorageConfiguration);
 
             // Prepare the UI control with the right hooks.
-            /*
-            AzureStorageConfigurationUi configUi = new AzureStorageConfigurationUi(this, this.Configuration);
-            configUi.OnConfigurationSaved += ConfigurationSaved;
-            configUi.OnSourceDataUpdated += AcquireContent;
-            */
             CustomStorageConfiguration configUi = new CustomStorageConfiguration(this, this.Configuration);
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += AcquireContent;
@@ -163,6 +158,34 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             return returnFiles;
 
         }
+
+        public void UpdateSourceBatch(IEnumerable<SourceFile> fileBatch)
+        {
+            if (this.Sink != null)
+            {
+                List<ScoredItem> updateList = new List<ScoredItem>();
+
+                foreach (SourceFile file in fileBatch)
+                {
+                    ScoringImage image = this.CurrentImageList.FirstOrDefault(x => String.Compare(System.IO.Path.GetFileName(x.Url), file.Name, true) == 0);
+                    if (image != null && this.Sink != null)
+                    {
+                        ScoredItem item = new ScoredItem()
+                        {
+                            Container = this.CurrentContainer,
+                            Name = image.Url,
+                            Classifications = file.Classifications
+                        };
+
+                        updateList.Add(item);
+                    }
+                }
+
+                this.Sink.Record(updateList);
+
+            }
+        }
+
         #endregion
 
         #region IDataSource abstract overrides

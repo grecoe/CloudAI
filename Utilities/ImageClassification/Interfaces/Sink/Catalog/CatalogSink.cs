@@ -42,6 +42,8 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
     {
         private const String BASEDIR = "Catalog";
         private const String BASECOLLECTION = "Catalog.csv";
+        private object ThreadLock { get; set; }
+
         private static string[] COLLECTION_HEADERS = new string[] { "Container,Location" };
 
         private static string[] CATALOG_HEADERS = new string[] { "Container,Item,Classifications" };
@@ -50,22 +52,24 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
         /// Collection of the original conatiner to the container CSV
         /// map that this object collects.
         /// </summary>
-        private Dictionary<string,string> CollectionMap { get; set; }
+        private Dictionary<string, string> CollectionMap { get; set; }
 
         private Dictionary<string, CollectionData> Collections { get; set; }
 
         public CatalogSink(string provider)
-            :base(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, String.Format("{0}{1}", provider,CatalogSink.BASEDIR)),
+            : base(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, String.Format("{0}{1}", provider, CatalogSink.BASEDIR)),
                  CatalogSink.BASECOLLECTION,
                  CatalogSink.COLLECTION_HEADERS)
         {
+            this.ThreadLock = new object();
+
             this.Name = "Catalog Sink";
             // Get container mapping
             this.Collections = new Dictionary<string, CollectionData>();
             this.CollectionMap = new Dictionary<string, string>();
-            foreach(string[] entry in this.GetEntries())
+            foreach (string[] entry in this.GetEntries())
             {
-                if(entry.Count() == 2)
+                if (entry.Count() == 2)
                 {
                     this.CollectionMap.Add(entry[0], entry[1]);
                 }
@@ -99,13 +103,54 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
             bool returnValue = false;
             // Get or create the collection
             CollectionData collection = GetCollection(container);
-            if(collection != null)
+            if (collection != null)
             {
                 //Is this a duplicate? Are we updating something?
                 returnValue = (collection.Items.FirstOrDefault(x => String.Compare(x.Name, name) == 0) != null);
 
             }
             return returnValue;
+        }
+
+        public void Record(IEnumerable<ScoredItem> itemBatch)
+        {
+            CollectionData collection = null;
+            String collectionName = String.Empty;
+
+            // Restriction is they all have to belong to the same collection
+            foreach (ScoredItem item in itemBatch)
+            {
+                collection = GetCollection(item.Container);
+                if (collection == null)
+                {
+                    throw new Exception("Invalid collection");
+                }
+
+                if (!String.IsNullOrEmpty(collectionName) &&
+                    String.Compare(collectionName, collection.Logger.FileName) != 0)
+                {
+                    throw new Exception("Collections do not match on batch");
+                }
+
+                collectionName = collection.Logger.FileName;
+            }
+
+            // Now we know we have the same collection, update each one.
+            foreach (ScoredItem item in itemBatch)
+            {
+                ScoredItem existing = collection.Items.FirstOrDefault(x => String.Compare(x.Name, item.Name) == 0);
+                if (existing != null)
+                {
+                    existing.Classifications = item.Classifications;
+                }
+                else
+                {
+                    collection.Items.Add(item);
+                }
+            }
+
+            // Update the entire thing in one go
+            System.Threading.ThreadPool.QueueUserWorkItem(this.UpdateLog, collection);
         }
 
         public void Record(ScoredItem item)
@@ -121,19 +166,33 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
                 {
                     existing.Classifications = item.Classifications;
 
-                    // Update the file
-                    collection.Logger.ClearLog();
-
-                    // Rewrite the contents
-                    foreach (ScoredItem colitem in collection.Items)
-                    {
-                        collection.Logger.Record(this.FormatItem(colitem));
-                    }
+                    System.Threading.ThreadPool.QueueUserWorkItem(this.UpdateLog, collection);
                 }
                 else
                 {
                     collection.Items.Add(item);
                     collection.Logger.Record(this.FormatItem(item));
+                }
+            }
+        }
+
+        private void UpdateLog(object obj)
+        {
+            lock (this.ThreadLock)
+            {
+                CollectionData data = obj as CollectionData;
+                if (data != null)
+                {
+                    data.Logger.ClearLog();
+                    List<String> newEntries = new List<string>();
+
+                    foreach (ScoredItem colitem in data.Items)
+                    {
+                        newEntries.Add(this.FormatItem(colitem));
+                        //data.Logger.Record(this.FormatItem(colitem));
+                    }
+
+                    data.Logger.Rewrite(newEntries);
                 }
             }
         }

@@ -19,6 +19,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces.GlobalUtils
@@ -66,6 +67,29 @@ namespace ImageClassifier.Interfaces.GlobalUtils
                         }
 
                         writer.WriteLine(content);
+                    }
+                }
+            }
+        }
+
+        public void Rewrite(IEnumerable<string> fileEntries)
+        {
+            lock (FileLock)
+            {
+                if (fileEntries.Count() > 0)
+                {
+                    bool exists = System.IO.File.Exists(this.FilePath);
+                    using (System.IO.StreamWriter writer = new System.IO.StreamWriter(this.FilePath, true))
+                    {
+                        if (!exists)
+                        {
+                            writer.WriteLine(String.Join(",", this.Header));
+                        }
+
+                        foreach (string entry in fileEntries)
+                        {
+                            writer.WriteLine(entry);
+                        }
                     }
                 }
             }

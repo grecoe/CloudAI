@@ -101,7 +101,13 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void OnSelectionsChanged()
         {
+            DateTime start = DateTime.Now;
+            TimeSpan collect, classify, update;
+
             this.Item.CurrentSource.Classifications = ClassificationCheckboxPanelHelper.CollectSelections(this.ClassificationPanel);
+
+            collect = DateTime.Now - start;
+            start = DateTime.Now;
 
             if(this.Item.CurrentSource.Classifications.Count == 0)
             {
@@ -109,7 +115,13 @@ namespace ImageClassifier.Interfaces.GenericUI
                 this.Item.CurrentSource.Classifications.Add(this.Source.CurrentContainerAsClassification);
             }
 
+            classify = DateTime.Now - start;
+            start = DateTime.Now;
+
             this.Source.UpdateSourceFile(this.Item.CurrentSource);
+
+            update = DateTime.Now - start;
+            int x = 9;
         }
 
         private void ScaleImage()

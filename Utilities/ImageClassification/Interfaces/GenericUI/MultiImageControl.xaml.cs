@@ -130,16 +130,20 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
 
             // Otherwise, update EVERYTHING and save it.
+            List<SourceFile> updateList = new List<SourceFile>();
             foreach(CurrentItem item in this.CurrentSourceBatch)
             {
                 item.CurrentSource.Classifications.Clear();
                 item.CurrentSource.Classifications.AddRange(classifications);
 
-                this.MultiImageDataSource.UpdateSourceFile(item.CurrentSource);
+                updateList.Add(item.CurrentSource);
+                // TODO: DELETE this.MultiImageDataSource.UpdateSourceFile(item.CurrentSource);
             }
+            this.MultiImageDataSource.UpdateSourceBatch(updateList);
+
 
             // Now force all of the instances to update
-            foreach(MultiImageInstance instance in this.MultiImageInstanceList)
+            foreach (MultiImageInstance instance in this.MultiImageInstanceList)
             {
                 instance.UpdateLabels();
             }

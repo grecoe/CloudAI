@@ -42,6 +42,9 @@ namespace ImageClassifier.Interfaces
         /// <returns></returns>
         IEnumerable<string> GetContainerLabels();
 
+        /// <summary>
+        /// Gets the current batch size
+        /// </summary>
         int BatchSize { get; }
 
         /// <summary>
@@ -57,6 +60,9 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         /// <returns>SourceFile indicating information for the previous item</returns>
         IEnumerable<SourceFile> PreviousSourceGroup();
+
+        void UpdateSourceBatch(IEnumerable<SourceFile> fileBatch);
+
 
     }
 }

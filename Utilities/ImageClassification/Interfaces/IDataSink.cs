@@ -19,6 +19,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
@@ -50,6 +51,12 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         /// <param name="item">Item to record</param>
         void Record(ScoredItem item);
+        /// <summary>
+        /// Add a catalog entry for the given item. Causes the catalog
+        /// to be persisted.
+        /// </summary>
+        /// <param name="item">Item to record</param>
+        void Record(IEnumerable<ScoredItem> itemBatch);
         /// <summary>
         /// Purges the catalog data. Use on a refresh where the new catalog items
         /// may not match teh existing catalog data.
