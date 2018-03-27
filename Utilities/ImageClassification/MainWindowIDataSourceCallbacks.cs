@@ -41,7 +41,8 @@ namespace ImageClassifier
 
             this.PopulateAnnotationsTabAnnotationsPanel();
 
-            if (sender == this.SelectedDataSource)
+            // Make sure to capture any changes to the classifications
+            if (this.SelectedDataSource != null)
             {
                 InitializeUi(false);
             }

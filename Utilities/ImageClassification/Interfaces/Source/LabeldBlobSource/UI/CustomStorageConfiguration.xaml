@@ -36,6 +36,8 @@
             <ComboBoxItem Content="3"></ComboBoxItem>
             <ComboBoxItem Content="6" IsSelected="True"></ComboBoxItem>
             <ComboBoxItem Content="9"></ComboBoxItem>
+            <ComboBoxItem Content="10"></ComboBoxItem>
+            <ComboBoxItem Content="15"></ComboBoxItem>
         </ComboBox>
         
         <StackPanel x:Name="StorageConfigUiPanel"

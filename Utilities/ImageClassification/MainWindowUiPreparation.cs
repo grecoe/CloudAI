@@ -44,12 +44,12 @@ namespace ImageClassifier
                     // Set up the IContainerControl 
                     this.ContainerPanel.Children.Clear();
                     this.ContainerPanel.Children.Add(this.SelectedDataSource.ContainerControl.Control);
-
-                    if(this.SelectedDataSource is IMultiImageDataSource)
-                    {
-                        this.IMultiImageControlGroupChanged(null);
-                    }
                 }
+            }
+
+            if (this.SelectedDataSource is IMultiImageDataSource)
+            {
+                this.IMultiImageControlGroupChanged(null);
             }
         }
 

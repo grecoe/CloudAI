@@ -33,7 +33,9 @@ namespace ImageClassifier.Interfaces.GenericUI
     public partial class MultiImageControl : UserControl, IMultiImageControl
     {
         #region Private Members
-        private const int MAX_COLUMNS = 3;
+        private const int MAX_COLUMNS_TO_NINE = 3;
+        private const int MAX_COLUMNS_MORE_THAN_NINE = 5;
+
         private IMultiImageDataSource MultiImageDataSource { get; set; }
         private List<MultiImageInstance> MultiImageInstanceList { get; set; }
         #endregion
@@ -167,8 +169,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             // Get the size of the parent, default it to 300
             double parentHeight = 300;
             double parentWidth = 300;
-            int maxRows = this.CurrentSourceBatch.Count / MultiImageControl.MAX_COLUMNS;
-            int maxCols = MultiImageControl.MAX_COLUMNS;
+            int columnConfiguration = (this.CurrentSourceBatch.Count > 9) ? MultiImageControl.MAX_COLUMNS_MORE_THAN_NINE : MultiImageControl.MAX_COLUMNS_TO_NINE;
+            int maxRows = this.CurrentSourceBatch.Count / columnConfiguration;
+            int maxCols = columnConfiguration;
 
             FrameworkElement fe = this.Parent as FrameworkElement;
             if (fe != null)
