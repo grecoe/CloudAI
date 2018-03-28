@@ -234,7 +234,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.DirectoryListings = new List<string>();
 
             // Collect all directories in the configuration
-            this.RecurseDirectoryListings(this.Configuration.RecordLocation);
+            this.RecurseDirectoryListings(this.Configuration.RecordLocation, false);
             this.CurrentContainer = this.DirectoryListings.FirstOrDefault();
 
             // Initialize the list of items
@@ -244,16 +244,19 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
-        private void RecurseDirectoryListings(string baseDirectory)
+        private void RecurseDirectoryListings(string baseDirectory, bool inferPath)
         {
             if (System.IO.Directory.Exists(baseDirectory))
             {
                 //String listing = String.IsNullOrEmpty(parent) ? baseDirectory : System.IO.Path.Combine(parent, baseDirectory);
-                this.DirectoryListings.Add(baseDirectory);
+                if (!inferPath)
+                {
+                    this.DirectoryListings.Add(baseDirectory);
+                }
 
                 foreach (string directory in System.IO.Directory.GetDirectories(baseDirectory))
                 {
-                    this.RecurseDirectoryListings(directory);
+                    this.RecurseDirectoryListings(directory, false);
                 }
             }
         }

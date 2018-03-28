@@ -382,15 +382,22 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                 directories.Add(dir);
             }
 
-            foreach(string directory in directories)
+            try
             {
-                foreach (KeyValuePair<string, string> kvp in this.AzureStorageUtils.ListBlobs(this.Configuration.StorageConfiguration.StorageContainer,
-                    directory,
-                    this.Configuration.StorageConfiguration.FileType,
-                    false))
+                foreach (string directory in directories)
                 {
-                    this.PersistenceLogger.RecordLabelledImage(directory, kvp.Value);
+                    foreach (KeyValuePair<string, string> kvp in this.AzureStorageUtils.ListBlobs(this.Configuration.StorageConfiguration.StorageContainer,
+                        directory,
+                        this.Configuration.StorageConfiguration.FileType,
+                        false))
+                    {
+                        this.PersistenceLogger.RecordLabelledImage(directory, kvp.Value);
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Azure Storage Error");
             }
 
             // Close window saying we are downloading 

@@ -264,20 +264,27 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             int fileLabel = 1;
             int recordCount = 0;
             BlobPersistenceLogger logger = new BlobPersistenceLogger(this.Configuration, fileLabel);
-            foreach (KeyValuePair<String, String> kvp in this.AzureStorageUtils.ListBlobs(false))
+            try
             {
-                logger.Record(new string[] { kvp.Value});
+                foreach (KeyValuePair<String, String> kvp in this.AzureStorageUtils.ListBlobs(false))
+                {
+                    logger.Record(new string[] { kvp.Value });
 
-                // Too many?
-                if (++recordCount >= this.Configuration.FileCount)
-                {
-                    break;
+                    // Too many?
+                    if (++recordCount >= this.Configuration.FileCount)
+                    {
+                        break;
+                    }
+                    // Have to roll the file?
+                    if (recordCount % 100 == 0)
+                    {
+                        logger = new BlobPersistenceLogger(this.Configuration, ++fileLabel);
+                    }
                 }
-                // Have to roll the file?
-                if (recordCount % 100 == 0)
-                {
-                    logger = new BlobPersistenceLogger(this.Configuration, ++fileLabel);
-                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Azure Storage Exception");
             }
 
             contentWindow.Close();

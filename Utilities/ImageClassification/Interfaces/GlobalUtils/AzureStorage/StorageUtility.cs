@@ -24,7 +24,7 @@ using System.IO;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
-
+using System.Windows;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
@@ -95,19 +95,6 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             CloudBlobContainer blobContainer = this.BlobClient.GetContainerReference(container);
 
             return ListDirectoriesRecurse(blobContainer, prefix, recurse);
-            /*
-            foreach (IListBlobItem item in blobContainer.ListBlobs(prefix, false))
-            {
-                if (item.GetType() == typeof(CloudBlobDirectory))
-                {
-                    CloudBlobDirectory blob = (CloudBlobDirectory)item;
-
-                    directories.Add(blob.Prefix);
-                }
-            }
-
-            return directories;
-            */
         }
 
         private List<String> ListDirectoriesRecurse(CloudBlobContainer container, string prefix, bool recurse)
@@ -148,6 +135,25 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             if (includeToken)
             {
                 token = GetContainerSasToken(blobContainer, SharedAccessBlobPermissions.Read);
+            }
+
+            // Make sure the information provided is correct, otherwise show the error and leave.
+            try
+            {
+                bool exists = blobContainer.Exists();
+                if(!exists)
+                {
+                    throw new Exception(String.Format("Container {0} does not exist.", container));
+                }
+            }
+            catch(Exception ex)
+            {
+                String msg = String.Format("An error has occured connecting to the storage account:{0}{1}," +
+                    Environment.NewLine,
+                    ex.Message);
+
+                MessageBox.Show(msg, "Azure Storage Connection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw ex;
             }
 
             foreach (IListBlobItem item in blobContainer.ListBlobs(prefix, true))
