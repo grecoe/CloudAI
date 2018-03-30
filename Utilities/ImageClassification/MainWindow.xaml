@@ -109,6 +109,7 @@
                 </TextBox>
                     
                 <TextBlock 
+                    x:Name="SourceProviderConfigTitle"
                     Grid.Row="4"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
@@ -118,8 +119,11 @@
                     Source Provider Configurations
                 </TextBlock>
 
-                <TabControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ConfigurationTabSourceTabControl">
-                </TabControl>
+                    <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ProviderConfigurationPanel">
+                    </StackPanel>
+
+                    <!-- <TabControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ConfigurationTabSourceTabControl">
+                </TabControl>-->
             </Grid>
         </TabItem>
     </TabControl>

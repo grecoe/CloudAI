@@ -59,6 +59,16 @@ namespace ImageClassifier.Interfaces.GenericUI
                     // Blob prefixes from storage
                     returnValue = this.SourceContainer.Trim(new char[] { '/', '\\' });
                 }
+                else if (this.SourceType == DataSourceType.LabelledDisk)
+                {
+                    // Blob prefixes from storage
+                    returnValue = this.SourceContainer.Trim(new char[] { '/', '\\' });
+                    int idx = returnValue.LastIndexOf('\\');
+                    if(idx != -1)
+                    {
+                        returnValue = returnValue.Substring(idx + 1);
+                    }
+                }
                 else
                 {
                     // Files?

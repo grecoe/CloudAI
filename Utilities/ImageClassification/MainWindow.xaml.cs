@@ -109,21 +109,24 @@ namespace ImageClassifier
             blobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             blobSource.ConfigurationControl.Parent = this;
 
+            /*
             TabItem tabItem = new TabItem();
             tabItem.Header = blobSource.ConfigurationControl.Title;
             tabItem.Content = blobSource.ConfigurationControl.Control;
             this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
-
+            */
             // Disk Source
             IDataSource localSource = DataSourceFactory.GetDataSource(DataSourceProvider.LocalDisk, DataSink.Catalog);
             localSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
             localSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             localSource.ConfigurationControl.Parent = this;
 
+            /*
             tabItem = new TabItem();
             tabItem.Header = localSource.ConfigurationControl.Title;
             tabItem.Content = localSource.ConfigurationControl.Control;
             this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
+            */
 
             // Labelled blob Source
             IDataSource labelledBlobSource = DataSourceFactory.GetDataSource(DataSourceProvider.LabeledAzureBlob, DataSink.Catalog);
@@ -131,10 +134,12 @@ namespace ImageClassifier
             labelledBlobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             labelledBlobSource.ConfigurationControl.Parent = this;
 
+            /*
             tabItem = new TabItem();
             tabItem.Header = labelledBlobSource.ConfigurationControl.Title;
             tabItem.Content = labelledBlobSource.ConfigurationControl.Control;
             this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
+            */
 
             // Labelled local Source
             IDataSource labelledLocalSource = DataSourceFactory.GetDataSource(DataSourceProvider.LabelledLocalDisk, DataSink.Catalog);
@@ -142,10 +147,12 @@ namespace ImageClassifier
             labelledBlobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             labelledBlobSource.ConfigurationControl.Parent = this;
 
+            /*
             tabItem = new TabItem();
             tabItem.Header = labelledLocalSource.ConfigurationControl.Title;
             tabItem.Content = labelledLocalSource.ConfigurationControl.Control;
             this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
+            */
 
             this.DataSources = new List<IDataSource>() { blobSource, localSource, labelledBlobSource, labelledLocalSource };
 

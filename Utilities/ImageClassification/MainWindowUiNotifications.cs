@@ -114,6 +114,11 @@ namespace ImageClassifier
 
                 this.SelectedDataSource.ContainerControl.OnContainerChanged += this.IContainerControlContainerChanged;
                 this.SelectedDataSource.ContainerControl.Refresh();
+
+                // Now set up the configuration
+                this.SourceProviderConfigTitle.Text = String.Format("{0} Configuration", this.SelectedDataSource.ConfigurationControl.Title);
+                this.ProviderConfigurationPanel.Children.Clear();
+                this.ProviderConfigurationPanel.Children.Add(this.SelectedDataSource.ConfigurationControl.Control);
             }
         }
 

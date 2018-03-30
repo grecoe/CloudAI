@@ -26,6 +26,7 @@ namespace ImageClassifier.Interfaces
     {
         Blob,
         LabelledBlob,
-        Disk
+        Disk,
+        LabelledDisk
     };
 }

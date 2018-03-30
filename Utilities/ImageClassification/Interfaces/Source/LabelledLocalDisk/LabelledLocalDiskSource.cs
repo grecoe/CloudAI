@@ -30,7 +30,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         : base("LabelledLocalStorageConfiguration.json")
         {
             this.Name = "LabelledLocalStorageService";
-            this.SourceType = DataSourceType.Disk;
+            this.SourceType = DataSourceType.LabelledDisk;
             this.MultiClass = false;
             this.DeleteSourceFilesWhenComplete = false;
 
@@ -43,7 +43,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Labelled Local Storage Service",
+            this.ConfigurationControl = new ConfigurationControlImpl("Inferred Local Storage Service",
                 configUi);
 
             this.UpdateInformationRequested(null);

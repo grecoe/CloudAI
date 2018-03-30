@@ -1,0 +1,10 @@
+{
+  "batchSize": 3,
+  "localConfiguration": {
+    "fileTypes": [
+      "*.jpg",
+      "*.png"
+    ],
+    "recordLocation": "C:\\______Demos\\images"
+  }
+}
