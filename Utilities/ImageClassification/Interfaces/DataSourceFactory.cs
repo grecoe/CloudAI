@@ -21,6 +21,7 @@
 using ImageClassifier.Interfaces.Sink.Catalog;
 using ImageClassifier.Interfaces.Source.BlobSource;
 using ImageClassifier.Interfaces.Source.LabeldBlobSource;
+using ImageClassifier.Interfaces.Source.LabelledLocalDisk;
 using ImageClassifier.Interfaces.Source.LocalDisk;
 
 namespace ImageClassifier.Interfaces
@@ -32,7 +33,8 @@ namespace ImageClassifier.Interfaces
     {
         AzureBlob,
         LabeledAzureBlob,
-        LocalDisk
+        LocalDisk,
+        LabelledLocalDisk
     };
 
     public enum ImageControl
@@ -67,6 +69,9 @@ namespace ImageClassifier.Interfaces
                     break;
                 case DataSourceProvider.LocalDisk:
                     returnSource = new LocalDiskSource();
+                    break;
+                case DataSourceProvider.LabelledLocalDisk:
+                    returnSource = new LabelledLocalDiskSource();
                     break;
                 default:
                     throw new System.Exception("Invalid provider");

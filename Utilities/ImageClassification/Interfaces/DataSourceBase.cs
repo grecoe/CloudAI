@@ -4,14 +4,26 @@ using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
-    abstract class DataSourceBase<T>: ConfigurationBase<T>, IDataSource where T:class, new()
+    abstract class DataSourceBase<T,I>: ConfigurationBase<T>, IDataSource where T:class, new() where I: class
     {
+        #region Common Collection Information
+        /// <summary>
+        /// Index into CurrentImageList
+        /// </summary>
+        protected int CurrentImage { get; set; }
+        /// <summary>
+        /// List of files from the currently selected directory
+        /// </summary>
+        protected List<I> CurrentImageList { get; set; }
+        #endregion
+
         public DataSourceBase(String name)
             :base(name)
         {
-
+            this.CurrentImageList = new List<I>();
         }
 
+        #region IDataSource
         public string Name { get; protected set; }
 
         public DataSourceType SourceType { get; protected set; }
@@ -50,6 +62,8 @@ namespace ImageClassifier.Interfaces
         public abstract void SetContainer(string container);
 
         public abstract void UpdateSourceFile(SourceFile file);
+
+        #endregion
 
         #endregion
     }

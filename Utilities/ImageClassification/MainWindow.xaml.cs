@@ -21,6 +21,7 @@
 using ImageClassifier.Configuration;
 using ImageClassifier.Interfaces;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.Source.LabeldBlobSource;
 using ImageClassifier.UIUtils;
 using System;
@@ -135,7 +136,18 @@ namespace ImageClassifier
             tabItem.Content = labelledBlobSource.ConfigurationControl.Control;
             this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
 
-            this.DataSources = new List<IDataSource>() { blobSource, localSource, labelledBlobSource };
+            // Labelled local Source
+            IDataSource labelledLocalSource = DataSourceFactory.GetDataSource(DataSourceProvider.LabelledLocalDisk, DataSink.Catalog);
+            labelledBlobSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
+            labelledBlobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
+            labelledBlobSource.ConfigurationControl.Parent = this;
+
+            tabItem = new TabItem();
+            tabItem.Header = labelledLocalSource.ConfigurationControl.Title;
+            tabItem.Content = labelledLocalSource.ConfigurationControl.Control;
+            this.ConfigurationTabSourceTabControl.Items.Add(tabItem);
+
+            this.DataSources = new List<IDataSource>() { blobSource, localSource, labelledBlobSource, labelledLocalSource };
 
             // Set the UI up but don't select one, happens later after we hook the selection changed.
             foreach (IDataSource source in this.DataSources)

@@ -32,23 +32,14 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
     /// <summary>
     /// An IDataSource implementation for Azure Blob Storage.
     /// </summary>
-    class AzureBlobSource : DataSourceBase<AzureBlobStorageConfiguration>, ISingleImageDataSource 
+    class AzureBlobSource : DataSourceBase<AzureBlobStorageConfiguration, ScoringImage>, ISingleImageDataSource 
     {
         #region PrivateMembers
         private AzureBlobStorageConfiguration Configuration { get; set; }
 
-        /// <summary>
-        /// Index into CurrentImageList
-        /// </summary>
-        private int CurrentImage { get; set; }
-        /// <summary>
-        /// List of files from the currently selected catalog file
-        /// </summary>
-        private List<ScoringImage> CurrentImageList { get; set; }
+        private StorageUtility AzureStorageUtils { get; set; }
 
         private List<string> CatalogFiles { get; set; }
-
-        private StorageUtility AzureStorageUtils { get; set; }
         #endregion
 
         public AzureBlobSource()

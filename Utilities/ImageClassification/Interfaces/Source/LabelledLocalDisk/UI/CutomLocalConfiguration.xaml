@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI.CutomLocalConfiguration"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI"
+             xmlns:controls="clr-namespace:ImageClassifier.Interfaces.GenericUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="700">
+    <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock 
+            Grid.Row="0" 
+            Grid.Column="0"
+            Margin="5,5,5,5"
+            FontSize="13">
+            Batch Size
+            </TextBlock>
+            <ComboBox
+            Grid.Row="0"
+            Grid.Column="1"
+            x:Name="BatchSize"
+            Margin="5,5,5,5"
+            IsEditable="False">
+                <ComboBoxItem Content="1"></ComboBoxItem>
+                <ComboBoxItem Content="2"></ComboBoxItem>
+                <ComboBoxItem Content="3"></ComboBoxItem>
+                <ComboBoxItem Content="6" IsSelected="True"></ComboBoxItem>
+                <ComboBoxItem Content="9"></ComboBoxItem>
+                <ComboBoxItem Content="10"></ComboBoxItem>
+                <ComboBoxItem Content="15"></ComboBoxItem>
+            </ComboBox>
+
+            <StackPanel x:Name="LocalSourceUiPanel"
+                    Grid.Row =" 1" Grid.Column="0" Grid.ColumnSpan="2" >
+                <controls:LocalSourceConfigurationUi />
+            </StackPanel>
+    </Grid>
+</UserControl>

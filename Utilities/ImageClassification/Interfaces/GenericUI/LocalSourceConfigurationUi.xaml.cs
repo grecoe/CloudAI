@@ -18,11 +18,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.Source.LocalDisk.Configuration;
 using System;
 using System.Windows.Controls;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
-namespace ImageClassifier.Interfaces.Source.LocalDisk.UI
+namespace ImageClassifier.Interfaces.GenericUI
 {
     /// <summary>
     /// Interaction logic for LocalSourceConfigurationUi.xaml
@@ -35,6 +35,11 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk.UI
 
         public IDataSource Provider { get; private set; }
         public LocalDiskSourceConfiguration Configuration { get; private set; }
+
+        public LocalSourceConfigurationUi()
+        {
+            InitializeComponent();
+        }
 
         public LocalSourceConfigurationUi(IDataSource source, LocalDiskSourceConfiguration config)
         {

@@ -51,7 +51,7 @@ namespace ImageClassifier
         /// <param name="file"></param>
         private void IMultiImageControlGroupChanged(SourceFile file)
         {
-            if (this.SelectedDataSource != null)
+            if (this.SelectedDataSource != null && !String.IsNullOrEmpty(this.SelectedDataSource.CurrentContainer))
             {
                 String classification = (this.SelectedDataSource as IMultiImageDataSource).CurrentContainerAsClassification;
                 int groupSize = (this.SelectedDataSource as IMultiImageDataSource).BatchSize;
@@ -60,13 +60,18 @@ namespace ImageClassifier
                 int totalGroups = this.SelectedDataSource.CurrentContainerCollectionCount / groupSize;
                 int currentGroup = (currentIndex > 0) ? (int)Math.Round((decimal)currentIndex / (decimal)groupSize) : 1;
 
+                if(totalGroups == 0 && this.SelectedDataSource.CurrentContainerCollectionCount > 0)
+                {
+                    totalGroups = 1;
+                }
+
                 ClassificationCheckboxPanelHelper.MakeSelection(
                     this.ClassificationTabSelectionPanel,
                     classification);
 
                 this.StatusBarLocationStatus.Text =
                     String.Format("Viewing Group :  {0} of {1}",
-                    currentGroup,
+                    (currentGroup > 0)?currentGroup : 1,
                     totalGroups);
             }
         }

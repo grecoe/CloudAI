@@ -20,12 +20,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace ImageClassifier.Interfaces.Source.LocalDisk.Configuration
+namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
     public class LocalDiskSourceConfiguration
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "fileTypes")]
         public List<String> FileTypes { get; set; }
+
         [Newtonsoft.Json.JsonProperty(PropertyName = "recordLocation")]
         public string RecordLocation { get; set; }
 

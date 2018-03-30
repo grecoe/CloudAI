@@ -32,7 +32,7 @@ using ImageClassifier.Interfaces.Source.LabeldBlobSource.UI;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 {
-    class LabeledAzureBlobSource : DataSourceBase<LabelledBlobSourceConfiguration>, IMultiImageDataSource 
+    class LabeledAzureBlobSource : DataSourceBase<LabelledBlobSourceConfiguration, ScoringImage>, IMultiImageDataSource 
     {
         #region PrivateMembers
         private const int DEFAULT_BATCH_SIZE = 6;
@@ -49,14 +49,6 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         /// Persists storage information account information
         /// </summary>
         private LabelledBlobPersisteceLogger PersistenceLogger { get; set; }
-        /// <summary>
-        /// Index into CurrentImageList
-        /// </summary>
-        private int CurrentImage { get; set; }
-        /// <summary>
-        /// List of files from the currently selected catalog file
-        /// </summary>
-        private List<ScoringImage> CurrentImageList { get; set; }
         #endregion
 
         public LabeledAzureBlobSource()
@@ -91,9 +83,13 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                 configUi);
 
             // Get a list of containers through the persistence logger 
-            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
-            this.CurrentContainer = this.Containers.FirstOrDefault();
-            this.InitializeOnNewContainer();
+            if (!String.IsNullOrEmpty(this.Configuration.StorageConfiguration.StorageAccount) &&
+                !String.IsNullOrEmpty(this.Configuration.StorageConfiguration.StorageAccountKey))
+            {
+                this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
+                this.CurrentContainer = this.Containers.FirstOrDefault();
+                this.InitializeOnNewContainer();
+            }
 
             this.ContainerControl = new GenericContainerControl(this);
             this.ImageControl = new MultiImageControl(this);
@@ -198,7 +194,17 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             }
         }
 
-        public override IEnumerable<string> Containers { get { return this.PersistenceLogger.LabelMap.Keys; } }
+        public override IEnumerable<string> Containers
+        {
+            get {
+                if (this.PersistenceLogger != null)
+                {
+                    return this.PersistenceLogger.LabelMap.Keys;
+                }
+
+                return new List<string>();
+            }
+        }
 
         public override void SetContainer(string container)
         {
@@ -333,6 +339,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             }
             return returnValue;
         }
+
         public IEnumerable<string> GetContainerLabels()
         {
             List<string> returnLabels = new List<string>();
@@ -377,9 +384,16 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
 
             List<String> directories = new List<string>();
-            foreach (String dir in this.AzureStorageUtils.ListDirectories(this.Configuration.StorageConfiguration.StorageContainer, this.Configuration.StorageConfiguration.BlobPrefix, false))
+            try
             {
-                directories.Add(dir);
+                foreach (String dir in this.AzureStorageUtils.ListDirectories(this.Configuration.StorageConfiguration.StorageContainer, this.Configuration.StorageConfiguration.BlobPrefix, false))
+                {
+                    directories.Add(dir);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Azure Storage Exception");
             }
 
             try

@@ -1,53 +1,35 @@
-﻿//
-// Copyright  Microsoft Corporation ("Microsoft").
-//
-// Microsoft grants you the right to use this software in accordance with your subscription agreement, if any, to use software 
-// provided for use with Microsoft Azure ("Subscription Agreement").  All software is licensed, not sold.  
-// 
-// If you do not have a Subscription Agreement, or at your option if you so choose, Microsoft grants you a nonexclusive, perpetual, 
-// royalty-free right to use and modify this software solely for your internal business purposes in connection with Microsoft Azure 
-// and other Microsoft products, including but not limited to, Microsoft R Open, Microsoft R Server, and Microsoft SQL Server.  
-// 
-// Unless otherwise stated in your Subscription Agreement, the following applies.  THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT 
-// WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL MICROSOFT OR ITS LICENSORS BE LIABLE 
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-// TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
-//
-
+﻿using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.GlobalUtils;
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
+using ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
-using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.Interfaces.GlobalUtils;
-using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
-namespace ImageClassifier.Interfaces.Source.LocalDisk
+namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 {
-    /// <summary>
-    /// An IDataSource implementation for local disk.
-    /// </summary>
-    class LocalDiskSource : DataSourceBase<LocalDiskSourceConfiguration, String>, ISingleImageDataSource 
+    class LabelledLocalDiskSource : DataSourceBase<LabelledLocalConfiguration, String>, IMultiImageDataSource
     {
         #region Private Members
         /// <summary>
         /// Configuration file for this source
         /// </summary>
-        private LocalDiskSourceConfiguration Configuration { get; set; }
+        private LabelledLocalConfiguration Configuration { get; set; }
         /// <summary>
         /// List of directories, which in this case become the containers.
         /// </summary>
         private List<String> DirectoryListings { get; set; }
         #endregion
 
-        public LocalDiskSource()
-        : base("LocalStorageConfiguration.json")
+        public LabelledLocalDiskSource()
+        : base("LabelledLocalStorageConfiguration.json")
         {
-            this.Name = "LocalStorageService";
+            this.Name = "LabelledLocalStorageService";
             this.SourceType = DataSourceType.Disk;
             this.MultiClass = false;
             this.DeleteSourceFilesWhenComplete = false;
@@ -56,25 +38,38 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.Configuration = this.LoadConfiguration();
 
             // Prepare the UI control with the right hooks.
-            LocalSourceConfigurationUi configUi = new LocalSourceConfigurationUi(this, this.Configuration);
+            CutomLocalConfiguration configUi = new CutomLocalConfiguration(this, this.Configuration);
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Local Storage Service",
+            this.ConfigurationControl = new ConfigurationControlImpl("Labelled Local Storage Service",
                 configUi);
 
             this.UpdateInformationRequested(null);
             this.InitializeOnNewContainer();
 
             this.ContainerControl = new GenericContainerControl(this);
-            this.ImageControl = new SingleImageControl(this);
+            this.ImageControl = new MultiImageControl(this);
         }
 
-        #region ISingleImageDataSource
-        public SourceFile NextSourceFile()
+        #region IMultiImageDataSource
+        public event OnContainerLabelsAcquired OnLabelsAcquired;
+        public int BatchSize { get { return this.Configuration.BatchSize; } }
+
+        public IEnumerable<string> GetContainerLabels()
         {
-            SourceFile returnFile = null;
+            List<string> returnLabels = new List<string>();
+            foreach (String container in this.Containers)
+            {
+                returnLabels.Add(this.CleanContainerForClassification(container));
+            }
+            return returnLabels;
+        }
+
+        public IEnumerable<SourceFile> NextSourceGroup()
+        {
+            List<SourceFile> returnFiles = new List<SourceFile>();
             if (this.CanMoveNext)
             {
                 if (this.CurrentImage <= -1)
@@ -82,36 +77,74 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
                     this.CurrentImage = -1;
                 }
 
-                string file = this.CurrentImageList[++this.CurrentImage];
-
-                returnFile = new SourceFile();
-                returnFile.Name = System.IO.Path.GetFileName(file);
-                returnFile.Classifications = new List<String>();
-                returnFile.DiskLocation = file;
-
-                // Is it cataloged?
-                if (this.Sink != null)
+                int count = 0;
+                while (this.CanMoveNext && count++ < this.BatchSize)
                 {
-                    ScoredItem found = this.Sink.Find(this.CurrentContainer, returnFile.DiskLocation);
-                    if (found != null)
+                    string image = this.CurrentImageList[++this.CurrentImage];
+
+                    // Download blah blah
+
+                    SourceFile returnFile = new SourceFile();
+                    returnFile.Name = System.IO.Path.GetFileName(image);
+                    returnFile.DiskLocation = image;
+
+                    if (this.Sink != null)
                     {
-                        returnFile.Classifications = found.Classifications;
+                        ScoredItem found = this.Sink.Find(this.CurrentContainer, image);
+                        if (found != null)
+                        {
+                            returnFile.Classifications = found.Classifications;
+                        }
+                    }
+
+                    if (returnFile.Classifications.Count == 0)
+                    {
+                        returnFile.Classifications.Add(this.CurrentContainerAsClassification);
+                        this.UpdateSourceFile(returnFile);
+                    }
+
+                    returnFiles.Add(returnFile);
+                }
+            }
+            return returnFiles;
+        }
+        public IEnumerable<SourceFile> PreviousSourceGroup()
+        {
+            List<SourceFile> returnFiles = new List<SourceFile>();
+            if (this.CanMovePrevious)
+            {
+                this.CurrentImage -= ((2 * this.BatchSize) + 1);
+                returnFiles.AddRange(this.NextSourceGroup());
+            }
+            return returnFiles;
+
+        }
+
+        public void UpdateSourceBatch(IEnumerable<SourceFile> fileBatch)
+        {
+            if (this.Sink != null)
+            {
+                List<ScoredItem> updateList = new List<ScoredItem>();
+
+                foreach (SourceFile file in fileBatch)
+                {
+                    string image = this.CurrentImageList.FirstOrDefault(x => String.Compare(x, file.Name, true) == 0);
+                    if (image != null && this.Sink != null)
+                    {
+                        ScoredItem item = new ScoredItem()
+                        {
+                            Container = this.CurrentContainer,
+                            Name = image,
+                            Classifications = file.Classifications
+                        };
+
+                        updateList.Add(item);
                     }
                 }
 
+                this.Sink.Record(updateList);
 
             }
-            return returnFile;
-        }
-        public SourceFile PreviousSourceFile()
-        {
-            SourceFile returnFile = null;
-            if (this.CanMovePrevious)
-            {
-                this.CurrentImage -= 2;
-                returnFile = this.NextSourceFile();
-            }
-            return returnFile;
         }
         #endregion
 
@@ -162,7 +195,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             {
                 error = "A colleciton must be present to use the Jump To function.";
             }
-            else if (index > this.CurrentImageList.Count || index < 1)
+            else if ((index-1) > this.CurrentImageList.Count || index < 1)
             {
                 error = String.Format("Jump to index must be within the collection size :: 1-{0}", this.CurrentImageList.Count);
             }
@@ -226,8 +259,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             // Collect all directories in the configuration
             // TODO: When doing this for multi image it's location,false,1
-            this.DirectoryListings.AddRange(FileUtils.GetDirectoryHierarchy(this.Configuration.RecordLocation, true, 0));
-            // TODO:DELETE AND FIXthis.RecurseDirectoryListings(this.Configuration.RecordLocation, false);
+            this.DirectoryListings.AddRange(FileUtils.GetDirectoryHierarchy(this.Configuration.LocalConfiguration.RecordLocation, false, 1));
             this.CurrentContainer = this.DirectoryListings.FirstOrDefault();
 
             // Initialize the list of items
@@ -245,7 +277,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             if (System.IO.Directory.Exists(this.CurrentContainer))
             {
-                foreach (String file in ImageClassifier.Interfaces.GlobalUtils.FileUtils.ListFile(this.CurrentContainer, this.Configuration.FileTypes))
+                foreach (String file in ImageClassifier.Interfaces.GlobalUtils.FileUtils.ListFile(this.CurrentContainer, this.Configuration.LocalConfiguration.FileTypes))
                 {
                     this.CurrentImageList.Add(file);
                 }
@@ -253,5 +285,29 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         }
         #endregion
 
+        #region Private Helpers
+        public string CurrentContainerAsClassification
+        {
+            get { return this.CleanContainerForClassification(this.CurrentContainer); }
+        }
+
+        private String CleanContainerForClassification(string container)
+        {
+            string returnValue = String.Empty;
+            string cont = container.Trim(new char[] { '\\' });
+
+            int idx = cont.LastIndexOf('\\');
+            if (idx > 0)
+            {
+                returnValue = cont.Substring(idx + 1);
+            }
+            else
+            {
+                returnValue = cont;
+            }
+            return returnValue;
+        }
+        #endregion
     }
+
 }

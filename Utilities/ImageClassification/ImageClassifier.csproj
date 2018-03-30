@@ -35,13 +35,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\StorageLoader_NOTGIT\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
+      <HintPath>packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Storage, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\StorageLoader_NOTGIT\packages\WindowsAzure.Storage.9.0.0\lib\net45\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=9.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\WindowsAzure.Storage.9.1.0\lib\net45\Microsoft.WindowsAzure.Storage.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\StorageLoader_NOTGIT\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -119,9 +119,14 @@
     <Compile Include="Interfaces\Source\LabeldBlobSource\UI\CustomStorageConfiguration.xaml.cs">
       <DependentUpon>CustomStorageConfiguration.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Interfaces\Source\LocalDisk\Configuration\LocalDiskSourceConfiguration.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Configuration\LocalDiskSourceConfiguration.cs" />
+    <Compile Include="Interfaces\Source\LabelledLocalDisk\Configuration\LabelledLocalConfiguration.cs" />
+    <Compile Include="Interfaces\Source\LabelledLocalDisk\LabelledLocalDiskSource.cs" />
+    <Compile Include="Interfaces\Source\LabelledLocalDisk\UI\CutomLocalConfiguration.xaml.cs">
+      <DependentUpon>CutomLocalConfiguration.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\Source\LocalDisk\LocalDiskSource.cs" />
-    <Compile Include="Interfaces\Source\LocalDisk\UI\LocalSourceConfigurationUi.xaml.cs">
+    <Compile Include="Interfaces\GenericUI\LocalSourceConfigurationUi.xaml.cs">
       <DependentUpon>LocalSourceConfigurationUi.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindowIContainerControlCallback.cs" />
@@ -166,7 +171,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Interfaces\Source\LocalDisk\UI\LocalSourceConfigurationUi.xaml">
+    <Page Include="Interfaces\GenericUI\LocalSourceConfigurationUi.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\Source\LabelledLocalDisk\UI\CutomLocalConfiguration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -205,16 +214,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Content Include="AzureStorageConfiguration.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="LocalStorageConfiguration.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="LabeledAzureStorageConfiguration.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="packages.config" />
+    <Content Include="AzureStorageConfiguration.json" />
+    <Content Include="LocalStorageConfiguration.json" />
+    <Content Include="LabeledAzureStorageConfiguration.json" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

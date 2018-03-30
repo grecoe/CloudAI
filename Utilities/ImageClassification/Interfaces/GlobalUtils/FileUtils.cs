@@ -90,6 +90,86 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             }
         }
 
+        /// <summary>
+        /// Gets a list of directories and sub directories up to a certain depth.
+        /// </summary>
+        /// <param name="root">Directory to start in</param>
+        /// <param name="includeRoot">Should include passed in root directory in results</param>
+        /// <param name="depth">Maximum depth of directory search</param>
+        /// <returns>List of all directories up to depth [depth] under root.</returns>
+        public static IEnumerable<string> GetDirectoryHierarchy(String root, bool includeRoot, int depth)
+        {
+            List<string> paths = new List<string>();
+            if (System.IO.Directory.Exists(root))
+            {
+                List<string> firstLevelChildren = new List<string>();
+                foreach (string directory in System.IO.Directory.GetDirectories(root))
+                {
+                    firstLevelChildren.Add(directory);
+                }
+
+                if (depth > 0)
+                {
+                    if (depth == 1)
+                    {
+                        paths.AddRange(firstLevelChildren);
+                    }
+                    else
+                    {
+                        int currentDepth = 1;
+                        List<List<string>> subjectPaths = new List<List<string>>();
+                        foreach (string directory in firstLevelChildren)
+                        {
+                            subjectPaths.Add(new List<string>(FileUtils.RecurseDirectoryListings(directory, depth, currentDepth)));
+                            currentDepth = 1;
+                        }
+
+                        foreach (List<string> subjPath in subjectPaths)
+                        {
+                            paths.AddRange(subjPath);
+                        }
+                    }
+                }
+
+                if (includeRoot)
+                {
+                    paths.Insert(0,root);
+                }
+            }
+
+            return paths;
+
+        }
+
+        /// <summary>
+        /// Used internal to GetDirectoryHierarchy to keep recursing over directories to get depth.
+        /// </summary>
+        /// <param name="root">Directory to start</param>
+        /// <param name="maxDepth">Maximum depth of directory tree to drill down</param>
+        /// <param name="currentDepth">Current depth in the directory tree</param>
+        /// <returns>List of directories under root</returns>
+        private static IEnumerable<string> RecurseDirectoryListings(String root, int maxDepth, int currentDepth)
+        {
+            List<string> paths = new List<string>();
+            if (currentDepth <= maxDepth)
+            {
+                if (System.IO.Directory.Exists(root))
+                {
+                    paths.Add(root);
+                    foreach (string directory in System.IO.Directory.GetDirectories(root))
+                    {
+                        paths.AddRange(FileUtils.RecurseDirectoryListings(directory, maxDepth, currentDepth+1));
+                    }
+                }
+            }
+
+            return paths;
+        }
+
+
+        /// <summary>
+        /// Return a file stream with position set to 0 on a file on disk
+        /// </summary>
         public static System.IO.MemoryStream GetFileStream(string fileLocation)
         {
             System.IO.MemoryStream returnStream = null;
@@ -103,6 +183,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             return returnStream;
         }
 
+        /// <summary>
+        /// Gets a usable extension for searching for files. Inserts a * on the extension if not there.
+        /// </summary>
         private static String GetUsableExtension(string extension)
         {
             String usableExtension = extension;

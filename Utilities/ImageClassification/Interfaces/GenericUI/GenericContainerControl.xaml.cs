@@ -69,7 +69,7 @@ namespace ImageClassifier.Interfaces.GenericUI
         {
             this.SourceContainerCombo.Items.Clear();
 
-            if (this.DataSource != null)
+            if (this.DataSource != null && this.DataSource.Containers != null)
             {
                 foreach (String file in this.DataSource.Containers)
                 {
