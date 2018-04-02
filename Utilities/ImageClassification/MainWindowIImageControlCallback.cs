@@ -34,9 +34,12 @@ namespace ImageClassifier
         {
             if (this.SelectedDataSource != null)
             {
-                ClassificationCheckboxPanelHelper.MakeSelection(
-                    this.ClassificationTabSelectionPanel,
-                    file);
+                if (file != null)
+                {
+                    ClassificationCheckboxPanelHelper.MakeSelection(
+                        this.ClassificationTabSelectionPanel,
+                        file);
+                }
 
                 this.StatusBarLocationStatus.Text =
                     String.Format("Viewing {0} of {1} ",

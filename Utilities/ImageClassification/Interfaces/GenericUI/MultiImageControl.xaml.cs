@@ -247,7 +247,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.MultiImageDataSource.ClearSourceFiles();
 
             if (this.MultiImageDataSource != null &&
-                this.MultiImageDataSource.CanMoveNext )
+                this.ContinueToImage(true))
             {
                 this.DisplayImages(this.MultiImageDataSource.NextSourceGroup());
             }
@@ -263,7 +263,7 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             this.DataSource.ClearSourceFiles();
             if (this.MultiImageDataSource != null &&
-                this.MultiImageDataSource.CanMovePrevious)
+                this.ContinueToImage(false))
             {
                 this.DisplayImages(this.MultiImageDataSource.PreviousSourceGroup());
             }
@@ -288,6 +288,46 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             return contentWindow;
 
+        }
+
+        private bool ContinueToImage(bool forward)
+        {
+            bool continueToImage = true;
+
+            int totalImages = this.DataSource.CurrentContainerCollectionCount;
+            ImageControlNotificationDisplay returnDisplay = null;
+
+            if (totalImages == 0)
+            {
+                returnDisplay = new ImageControlNotificationDisplay(null, this.ParentControl as FrameworkElement);
+            }
+            else
+            {
+                if (forward &&
+                    (this.DataSource == null || !this.DataSource.CanMoveNext))
+                {
+                    returnDisplay = new ImageControlNotificationDisplay("There are no more next images to display for this provider",
+                        this.ParentControl as FrameworkElement);
+                }
+
+                if (!forward &&
+                    (this.DataSource == null || !this.DataSource.CanMovePrevious))
+                {
+                    returnDisplay = new ImageControlNotificationDisplay("There are no more previous images to display for this provider",
+                        this.ParentControl as FrameworkElement);
+                }
+
+            }
+
+            if (returnDisplay != null)
+            {
+                this.ImagePanel.Children.Clear();
+                this.ImagePanel.Children.Add(returnDisplay);
+                this.ImageChanged?.Invoke(null);
+                continueToImage = false;
+            }
+
+            return continueToImage;
         }
         #endregion
     }

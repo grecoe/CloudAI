@@ -21,6 +21,7 @@
 using System;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System.Windows.Controls;
+using System.Windows;
 
 namespace ImageClassifier.Interfaces.GenericUI
 {
@@ -71,24 +72,32 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void Collect()
         {
-            this.Configuration.StorageAccount = this.ConfigurationTextStorageAccount.Text;
-            this.Configuration.StorageAccountKey = this.ConfigurationTextStorageAccountKey.Text;
-            this.Configuration.StorageContainer = this.ConfigurationTextStorageContainer.Text;
-            this.Configuration.BlobPrefix = this.ConfigurationTextBlobPrefix.Text;
-            this.Configuration.FileType = this.ConfigurationTextFileExtension.Text;
-            this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
-            try
+            if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                this.Configuration.FileCount = int.Parse(this.ConfigurationTextFileCount.Text);
+
+                this.Configuration.StorageAccount = this.ConfigurationTextStorageAccount.Text;
+                this.Configuration.StorageAccountKey = this.ConfigurationTextStorageAccountKey.Text;
+                this.Configuration.StorageContainer = this.ConfigurationTextStorageContainer.Text;
+                this.Configuration.BlobPrefix = this.ConfigurationTextBlobPrefix.Text;
+                this.Configuration.FileType = this.ConfigurationTextFileExtension.Text;
+                this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
+                try
+                {
+                    this.Configuration.FileCount = int.Parse(this.ConfigurationTextFileCount.Text);
+                }
+                catch
+                {
+                    // Just set a default and seed it
+                    this.Configuration.FileCount = 1000;
+                    this.Seed();
+                }
+
+                OnConfigurationSaved?.Invoke(this.Provider);
             }
-            catch
+            else
             {
-                // Just set a default and seed it
-                this.Configuration.FileCount = 1000;
                 this.Seed();
             }
-
-            OnConfigurationSaved?.Invoke(this.Provider);
         }
 
         private void ConfigurationSelectLogFolder()

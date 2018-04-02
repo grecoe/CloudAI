@@ -209,12 +209,26 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         #region Private Helpers
         private void ConfigurationSaved(object caller)
         {
+            // Delete the ISink storage
+            if (this.Sink != null)
+            {
+                this.Sink.Purge();
+            }
+
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
             this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
+
+            // Update containers
+            this.ContainerControl = new GenericContainerControl(this);
+
+            // Initialize the list of items
+            this.InitializeOnNewContainer();
+
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
+            
             // Since there is no new acquisition of data, go and do this too
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
@@ -224,11 +238,11 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             // Update class variables
             this.DirectoryListings = new List<string>();
 
+
             // Collect all directories in the configuration
-            // TODO: When doing this for multi image it's location,false,1
             this.DirectoryListings.AddRange(FileUtils.GetDirectoryHierarchy(this.Configuration.RecordLocation, true, 0));
-            // TODO:DELETE AND FIXthis.RecurseDirectoryListings(this.Configuration.RecordLocation, false);
             this.CurrentContainer = this.DirectoryListings.FirstOrDefault();
+
 
             // Initialize the list of items
             this.InitializeOnNewContainer();

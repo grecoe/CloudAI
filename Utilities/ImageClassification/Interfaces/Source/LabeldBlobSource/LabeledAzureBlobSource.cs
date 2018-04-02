@@ -79,7 +79,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             configUi.OnSourceDataUpdated += AcquireContent;
 
             this.ConfigurationControl =
-                new ConfigurationControlImpl("Inferred Azure Storage Service",
+                new ConfigurationControlImpl("Azure Storage Service - Directory Classification",
                 configUi);
 
             // Get a list of containers through the persistence logger 

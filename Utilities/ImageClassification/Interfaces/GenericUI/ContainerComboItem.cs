@@ -50,18 +50,18 @@ namespace ImageClassifier.Interfaces.GenericUI
             {
                 if (this.SourceType == DataSourceType.Disk)
                 {
-                    // Directories
+                    // Directories - show whole thing in this case so you know lineage
                     string root = System.IO.Path.GetPathRoot(this.SourceContainer);
                     returnValue = this.SourceContainer.Substring(root.Length);
                 }
                 else if(this.SourceType == DataSourceType.LabelledBlob)
                 {
-                    // Blob prefixes from storage
+                    // Blob prefixes from storage 
                     returnValue = this.SourceContainer.Trim(new char[] { '/', '\\' });
                 }
                 else if (this.SourceType == DataSourceType.LabelledDisk)
                 {
-                    // Blob prefixes from storage
+                    // Prefixes from disk (directory)
                     returnValue = this.SourceContainer.Trim(new char[] { '/', '\\' });
                     int idx = returnValue.LastIndexOf('\\');
                     if(idx != -1)
@@ -71,7 +71,7 @@ namespace ImageClassifier.Interfaces.GenericUI
                 }
                 else
                 {
-                    // Files?
+                    // Files
                     returnValue = System.IO.Path.GetFileName(this.SourceContainer);
                 }
             }

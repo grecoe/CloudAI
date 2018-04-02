@@ -19,6 +19,7 @@
 //
 
 using System;
+using System.Windows;
 using System.Windows.Controls;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
@@ -62,10 +63,18 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void Collect()
         {
-            this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-            this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
+            if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
 
-            OnConfigurationSaved?.Invoke(this.Provider);
+                this.OnConfigurationSaved?.Invoke(this.Provider);
+                this.OnSourceDataUpdated?.Invoke(this.Provider);
+            }
+            else
+            {
+                this.Seed();
+            }
         }
 
         private void ConfigurationSelectSourceFolder()

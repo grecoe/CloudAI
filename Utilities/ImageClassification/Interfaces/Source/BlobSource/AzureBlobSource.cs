@@ -294,6 +294,9 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         /// Triggered by the configuration UI when the underlying configuration is updated.
         /// 
         /// Performs work then bubbles the call out to the parent app (listener)
+        /// 
+        /// No need to update the container drop list because it's not automatic, happens when
+        /// data update is requested.
         /// </summary>
         /// <param name="caller">unused</param>
         private void ConfigurationSaved(object caller)

@@ -21,6 +21,7 @@
 using ImageClassifier.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace ImageClassifier
 {
@@ -46,6 +47,8 @@ namespace ImageClassifier
             {
                 InitializeUi(false);
             }
+
+            MessageBox.Show("Configuration has been saved", "Save Configuration", MessageBoxButton.OK);
         }
 
         /// <summary>

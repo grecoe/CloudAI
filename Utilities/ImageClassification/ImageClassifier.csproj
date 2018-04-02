@@ -85,6 +85,9 @@
     <Compile Include="Interfaces\GenericUI\SingleImageControl.xaml.cs">
       <DependentUpon>SingleImageControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\GenericUI\ImageControlNotificationDisplay.xaml.cs">
+      <DependentUpon>ImageControlNotificationDisplay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationBase.cs" />
     <Compile Include="Interfaces\DataSourceFactory.cs" />
     <Compile Include="Interfaces\GlobalUtils\FileUtils.cs" />
@@ -164,6 +167,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Interfaces\GenericUI\AzureStorageConfigurationUi.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Interfaces\GenericUI\ImageControlNotificationDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

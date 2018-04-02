@@ -38,8 +38,7 @@
             x:Name="ImageSizeData"
             FontSize="12"
             HorizontalAlignment="Center">
-            sizedata
-        </TextBlock>
+       </TextBlock>
 
         <StackPanel 
             x:Name="NavigationPanel"

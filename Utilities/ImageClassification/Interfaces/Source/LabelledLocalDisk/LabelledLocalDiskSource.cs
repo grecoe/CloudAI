@@ -1,15 +1,12 @@
 ﻿using ImageClassifier.Interfaces.GenericUI;
 using ImageClassifier.Interfaces.GlobalUtils;
-using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
-using ImageClassifier.Interfaces.GlobalUtils.Configuration;
-using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
-using ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
+using ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI;
 
 namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 {
@@ -43,7 +40,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Inferred Local Storage Service",
+            this.ConfigurationControl = new ConfigurationControlImpl("Local Storage Service - Directory Classification",
                 configUi);
 
             this.UpdateInformationRequested(null);
@@ -55,6 +52,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
         #region IMultiImageDataSource
         public event OnContainerLabelsAcquired OnLabelsAcquired;
+
         public int BatchSize { get { return this.Configuration.BatchSize; } }
 
         public IEnumerable<string> GetContainerLabels()
@@ -242,12 +240,26 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         #region Private Helpers
         private void ConfigurationSaved(object caller)
         {
+            // Delete the ISink storage
+            if (this.Sink != null)
+            {
+                this.Sink.Purge();
+            }
+
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
             this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
+
+            // Update containers
+            this.ContainerControl = new GenericContainerControl(this);
+
+            // Initialize the list of items
+            this.InitializeOnNewContainer();
+
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
+            
             // Since there is no new acquisition of data, go and do this too
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }

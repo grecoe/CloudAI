@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="ImageClassifier.Interfaces.GenericUI.ImageControlNotificationDisplay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ImageClassifier.Interfaces.GenericUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400">
+    <StackPanel
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
+        <TextBlock
+            x:Name="PlaceHolderText"
+            TextWrapping="Wrap"
+            FontSize="20"
+            Foreground="DarkGray"
+            FontWeight="Bold"
+            TextAlignment="Center">
+            There are currently no available images in this container. Change the container or check the settings for the provider and try again.
+        </TextBlock>
+            
+    </StackPanel>
+</UserControl>

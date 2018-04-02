@@ -177,6 +177,9 @@ namespace ImageClassifier.Interfaces.GenericUI
         {
             this.CurrentSourceFile.CurrentSource = file;
 
+            // Clear settings
+            this.Clear();
+
             // Get the size of the parent
             double height = 100;
             double width = 100;
@@ -191,10 +194,7 @@ namespace ImageClassifier.Interfaces.GenericUI
                 height -= ((this.ImageLabel.ActualHeight + this.ImageSizeData.ActualHeight + this.NavigationPanel.ActualHeight));
             }
 
-            // Clear the panel 
-            this.ImageLabel.Text = String.Empty;
-            this.ImagePanel.Children.Clear();
-
+            // Get the stream on the file
             System.IO.MemoryStream downloadFile = FileUtils.GetFileStream(file.DiskLocation);
 
             // Call the image changed so that the base can update what it needs.
@@ -216,9 +216,8 @@ namespace ImageClassifier.Interfaces.GenericUI
         {
             this.DataSource.ClearSourceFiles();
 
-            if (this.DataSource != null && 
-                this.DataSource.CanMovePrevious &&
-                this.DataSource is ISingleImageDataSource)
+
+            if (this.ContinueToImage(true) && this.DataSource is ISingleImageDataSource)
             {
                 this.MoveImage((this.DataSource as ISingleImageDataSource).PreviousSourceFile());
             }
@@ -228,12 +227,50 @@ namespace ImageClassifier.Interfaces.GenericUI
         {
             this.DataSource.ClearSourceFiles();
 
-            if (this.DataSource != null && 
-                this.DataSource.CanMoveNext &&
-                this.DataSource is ISingleImageDataSource)
+            if (this.ContinueToImage(true) && this.DataSource is ISingleImageDataSource)
             {
                 this.MoveImage((this.DataSource as ISingleImageDataSource).NextSourceFile());
             }
+        }
+
+        private bool ContinueToImage(bool forward)
+        {
+            bool continueToImage = true;
+
+            int totalImages = this.DataSource.CurrentContainerCollectionCount;
+            ImageControlNotificationDisplay returnDisplay = null;
+
+            if (totalImages == 0)
+            {
+                returnDisplay = new ImageControlNotificationDisplay(null, this.ParentControl as FrameworkElement);
+            }
+            else
+            {
+                if(forward && 
+                    (this.DataSource == null || !this.DataSource.CanMoveNext))
+                {
+                    returnDisplay = new ImageControlNotificationDisplay("There are no more next images to display for this provider",
+                        this.ParentControl as FrameworkElement);
+                }
+
+                if( !forward &&
+                    (this.DataSource == null || !this.DataSource.CanMovePrevious))
+                {
+                    returnDisplay = new ImageControlNotificationDisplay("There are no more previous images to display for this provider",
+                        this.ParentControl as FrameworkElement);
+                }
+
+            }
+
+            if (returnDisplay != null)
+            {
+                this.Clear();
+                this.ImagePanel.Children.Add(returnDisplay);
+                this.ImageChanged?.Invoke(null);
+                continueToImage = false;
+            }
+
+            return continueToImage;
         }
         #endregion
     }

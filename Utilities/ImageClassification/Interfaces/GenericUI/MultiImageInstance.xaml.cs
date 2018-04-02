@@ -60,10 +60,12 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             this.ImagePanel.MouseDown += ImagePanel_MouseDown;
 
+            this.ThreadCollectImage(null);
+
             // Spin a thread to load image
-            System.Threading.Thread startThread = new System.Threading.Thread(ThreadCollectImage);
-            startThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            startThread.Start(null);
+            //System.Threading.Thread startThread = new System.Threading.Thread(ThreadCollectImage);
+            //startThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            //startThread.Start(null);
         }
 
         public void UpdateLabels()
@@ -89,15 +91,24 @@ namespace ImageClassifier.Interfaces.GenericUI
             double height = this.ParentHeight * .75;
             double width = this.ParentWidth * .75;
 
-            this.ImagePanel.Dispatcher.Invoke(() => {
-                System.IO.MemoryStream downloadFile = FileUtils.GetFileStream(this.Item.CurrentSource.DiskLocation);
-                this.ItemImage = ElementCreation.CreateUiImage(this.Item, height, width, downloadFile);
-                this.ImagePanel.Children.Add(this.ItemImage);
-            });
+            try
+            {
+                this.ImagePanel.Dispatcher.Invoke(() =>
+                {
+                    System.IO.MemoryStream downloadFile = FileUtils.GetFileStream(this.Item.CurrentSource.DiskLocation);
+                    this.ItemImage = ElementCreation.CreateUiImage(this.Item, height, width, downloadFile);
+                    this.ImagePanel.Children.Add(this.ItemImage);
+                });
 
-            this.ImageSize.Dispatcher.Invoke(() => {
-                this.ImageSize.Text = String.Format("{0}w x {1}h", this.Item.OriginalSize.Width, this.Item.OriginalSize.Height);
-            });
+                this.ImageSize.Dispatcher.Invoke(() =>
+                {
+                    this.ImageSize.Text = String.Format("{0}w x {1}h", this.Item.OriginalSize.Width, this.Item.OriginalSize.Height);
+                });
+            }
+            catch(Exception ex)
+            {
+                int x = 9;
+            }
         }
     }
 }
