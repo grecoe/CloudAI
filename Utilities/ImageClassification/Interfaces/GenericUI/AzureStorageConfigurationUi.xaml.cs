@@ -28,10 +28,12 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// <summary>
     /// Control for collecting azure storage information.
     /// </summary>
-    public partial class AzureStorageConfigurationUi : UserControl
+    public partial class AzureStorageConfigurationUi : UserControl, IConfigurationControlNotifications
     {
+        #region IConfigurationControlNotifications
         public event OnConfigurationUpdatedHandler OnConfigurationSaved;
         public event OnUpdateSourceData OnSourceDataUpdated;
+        #endregion
 
         public IDataSource Provider { get; private set; }
 

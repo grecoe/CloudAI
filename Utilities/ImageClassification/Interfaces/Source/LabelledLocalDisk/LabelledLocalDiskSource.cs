@@ -85,6 +85,11 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             return returnLabels;
         }
 
+        public string CurrentContainerAsClassification
+        {
+            get { return this.CleanContainerForClassification(this.CurrentContainer); }
+        }
+
         public IEnumerable<SourceFile> NextSourceGroup()
         {
             List<SourceFile> returnFiles = new List<SourceFile>();
@@ -140,7 +145,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
         public void UpdateSourceBatch(IEnumerable<SourceFile> fileBatch)
         {
-            if (this.Sink != null)
+            if (this.Sink != null && !String.IsNullOrEmpty(this.CurrentContainer) )
             {
                 List<ScoredItem> updateList = new List<ScoredItem>();
 
@@ -161,7 +166,6 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
                 }
 
                 this.Sink.Record(updateList);
-
             }
         }
         #endregion
@@ -239,7 +243,6 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
                 this.InitializeOnNewContainer();
             }
         }
-
         public override void UpdateSourceFile(SourceFile file)
         {
             //throw new NotImplementedException();
@@ -258,6 +261,9 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         #endregion
 
         #region Private Helpers
+        /// <summary>
+        /// Performs the steps needed on saving the configuration and re-initializing
+        /// </summary>
         private void ConfigurationSaved(object caller)
         {
             // Delete the ISink storage
@@ -274,23 +280,22 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             // Update containers
             this.ContainerControl = new GenericContainerControl(this);
 
-            // Initialize the list of items
-            this.InitializeOnNewContainer();
+            this.UpdateInformationRequested(null);
 
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
-            
-            // Since there is no new acquisition of data, go and do this too
-            this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
+        /// <summary>
+        /// When teh configuration is saved and new information needs to be loaded, re-initialized,
+        /// and notify any listeners of the change.
+        /// </summary>
         private void UpdateInformationRequested(object caller)
         {
             // Update class variables
             this.DirectoryListings = new List<string>();
 
             // Collect all directories in the configuration
-            // TODO: When doing this for multi image it's location,false,1
             this.DirectoryListings.AddRange(FileUtils.GetDirectoryHierarchy(this.Configuration.LocalConfiguration.RecordLocation, false, 1));
             this.CurrentContainer = this.DirectoryListings.FirstOrDefault();
 
@@ -301,41 +306,48 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
-
+        /// <summary>
+        /// Resets the internal list and list index when a container is changed.
+        /// </summary>
         private void InitializeOnNewContainer()
         {
             this.CurrentImage = -1;
             this.CurrentImageList = new List<String>();
 
-            if (System.IO.Directory.Exists(this.CurrentContainer))
+            // If a directory was chosen that doens't have children there are no containers
+            if (!String.IsNullOrEmpty(this.CurrentContainer))
             {
-                foreach (String file in ImageClassifier.Interfaces.GlobalUtils.FileUtils.ListFile(this.CurrentContainer, this.Configuration.LocalConfiguration.FileTypes))
+                if (System.IO.Directory.Exists(this.CurrentContainer))
                 {
-                    this.CurrentImageList.Add(file);
+                    foreach (String file in ImageClassifier.Interfaces.GlobalUtils.FileUtils.ListFile(this.CurrentContainer, this.Configuration.LocalConfiguration.FileTypes))
+                    {
+                        this.CurrentImageList.Add(file);
+                    }
                 }
             }
         }
-        #endregion
 
-        #region Private Helpers
-        public string CurrentContainerAsClassification
-        {
-            get { return this.CleanContainerForClassification(this.CurrentContainer); }
-        }
-
+        /// <summary>
+        /// In this source, we use the last directory in the path as the base classificaiton for 
+        /// the item, so retrieve just the last directory in the data.
+        /// </summary>
         private String CleanContainerForClassification(string container)
         {
             string returnValue = String.Empty;
-            string cont = container.Trim(new char[] { '\\' });
 
-            int idx = cont.LastIndexOf('\\');
-            if (idx > 0)
+            if (!String.IsNullOrEmpty(container))
             {
-                returnValue = cont.Substring(idx + 1);
-            }
-            else
-            {
-                returnValue = cont;
+                string cont = container.Trim(new char[] { '\\' });
+
+                int idx = cont.LastIndexOf('\\');
+                if (idx > 0)
+                {
+                    returnValue = cont.Substring(idx + 1);
+                }
+                else
+                {
+                    returnValue = cont;
+                }
             }
             return returnValue;
         }

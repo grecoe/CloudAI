@@ -22,8 +22,16 @@ using ImageClassifier.UIUtils;
 namespace ImageClassifier.Interfaces
 {
 
+    /// <summary>
+    /// Extension of IImageControl for single image data sources. 
+    /// 
+    /// Single image data sources show only one image at a time.
+    /// </summary>
     public interface ISingleImageControl : IImageControl
     {
+        /// <summary>
+        /// The image currently used in the control
+        /// </summary>
         CurrentItem CurrentSourceFile { get; }
     }
 }

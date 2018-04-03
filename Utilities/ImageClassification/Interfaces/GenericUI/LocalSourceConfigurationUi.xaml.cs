@@ -29,10 +29,12 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// Interaction logic for LocalSourceConfigurationUi.xaml
     /// </summary>
     #pragma warning disable CS0067
-    public partial class LocalSourceConfigurationUi : UserControl
+    public partial class LocalSourceConfigurationUi : UserControl, IConfigurationControlNotifications
     {
+        #region IConfigurationControlNotifications
         public event OnConfigurationUpdatedHandler OnConfigurationSaved;
         public event OnUpdateSourceData OnSourceDataUpdated;
+        #endregion 
 
         public IDataSource Provider { get; private set; }
         public LocalDiskSourceConfiguration Configuration { get; private set; }

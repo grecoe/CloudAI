@@ -58,6 +58,10 @@ namespace ImageClassifier.Configuration
             {
                 returnConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<ClassificationContext>(System.IO.File.ReadAllText(path));
             }
+            else
+            {
+                returnConfig.Save();
+            }
 
             return returnConfig;
         }

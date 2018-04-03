@@ -35,6 +35,8 @@ namespace ImageClassifier
         /// <param name="sender">The provider that made the change</param>
         private void IDataSourceOnConfigurationUdpated(IDataSource sender)
         {
+            this.StatusBarClearStatus();
+
             // Something changed, make sure we get the annotations saved out
             this.ConfigurationContext.Classifications =
                 new List<string>(this.ConfigurationTabTextAnnotationTags.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));

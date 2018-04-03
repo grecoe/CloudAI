@@ -30,11 +30,12 @@
             </TextBlock>
 
             <TextBox 
-                                x:Name="ConfigurationTextFileExtension"
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Margin="5,5,5,5"
-                                FontSize="13">
+                ToolTip="Select the number of images to show in a group."
+                x:Name="ConfigurationTextFileExtension"
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="5,5,5,5"
+                FontSize="13">
             </TextBox>
         
         

@@ -18,23 +18,25 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
+using System.Collections.Generic;
 using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
-using System;
-using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence
 {
     /// <summary>
-    /// Different from the single instance, we need to keep images separated by
-    /// container/directory so we use this class here as a master dictionary of the other 
-    /// files.
+    /// The catalog logger. This separates information from each container into it's own 
+    /// catalog file.
     /// </summary>
     class LabelledBlobPersisteceLogger : GenericCsvLogger
     {
+        #region Private Members
         private AzureBlobStorageConfiguration Configuration { get; set; }
         public Dictionary<String,String> LabelMap { get; set; }
+        #endregion
+
 
         public LabelledBlobPersisteceLogger(AzureBlobStorageConfiguration configuration)
             : base(configuration.RecordLocation,
@@ -53,7 +55,12 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence
             }
         }
 
-        public void RecordLabelledImage(string container, string url)
+        /// <summary>
+        /// Appends, and creates if neccesary, a catalog file for a given image URL.
+        /// 
+        /// Used when initially acquiring images from the storage account.
+        /// </summary>
+        public void RecordStorageImage(string container, string url)
         {
             if(String.IsNullOrEmpty(container) || string.IsNullOrEmpty(url))
             {
@@ -74,6 +81,9 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence
             labelLogger.Record(url);
         }
 
+        /// <summary>
+        /// Gets the parsed list of items that are stored in a local catalog file for a particular container.
+        /// </summary>
         public List<ScoringImage> LoadContainerData(string container)
         {
             List<ScoringImage> returnValue = new List<ScoringImage>();
@@ -91,29 +101,12 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence
                     {
                         if (entry.Length == 1)
                         {
-                            returnValue.Add(ParseRecord(entry[0]));
+                            returnValue.Add(ScoringImage.ParseRecord(entry[0]));
                         }
                     }
                 }
             }
             return returnValue;
         }
-
-        public static ScoringImage ParseRecord(String entry)
-        {
-            string[] parts = entry.Split(new char[] { ',' });
-
-            if (parts.Length == 1)
-            {
-                return new ScoringImage()
-                {
-                    Url = parts[0]
-                };
-            }
-
-            return null;
-        }
-
-
     }
 }

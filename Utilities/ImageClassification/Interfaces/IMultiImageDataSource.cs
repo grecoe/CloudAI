@@ -22,47 +22,50 @@ using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Base for the event when the labels of the multi image data source are changed.
+    /// </summary>
+    /// <param name="containerLabels"></param>
     public delegate void OnContainerLabelsAcquired(IEnumerable<string> containerLabels);
 
+    /// <summary>
+    /// Extends the IDataSource for multi image sources. Multi image sources use path information
+    /// of the container to infer initial classifications for the objects in the collection.
+    /// </summary>
     public interface IMultiImageDataSource : IDataSource
     {
         /// <summary>
         /// Notifiy parent controls that new labels have been acquired from the containers.
         /// </summary>
         event OnContainerLabelsAcquired OnLabelsAcquired;
-
         /// <summary>
         /// Gets the current container as a classificaiton entry
         /// </summary>
         string CurrentContainerAsClassification { get; }
-        
         /// <summary>
         /// Collect the container labels
         /// </summary>
         /// <returns></returns>
         IEnumerable<string> GetContainerLabels();
-
         /// <summary>
         /// Gets the current batch size
         /// </summary>
         int BatchSize { get; }
-
         /// <summary>
         /// Request the next item in the current container
         /// collection.
         /// </summary>
         /// <returns>SourceFile indicating information for the next item</returns>
         IEnumerable<SourceFile> NextSourceGroup();
-
         /// <summary>
         /// Request the previous item in the current container
         /// collection.
         /// </summary>
         /// <returns>SourceFile indicating information for the previous item</returns>
         IEnumerable<SourceFile> PreviousSourceGroup();
-
+        /// <summary>
+        /// Update a batch of files in the IDataSink to expedite disk writes.
+        /// </summary>
         void UpdateSourceBatch(IEnumerable<SourceFile> fileBatch);
-
-
     }
 }

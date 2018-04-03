@@ -69,6 +69,7 @@
     <Compile Include="Interfaces\DataSourceBase.cs" />
     <Compile Include="Interfaces\DataSourceType.cs" />
     <Compile Include="Interfaces\GenericUI\ClassificationCheckboxPanelHelper.cs" />
+    <Compile Include="Interfaces\GenericUI\IConfigurationControlNotifications.cs" />
     <Compile Include="Interfaces\GenericUI\ElementCreation.cs" />
     <Compile Include="Interfaces\GenericUI\GenericContainerControl.xaml.cs">
       <DependentUpon>GenericContainerControl.xaml</DependentUpon>

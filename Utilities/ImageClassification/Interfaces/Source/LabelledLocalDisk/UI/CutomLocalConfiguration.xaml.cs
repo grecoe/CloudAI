@@ -18,27 +18,34 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
 using System;
 using System.Windows.Controls;
+using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
 {
     /// <summary>
     /// Interaction logic for CutomLocalConfiguration.xaml
     /// </summary>
-    public partial class CutomLocalConfiguration : UserControl
+    public partial class CutomLocalConfiguration : UserControl, IConfigurationControlNotifications
     {
         #region Private Members
         private LocalSourceConfigurationUi ChildControl { get; set; }
         private LabelledLocalConfiguration Configuration { get; set; }
         #endregion
 
+        #region IConfigurationControlNotifications
         public event OnConfigurationUpdatedHandler OnConfigurationSaved;
         public event OnUpdateSourceData OnSourceDataUpdated;
+        #endregion
 
+        #region Public Members
+        /// <summary>
+        /// The IDataSource behind this configuraiton
+        /// </summary>
         public IDataSource Provider { get; private set; }
+        #endregion
 
         public CutomLocalConfiguration(IDataSource source, LabelledLocalConfiguration configuration)
         {
@@ -69,16 +76,26 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
             }
         }
 
+        #region Private Helpers - child control hooks
+        /// <summary>
+        /// Event hooked from childe AzureStoreageConfigurationUi so that it can be broadcast out
+        /// to listeners.
+        /// </summary>
         private void ChildSourceUpdated(IDataSource source)
         {
             this.OnSourceDataUpdated?.Invoke(source);
         }
 
+        /// <summary>
+        /// Event hooked from childe AzureStoreageConfigurationUi so that it can collect additional 
+        /// information before being broadcast outto listeners.
+        /// </summary>
         private void ChildConfigurationSaved(IDataSource source)
         {
             this.Configuration.BatchSize = int.Parse((this.BatchSize.SelectedItem as ComboBoxItem).Content.ToString());
             this.OnConfigurationSaved?.Invoke(source);
         }
+        #endregion
 
     }
 }

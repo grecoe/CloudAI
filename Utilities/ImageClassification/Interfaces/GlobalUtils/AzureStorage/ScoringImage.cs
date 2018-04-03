@@ -34,5 +34,20 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
         {
             return this.Url;
         }
+
+        public static ScoringImage ParseRecord(String entry)
+        {
+            string[] parts = entry.Split(new char[] { ',' });
+
+            if (parts.Length == 1)
+            {
+                return new ScoringImage()
+                {
+                    Url = parts[0]
+                };
+            }
+
+            return null;
+        }
     }
 }

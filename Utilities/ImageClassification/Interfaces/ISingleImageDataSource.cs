@@ -20,6 +20,10 @@
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Extends the IDataSource for single image sources. Single image sources do not
+    /// infer classification based on container location. 
+    /// </summary>
     public interface ISingleImageDataSource : IDataSource
     {
         /// <summary>
@@ -28,13 +32,11 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         /// <returns>SourceFile indicating information for the next item</returns>
         SourceFile NextSourceFile();
-
         /// <summary>
         /// Request the previous item in the current container
         /// collection.
         /// </summary>
         /// <returns>SourceFile indicating information for the previous item</returns>
         SourceFile PreviousSourceFile();
-
     }
 }

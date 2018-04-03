@@ -18,25 +18,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.GlobalUtils.Configuration;
-
-namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration
+namespace ImageClassifier.Interfaces.GenericUI
 {
     /// <summary>
-    /// Extends the LocalDiskSourceConfiguration by adding batch size. Batch size is used
-    /// for display purposes in how many images to show per batch.
+    /// Base class used for configuration controls that need to notify of 
+    /// 
+    /// 1. Configuration changes
+    /// 2. Data changes
     /// </summary>
-    public class LabelledLocalConfiguration
+    public interface IConfigurationControlNotifications
     {
-        [Newtonsoft.Json.JsonProperty(PropertyName = "batchSize")]
-        public int BatchSize { get; set; }
-
-        [Newtonsoft.Json.JsonProperty(PropertyName = "localConfiguration")]
-        public LocalDiskSourceConfiguration LocalConfiguration { get; set; }
-
-        public LabelledLocalConfiguration()
-        {
-            this.LocalConfiguration = new LocalDiskSourceConfiguration();
-        }
+        event OnConfigurationUpdatedHandler OnConfigurationSaved;
+        event OnUpdateSourceData OnSourceDataUpdated;
     }
 }

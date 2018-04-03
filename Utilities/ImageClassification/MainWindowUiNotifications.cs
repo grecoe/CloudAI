@@ -104,7 +104,7 @@ namespace ImageClassifier
                 this.ConfigurationContext.DefaultProvider = this.SelectedDataSource.Name;
                 this.ConfigurationContext.Save();
 
-                this.InitializeUi(true);
+                // TODO:DELETE this.InitializeUi(true);
 
                 // Hook control callbacks......
                 if (this.SelectedDataSource != null)
@@ -125,6 +125,8 @@ namespace ImageClassifier
 
                 this.SelectedDataSource.ContainerControl.OnContainerChanged += this.IContainerControlContainerChanged;
                 this.SelectedDataSource.ContainerControl.Refresh();
+
+                this.InitializeUi(true);
 
                 // Now set up the configuration
                 this.SourceProviderConfigTitle.Text = String.Format("{0} Configuration", this.SelectedDataSource.ConfigurationControl.Title);

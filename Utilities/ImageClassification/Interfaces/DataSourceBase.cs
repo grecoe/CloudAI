@@ -24,6 +24,12 @@ using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Base class for any class that implements IDataSource. Provides base implementations of core 
+    /// members and abstract implementations of anything a source must provide.
+    /// </summary>
+    /// <typeparam name="T">Class that identifies the configuration type used by the source.</typeparam>
+    /// <typeparam name="I">Class that identifies what is kept in the internal image list</typeparam>
     abstract class DataSourceBase<T,I>: ConfigurationBase<T>, IDataSource where T:class, new() where I: class
     {
         #region Common Collection Information

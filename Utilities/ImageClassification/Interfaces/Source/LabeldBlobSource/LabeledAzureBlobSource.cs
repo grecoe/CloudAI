@@ -42,11 +42,11 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         /// </summary>
         private LabelledBlobSourceConfiguration Configuration { get; set; }
         /// <summary>
-        /// Utility to read Azure Storage account
+        /// The Azure Storage Account utility class
         /// </summary>
         private StorageUtility AzureStorageUtils { get; set; }
         /// <summary>
-        /// Persists storage information account information
+        /// Persists storage account information
         /// </summary>
         private LabelledBlobPersisteceLogger PersistenceLogger { get; set; }
         #endregion
@@ -100,6 +100,21 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         public event OnContainerLabelsAcquired OnLabelsAcquired;
         public int BatchSize { get { return this.Configuration.BatchSize; } }
 
+        public string CurrentContainerAsClassification
+        {
+            get { return this.CleanContainerForClassification(this.CurrentContainer); }
+        }
+
+        public IEnumerable<string> GetContainerLabels()
+        {
+            List<string> returnLabels = new List<string>();
+            foreach (String container in this.Containers)
+            {
+                returnLabels.Add(this.CleanContainerForClassification(container));
+            }
+            return returnLabels;
+        }
+
         public IEnumerable<SourceFile> NextSourceGroup()
         {
             List<SourceFile> returnFiles = new List<SourceFile>();
@@ -121,7 +136,11 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
                     SourceFile returnFile = new SourceFile();
                     returnFile.Name = System.IO.Path.GetFileName(image.Url);
-                    returnFile.DiskLocation = this.DownloadStorageFile(imageUrl);
+
+                    // Was this.DownloadStorageFile(imageUrl)
+                    returnFile.DiskLocation = this.AzureStorageUtils.DownloadImageBlob(
+                        imageUrl,
+                        System.IO.Path.Combine(this.Configuration.StorageConfiguration.RecordLocation, "temp"));
 
                     if (this.Sink != null)
                     {
@@ -157,7 +176,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
         public void UpdateSourceBatch(IEnumerable<SourceFile> fileBatch)
         {
-            if (this.Sink != null)
+            if (this.Sink != null && !String.IsNullOrEmpty(this.CurrentContainer))
             {
                 List<ScoredItem> updateList = new List<ScoredItem>();
 
@@ -187,7 +206,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         #region IDataSource abstract overrides
         public override void ClearSourceFiles()
         {
-            if(this.DeleteSourceFilesWhenComplete)
+            if(this.DeleteSourceFilesWhenComplete && !String.IsNullOrEmpty(this.Configuration.StorageConfiguration.RecordLocation))
             {
                 String downloadDirectory = System.IO.Path.Combine(this.Configuration.StorageConfiguration.RecordLocation, "temp");
                 FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.StorageConfiguration.FileType });
@@ -294,6 +313,9 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
         #region Private Helpers
 
+        /// <summary>
+        /// When a new container is selected, reset the interal list and list index
+        /// </summary>
         private void InitializeOnNewContainer()
         {
             this.CurrentImage = -1;
@@ -318,38 +340,37 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
         }
 
-        public string CurrentContainerAsClassification
-        {
-            get { return this.CleanContainerForClassification(this.CurrentContainer); }
-        }
-
+        /// <summary>
+        /// Does the actual cleaning of a container name by stripping the last directory out
+        /// of the path. In this store that is the base classification of any item.
+        /// </summary>
+        /// <param name="container"></param>
+        /// <returns></returns>
         private String CleanContainerForClassification(string container)
         {
             string returnValue = String.Empty;
-            string cont = container.Trim(new char[] { '/' });
+            if (!String.IsNullOrEmpty(container))
+            {
+                string cont = container.Trim(new char[] { '/' });
 
-            int idx = cont.LastIndexOf('/');
-            if (idx > 0)
-            {
-                returnValue = cont.Substring(idx + 1);
-            }
-            else
-            {
-                returnValue = cont;
+                int idx = cont.LastIndexOf('/');
+                if (idx > 0)
+                {
+                    returnValue = cont.Substring(idx + 1);
+                }
+                else
+                {
+                    returnValue = cont;
+                }
             }
             return returnValue;
         }
 
-        public IEnumerable<string> GetContainerLabels()
-        {
-            List<string> returnLabels = new List<string>();
-            foreach(String container in this.Containers)
-            {
-                returnLabels.Add(this.CleanContainerForClassification(container));
-            }
-            return returnLabels;
-        }
-
+        /// <summary>
+        /// Call to load data from the storage account. This call will delete all other data that has been acquired, downloaded, or scored locally. 
+        /// 
+        /// After cleaning re-builds local catalogs with new data.
+        /// </summary>
         private void AcquireContent(object caller)
         {
             // Update the data source
@@ -405,7 +426,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                         this.Configuration.StorageConfiguration.FileType,
                         false))
                     {
-                        this.PersistenceLogger.RecordLabelledImage(directory, kvp.Value);
+                        this.PersistenceLogger.RecordStorageImage(directory, kvp.Value);
                     }
                 }
             }
@@ -426,20 +447,6 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 
             this.OnLabelsAcquired?.Invoke(this.GetContainerLabels());
         }
-
-        private String DownloadStorageFile(string imageUrl)
-        {
-            String downloadDirectory = System.IO.Path.Combine(this.Configuration.StorageConfiguration.RecordLocation, "temp");
-            FileUtils.EnsureDirectoryExists(downloadDirectory);
-
-            string downloadFile = System.IO.Path.Combine(downloadDirectory, String.Format("{0}.jpg", (Guid.NewGuid().ToString("N"))));
-
-            this.AzureStorageUtils.DownloadBlob(imageUrl, downloadFile);
-
-            return downloadFile;
-        }
-
         #endregion
-
     }
 }

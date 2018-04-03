@@ -24,10 +24,22 @@ using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Extension of IImageControl but for multi image data sources. 
+    /// 
+    /// Multi image data sources show a grid of
+    /// images and not just a single one.
+    /// </summary>
     interface IMultiImageControl : IImageControl
     {
+        /// <summary>
+        /// Classifications from the IMultiImageDataSource that are derived
+        /// from the container names.
+        /// </summary>
         List<String> Classifications { get; set; }
+        /// <summary>
+        /// The current batch of images that are being shown.
+        /// </summary>
         List<CurrentItem> CurrentSourceBatch { get; }
-
     }
 }

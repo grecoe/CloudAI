@@ -139,7 +139,6 @@ namespace ImageClassifier.Interfaces.GenericUI
                 item.CurrentSource.Classifications.AddRange(classifications);
 
                 updateList.Add(item.CurrentSource);
-                // TODO: DELETE this.MultiImageDataSource.UpdateSourceFile(item.CurrentSource);
             }
             this.MultiImageDataSource.UpdateSourceBatch(updateList);
 

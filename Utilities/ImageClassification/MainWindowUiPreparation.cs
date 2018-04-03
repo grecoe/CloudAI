@@ -44,7 +44,7 @@ namespace ImageClassifier
                     this.ImagePanel.Children.Clear();
                     this.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
                     this.ImagePanel.Children.Add(this.SelectedDataSource.ImageControl.Control);
-                    this.SelectedDataSource.ImageControl.FastForward();
+                   // this.SelectedDataSource.ImageControl.FastForward();
 
                     // Set up the IContainerControl 
                     this.ContainerPanel.Children.Clear();

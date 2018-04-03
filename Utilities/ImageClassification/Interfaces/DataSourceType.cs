@@ -20,7 +20,7 @@
 namespace ImageClassifier.Interfaces
 {
     /// <summary>
-    /// DataSource types 
+    /// DataSource types. Exposed by an IDataSource.SourceType 
     /// </summary>
     public enum DataSourceType
     {

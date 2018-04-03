@@ -26,6 +26,7 @@
             Batch Size
             </TextBlock>
             <ComboBox
+                ToolTip="Select the number of images to show in a group."
             Grid.Row="0"
             Grid.Column="1"
             x:Name="BatchSize"

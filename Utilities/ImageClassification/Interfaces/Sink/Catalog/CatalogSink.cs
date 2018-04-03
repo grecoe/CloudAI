@@ -18,16 +18,25 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.GlobalUtils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ImageClassifier.Interfaces.GlobalUtils;
 
 namespace ImageClassifier.Interfaces.Sink.Catalog
 {
+    /// <summary>
+    /// Class used to track items from a particular catalog file
+    /// </summary>
     class CollectionData
     {
+        /// <summary>
+        /// Individual items in the catalog
+        /// </summary>
         public List<ScoredItem> Items { get; set; }
+        /// <summary>
+        /// The logger used to read/write the itmes
+        /// </summary>
         public GenericCsvLogger Logger { get; set; }
 
         public CollectionData()
@@ -36,25 +45,45 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
         }
     }
 
-    // Creates a catalog directory right under the 
-    // main application running directory called catalog.
+    /// <summary>
+    /// The CatalogSink is used to track items from a data source that have been tagged.
+    /// 
+    /// Each container in the source creates a new catalog file and the catalog sink creates it's
+    /// own lookup catalog to find the file associated with a container.
+    /// 
+    /// Each catalog for a specific container keeps the container information, the full location of the 
+    /// core source item and the classifications assigned by a user.
+    /// </summary>
     class CatalogSink : GenericCsvLogger, IDataSink
     {
+        #region Private Constants
         private const String BASEDIR = "Catalog";
         private const String BASECOLLECTION = "Catalog.csv";
-        private object ThreadLock { get; set; }
+        #endregion
 
-        private static string[] COLLECTION_HEADERS = new string[] { "Container,Location" };
-
-        private static string[] CATALOG_HEADERS = new string[] { "Container,Item,Classifications" };
-
+        #region Private Members
         /// <summary>
-        /// Collection of the original conatiner to the container CSV
-        /// map that this object collects.
+        /// Private lock for threaded calls
+        /// </summary>
+        private object ThreadLock { get; set; }
+        /// <summary>
+        /// Headers to the main catalog file. This tracks where the catalog for a particular
+        /// source container is located.
+        /// </summary>
+        private static string[] COLLECTION_HEADERS = new string[] { "Container,Location" };
+        /// <summary>
+        /// Headers to a container catalog file
+        /// </summary>
+        private static string[] CATALOG_HEADERS = new string[] { "Container,Item,Classifications" };
+        /// <summary>
+        /// Collection of the original conatiner to the catalog for the container.
         /// </summary>
         private Dictionary<string, string> CollectionMap { get; set; }
-
+        /// <summary>
+        /// Collection of container catalogs and the information stored in them
+        /// </summary>
         private Dictionary<string, CollectionData> Collections { get; set; }
+        #endregion
 
         public CatalogSink(string provider)
             : base(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, String.Format("{0}{1}", provider, CatalogSink.BASEDIR)),
@@ -206,6 +235,11 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
 
         #endregion
 
+        #region Private Helpers
+
+        /// <summary>
+        /// Formats an instance of ScoredItem for insertion into the container catalog.
+        /// </summary>
         private String FormatItem(ScoredItem item)
         {
             return String.Format("{0},{1},{2}",
@@ -213,6 +247,10 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
                             item.Name,
                             String.Join("|", item.Classifications));
         }
+
+        /// <summary>
+        /// Retrieves or creates a container catalog based on container name. 
+        /// </summary>
         private CollectionData GetCollection(string container)
         {
             CollectionData returnData = null;
@@ -243,6 +281,9 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
             return returnData;
         }
 
+        /// <summary>
+        /// Loads the individual container catalogs into memory 
+        /// </summary>
         private void LoadData()
         {
             foreach(KeyValuePair <string,string> kvp in this.CollectionMap )
@@ -268,5 +309,6 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
                 }
             }
         }
+        #endregion
     }
 }

@@ -22,12 +22,17 @@ using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.Configuration
 {
+    /// <summary>
+    /// Extends the AzureBlobStorageConfiguration by adding batch size. Batch size is used
+    /// for display purposes in how many images to show per batch.
+    /// </summary>
     public class LabelledBlobSourceConfiguration
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "batchSize")]
         public int BatchSize { get; set; }
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "storageConfiguration")]
+
         public AzureBlobStorageConfiguration StorageConfiguration { get; set; }
 
         public LabelledBlobSourceConfiguration()

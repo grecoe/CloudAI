@@ -26,19 +26,28 @@ using System.Windows.Controls;
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.UI
 {
     /// <summary>
-    /// Interaction logic for CustomStorageConfiguration.xaml
+    /// Extens the configuration screen of the AzureStorageConfigurationUi by including it and adding in
+    /// additional information.
     /// </summary>
-    public partial class CustomStorageConfiguration : UserControl
+    public partial class CustomStorageConfiguration : UserControl, IConfigurationControlNotifications
     {
         #region Private Members
         private AzureStorageConfigurationUi ChildControl { get; set; }
         private LabelledBlobSourceConfiguration Configuration { get; set; }
         #endregion
 
+        #region IConfigurationControlNotifications
         public event OnConfigurationUpdatedHandler OnConfigurationSaved;
         public event OnUpdateSourceData OnSourceDataUpdated;
+        #endregion
 
+        #region Public Members
+        /// <summary>
+        /// The IDataSource behind this configuraiton
+        /// </summary>
         public IDataSource Provider { get; private set; }
+        #endregion
+
 
         public CustomStorageConfiguration(IDataSource source, LabelledBlobSourceConfiguration config)
         {
@@ -69,15 +78,25 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.UI
             }
         }
 
+        #region Private Helpers - child control hooks
+        /// <summary>
+        /// Event hooked from childe AzureStoreageConfigurationUi so that it can be broadcast out
+        /// to listeners.
+        /// </summary>
         private void ChildSourceUpdated(IDataSource source)
         {
             this.OnSourceDataUpdated?.Invoke(source);
         }
 
+        /// <summary>
+        /// Event hooked from childe AzureStoreageConfigurationUi so that it can collect additional 
+        /// information before being broadcast outto listeners.
+        /// </summary>
         private void ChildConfigurationSaved(IDataSource source)
         {
             this.Configuration.BatchSize = int.Parse((this.BatchSize.SelectedItem as ComboBoxItem).Content.ToString());
             this.OnConfigurationSaved?.Invoke(source);
         }
+        #endregion
     }
 }

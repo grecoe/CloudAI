@@ -17,14 +17,14 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
-using ImageClassifier.Interfaces.GlobalUtils;
-using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
+using ImageClassifier.Interfaces.GlobalUtils;
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource
@@ -35,10 +35,17 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
     class AzureBlobSource : DataSourceBase<AzureBlobStorageConfiguration, ScoringImage>, ISingleImageDataSource 
     {
         #region PrivateMembers
+        /// <summary>
+        /// The Azure Storage Account configuration information
+        /// </summary>
         private AzureBlobStorageConfiguration Configuration { get; set; }
-
+        /// <summary>
+        /// The Azure Storage Account utility class
+        /// </summary>
         private StorageUtility AzureStorageUtils { get; set; }
-
+        /// <summary>
+        /// The list of catalog files containing the information retrieved from the storage account
+        /// </summary>
         private List<string> CatalogFiles { get; set; }
         #endregion
 
@@ -106,7 +113,11 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
 
                 returnFile = new SourceFile();
                 returnFile.Name = System.IO.Path.GetFileName(image.Url);
-                returnFile.DiskLocation = this.DownloadStorageFile(imageUrl);
+                // WAS returnFile.DiskLocation = this.DownloadStorageFile(imageUrl);
+                returnFile.DiskLocation = this.AzureStorageUtils.DownloadImageBlob(
+                    imageUrl,
+                    System.IO.Path.Combine(this.Configuration.RecordLocation, "temp"));
+
 
                 if (this.Sink != null)
                 {
@@ -124,7 +135,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         #region IDataSource abstract overrides
         public override void ClearSourceFiles()
         {
-            if (this.DeleteSourceFilesWhenComplete)
+            if (this.DeleteSourceFilesWhenComplete && !String.IsNullOrEmpty(this.Configuration.RecordLocation))
             {
                 String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
                 FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
@@ -335,7 +346,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                                 continue;
                             }
 
-                            ScoringImage img = BlobPersistenceLogger.ParseRecord(content);
+                            ScoringImage img = ScoringImage.ParseRecord(content);
                             if (img != null)
                             {
                                 this.CurrentImageList.Add(img);
@@ -345,26 +356,6 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 }
             }
         }
-
-        /// <summary>
-        /// Download an image from Azure Storage with the given URL. File is downloaded to a temp
-        /// directory with a GUID name. 
-        /// </summary>
-        /// <param name="imageUrl">Azure Storage URL to the blob to be downloaded.</param>
-        /// <returns>Local path location of the blob after download</returns>
-        private String DownloadStorageFile(string imageUrl)
-        {
-            String downloadDirectory = System.IO.Path.Combine(this.Configuration.RecordLocation, "temp");
-            FileUtils.EnsureDirectoryExists(downloadDirectory);
-
-            string downloadFile = System.IO.Path.Combine(downloadDirectory, String.Format("{0}.jpg", (Guid.NewGuid().ToString("N"))));
-
-            this.AzureStorageUtils.DownloadBlob(imageUrl, downloadFile);
-
-            return downloadFile;
-        }
-
         #endregion
-
     }
 }

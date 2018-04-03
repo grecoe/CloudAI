@@ -85,6 +85,7 @@
 
                 <ComboBox
                     x:Name="ConfigurationTabSourceProviderCombo"
+                    ToolTip="Select a default provider. This provider will remain the default upon application restart."
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="5,5,5,5"
@@ -104,8 +105,8 @@
                     Grid.Row="3"
                     Grid.Column="1"
                     Margin="5,5,5,20"
-                    FontSize="13">
-                    success,failure,other
+                    FontSize="13"
+                    ToolTip="Enter in classifications as a comma separated list with no spaces.">
                 </TextBox>
                     
                 <TextBlock 

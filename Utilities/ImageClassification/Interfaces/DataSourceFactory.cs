@@ -37,11 +37,6 @@ namespace ImageClassifier.Interfaces
         LabelledLocalDisk
     };
 
-    public enum ImageControl
-    {
-        SingleImageControl
-    };
-
     /// <summary>
     /// Enum to identify which type of sink to load
     /// </summary>

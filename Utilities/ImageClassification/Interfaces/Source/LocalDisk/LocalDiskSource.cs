@@ -207,6 +207,9 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         #endregion
 
         #region Private Helpers
+        /// <summary>
+        /// Triggered by the configuration UI when the user clicks save configuration.
+        /// </summary>
         private void ConfigurationSaved(object caller)
         {
             // Delete the ISink storage
@@ -233,6 +236,10 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
+        /// <summary>
+        /// Triggered by the configuraiton UI, during initialization and during configuration changes being saved
+        /// to update the internal data.
+        /// </summary>
         private void UpdateInformationRequested(object caller)
         {
             // Update class variables
@@ -251,7 +258,9 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
-
+        /// <summary>
+        /// Update the internal image list and index when a new container is selected.
+        /// </summary>
         private void InitializeOnNewContainer()
         {
             this.CurrentImage = -1;

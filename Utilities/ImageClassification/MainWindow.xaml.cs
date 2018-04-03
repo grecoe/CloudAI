@@ -18,16 +18,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Configuration;
-using ImageClassifier.Interfaces;
-using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.Interfaces.GlobalUtils;
-using ImageClassifier.Interfaces.Source.LabeldBlobSource;
-using ImageClassifier.UIUtils;
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
+using ImageClassifier.Configuration;
+using ImageClassifier.Interfaces;
+using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.UIUtils;
 
 namespace ImageClassifier
 {
@@ -123,9 +120,9 @@ namespace ImageClassifier
 
             // Labelled local Source
             IDataSource labelledLocalSource = DataSourceFactory.GetDataSource(DataSourceProvider.LabelledLocalDisk, DataSink.Catalog);
-            labelledBlobSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
-            labelledBlobSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
-            labelledBlobSource.ConfigurationControl.Parent = this;
+            labelledLocalSource.ConfigurationControl.OnConfigurationUdpated = this.IDataSourceOnConfigurationUdpated;
+            labelledLocalSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
+            labelledLocalSource.ConfigurationControl.Parent = this;
 
             this.DataSources = new List<IDataSource>() { blobSource, localSource, labelledBlobSource, labelledLocalSource };
 

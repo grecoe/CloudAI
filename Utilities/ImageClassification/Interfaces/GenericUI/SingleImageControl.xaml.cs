@@ -292,6 +292,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             if (returnDisplay != null)
             {
                 this.Clear();
+                this.ImagePanel.Children.Clear();
                 this.ImagePanel.Children.Add(returnDisplay);
                 this.ImageChanged?.Invoke(null);
                 continueToImage = false;

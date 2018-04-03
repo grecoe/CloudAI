@@ -24,27 +24,37 @@ using System.Windows.Input;
 
 namespace ImageClassifier.Interfaces
 {
+    /// <summary>
+    /// Notification event for when the image in the image control changes.
+    /// </summary>
+    /// <param name="file"></param>
     public delegate void OnImageChanged(SourceFile file);
 
+    /// <summary>
+    /// Notification event for when the classifications change.
+    /// </summary>
+    /// <param name="classifications"></param>
     public delegate void OnClassificationsChanged(List<string> classifications);
 
     public interface IImageControl
     {
+        /// <summary>
+        /// Implementation of the OnImageChanged delegate
+        /// </summary>
         event OnImageChanged ImageChanged;
-
-
         /// <summary>
         /// Parent control for sizing information
         /// </summary>
         UIElement ParentControl { get; set; }
-
+        /// <summary>
+        /// KeyBindings for the control to be added to the general key bindings
+        /// for the main applicaiton.
+        /// </summary>
         IEnumerable<KeyBinding> Bindings { get; }
-
         /// <summary>
         /// Allow owner to update the classifications on the current image or set of images
         /// </summary>
         void UpdateClassifications(List<string> classifications);
-
         /// <summary>
         /// DataSource that provides information
         /// </summary>
@@ -53,17 +63,15 @@ namespace ImageClassifier.Interfaces
         /// The actual control to display
         /// </summary>
         UIElement Control { get; }
-
         /// <summary>
         /// Clear UI elements
         /// </summary>
         void Clear();
-
         /// <summary>
-        /// Fast forward through the collection to the first un-tagged item
+        /// Fast forward through the collection to arrive at
+        /// the first un-tagged item in the container collection
         /// </summary>
         void FastForward();
-
         /// <summary>
         /// Force the UI to show whatever the datasource has
         /// </summary>

@@ -19,15 +19,21 @@
 //
 using System;
 using ImageClassifier.Interfaces.GlobalUtils;
-using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
 {
-
+    /// <summary>
+    /// Class used by AzureBlobSource that creates local catalogs of files found in Azure Storage.
+    /// 
+    /// For now this just creates random files with 100 images in each.
+    /// </summary>
     class BlobPersistenceLogger : GenericCsvLogger
     {
+        #region Private Members
         private AzureBlobStorageConfiguration Configuration { get; set; }
+        #endregion
+
 
         public BlobPersistenceLogger(AzureBlobStorageConfiguration configuration, int fileIndex)
             :base(configuration.RecordLocation,
@@ -37,21 +43,10 @@ namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
             this.Configuration = configuration;
         }
 
-        public static ScoringImage ParseRecord(String entry)
-        {
-            string[] parts = entry.Split(new char[] { ',' });
-
-            if (parts.Length == 1)
-            {
-                return new ScoringImage()
-                {
-                    Url = parts[0]
-                };
-            }
-
-            return null;
-        }
-
+        #region Static Members
+        /// <summary>
+        /// Collect all catalog files for a given storage account 
+        /// </summary>
         public static string[] GetAcquisitionFiles(AzureBlobStorageConfiguration configuration)
         {
             string[] fileList = new string[] { };
@@ -63,5 +58,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
 
             return fileList;
         }
+        #endregion
+
     }
 }

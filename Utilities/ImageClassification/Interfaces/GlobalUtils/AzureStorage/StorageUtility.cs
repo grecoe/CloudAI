@@ -218,6 +218,17 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             yield break;
         }
 
+        public String DownloadImageBlob(string blobUrl, string directory)
+        {
+            FileUtils.EnsureDirectoryExists(directory);
+
+            string downloadFile = System.IO.Path.Combine(directory, String.Format("{0}.jpg", (Guid.NewGuid().ToString("N"))));
+
+            this.DownloadBlob(blobUrl, downloadFile);
+
+            return downloadFile;
+        }
+
         /// <summary>
         /// Download a blob from the given url to the given local file location.
         /// </summary>
