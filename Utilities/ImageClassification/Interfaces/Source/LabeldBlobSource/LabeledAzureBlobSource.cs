@@ -57,14 +57,14 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             this.Name = "LabelledAzureStorageSource";
             this.SourceType = DataSourceType.LabelledBlob;
             this.DeleteSourceFilesWhenComplete = true;
-            this.MultiClass = true;
             this.CurrentImage = -1;
 
 
             // Get the configuration specific to this instance
             this.Configuration = this.LoadConfiguration();
+            this.MultiClass = this.Configuration.StorageConfiguration.MultiClass;
 
-            if(this.Configuration.BatchSize <= 0 || this.Configuration.BatchSize > 9)
+            if (this.Configuration.BatchSize <= 0 || this.Configuration.BatchSize > 9)
             {
                 this.Configuration.BatchSize = LabeledAzureBlobSource.DEFAULT_BATCH_SIZE;
                 this.SaveConfiguration(this.Configuration);
@@ -332,6 +332,8 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         {
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
+            // Update Multiclass
+            this.MultiClass = this.Configuration.StorageConfiguration.MultiClass;
             // Update the storage utils
             this.AzureStorageUtils = new StorageUtility(this.Configuration.StorageConfiguration);
             // Notify anyone who wants to be notified

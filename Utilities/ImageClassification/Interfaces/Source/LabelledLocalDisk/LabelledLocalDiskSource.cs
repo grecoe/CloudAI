@@ -48,11 +48,11 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         {
             this.Name = "LabelledLocalStorageService";
             this.SourceType = DataSourceType.LabelledDisk;
-            this.MultiClass = false;
             this.DeleteSourceFilesWhenComplete = false;
 
             // Get the configuration specific to this instance
             this.Configuration = this.LoadConfiguration();
+            this.MultiClass = this.Configuration.LocalConfiguration.MultiClass;
 
             // Prepare the UI control with the right hooks.
             CutomLocalConfiguration configUi = new CutomLocalConfiguration(this, this.Configuration);
@@ -276,6 +276,9 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             this.SaveConfiguration(this.Configuration);
             this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
+
+            // Update multiclass
+            this.MultiClass = this.Configuration.LocalConfiguration.MultiClass;
 
             // Update containers
             this.ContainerControl = new GenericContainerControl(this);

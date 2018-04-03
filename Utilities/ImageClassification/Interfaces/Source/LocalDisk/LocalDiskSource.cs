@@ -49,17 +49,17 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         {
             this.Name = "LocalStorageService";
             this.SourceType = DataSourceType.Disk;
-            this.MultiClass = false;
             this.DeleteSourceFilesWhenComplete = false;
 
             // Get the configuration specific to this instance
             this.Configuration = this.LoadConfiguration();
+            this.MultiClass = this.Configuration.MultiClass;
+
 
             // Prepare the UI control with the right hooks.
             LocalSourceConfigurationUi configUi = new LocalSourceConfigurationUi(this, this.Configuration);
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
-
 
             this.ConfigurationControl = new ConfigurationControlImpl("Local Storage Service",
                 configUi);
@@ -222,6 +222,9 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.SaveConfiguration(this.Configuration);
             this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
+
+            // Update multiclass
+            this.MultiClass = this.Configuration.MultiClass;
 
             // Update containers
             this.ContainerControl = new GenericContainerControl(this);

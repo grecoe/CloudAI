@@ -1,4 +1,5 @@
 ﻿{
+  "multiClass" :  true,
   "fileTypes": [ "*.jpg", ".png" ],
   "recordLocation": "C:\\______Demos\\images"
 }

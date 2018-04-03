@@ -67,6 +67,11 @@ namespace ImageClassifier
             // Clear current bindings
             this.InputBindings.Clear();
 
+            if (this.ConfigurationContext.Classifications != null)
+            {
+                this.ConfigurationTabTextAnnotationTags.Text = string.Join(",", this.ConfigurationContext.Classifications);
+            }
+
             // Set up all the boxes
             List<System.Windows.Controls.Primitives.ToggleButton> boxes = ClassificationCheckboxPanelHelper.PopulateSelectionPanel(
                 this.SelectedDataSource,

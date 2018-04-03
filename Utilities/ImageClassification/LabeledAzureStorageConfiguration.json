@@ -1,6 +1,7 @@
 ﻿{
   "batchSize": 9,
   "storageConfiguration": {
+    "multiClass": false,
     "storageAccount_1": "dangreadystgshare",
     "storageKey_1": "VeVsh/GD35JkIKaw6zqIdpOwZnIwnAufZEPY/krcAaMWJIEMLKkvDSoPHlYcfaC7EcF9ngAPkujKxnHpVwv0ig==",
     "storageContainer_1": "categories",

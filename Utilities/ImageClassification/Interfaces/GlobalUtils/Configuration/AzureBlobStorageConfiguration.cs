@@ -29,6 +29,8 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
     /// </summary>
     public class AzureBlobStorageConfiguration
     {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "multiClass")]
+        public bool MultiClass { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "storageAccount")]
         public String StorageAccount { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "storageKey")]

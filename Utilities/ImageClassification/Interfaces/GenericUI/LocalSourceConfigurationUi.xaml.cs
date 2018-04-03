@@ -19,8 +19,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.GenericUI
@@ -36,7 +38,10 @@ namespace ImageClassifier.Interfaces.GenericUI
         public event OnUpdateSourceData OnSourceDataUpdated;
         #endregion 
 
+        private List<ToggleButton> MultiClassSelections { get; set; }
+
         public IDataSource Provider { get; private set; }
+
         public LocalDiskSourceConfiguration Configuration { get; private set; }
 
         /// <summary>
@@ -55,8 +60,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.Configuration = config;
 
             this.ConfigurationButtonSave.Click += (o, e) => this.Collect();
-
             this.ConfigurationButtonDirectory.Click += (o, e) => ConfigurationSelectSourceFolder();
+
+            this.MultiClassSelections = new List<ToggleButton>() { this.Negative, this.Affirmitive };
 
             this.Seed();
         }
@@ -68,6 +74,7 @@ namespace ImageClassifier.Interfaces.GenericUI
         {
             this.ConfigurationTextFileExtension.Text = String.Join(",", this.Configuration.FileTypes);
             this.ConfigurationTextLocalDirectory.Text = this.Configuration.RecordLocation;
+            this.MultiClassSelections[(this.Configuration.MultiClass ? 1 : 0)].IsChecked = true;
         }
 
         /// <summary>
@@ -79,6 +86,8 @@ namespace ImageClassifier.Interfaces.GenericUI
             {
                 this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
                 this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
+
+                this.Configuration.MultiClass = !this.Negative.IsChecked.Value;
 
                 this.OnConfigurationSaved?.Invoke(this.Provider);
                 this.OnSourceDataUpdated?.Invoke(this.Provider);

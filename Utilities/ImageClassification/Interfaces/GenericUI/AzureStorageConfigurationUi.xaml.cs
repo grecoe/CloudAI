@@ -22,6 +22,8 @@ using System;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System.Windows.Controls;
 using System.Windows;
+using System.Collections.Generic;
+using System.Windows.Controls.Primitives;
 
 namespace ImageClassifier.Interfaces.GenericUI
 {
@@ -34,6 +36,8 @@ namespace ImageClassifier.Interfaces.GenericUI
         public event OnConfigurationUpdatedHandler OnConfigurationSaved;
         public event OnUpdateSourceData OnSourceDataUpdated;
         #endregion
+
+        private List<ToggleButton> MultiClassSelections { get; set; }
 
         public IDataSource Provider { get; private set; }
 
@@ -49,9 +53,13 @@ namespace ImageClassifier.Interfaces.GenericUI
             InitializeComponent();
             this.Provider = source;
             this.Configuration = config;
+            this.MultiClassSelections = new List<ToggleButton>() { this.Negative, this.Affirmitive };
+
             this.ConfigurationButtonSave.Click += (o, e) => this.Collect();
             this.ConfigurationButtonAquireContent.Click += (o, e) => this.AcquireContent();
             this.ConfigurationButtonDirectory.Click += (o, e) => ConfigurationSelectLogFolder();
+
+
             this.Seed();
         }
 
@@ -70,6 +78,8 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ConfigurationTextFileExtension.Text = this.Configuration.FileType;
             this.ConfigurationTextFileCount.Text = this.Configuration.FileCount.ToString();
             this.ConfigurationTextLocalDirectory.Text = this.Configuration.RecordLocation;
+
+            this.MultiClassSelections[(this.Configuration.MultiClass ? 1 : 0)].IsChecked = true;
         }
 
         private void Collect()
@@ -83,6 +93,8 @@ namespace ImageClassifier.Interfaces.GenericUI
                 this.Configuration.BlobPrefix = this.ConfigurationTextBlobPrefix.Text;
                 this.Configuration.FileType = this.ConfigurationTextFileExtension.Text;
                 this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
+                this.Configuration.MultiClass = !this.Negative.IsChecked.Value;
+
                 try
                 {
                     this.Configuration.FileCount = int.Parse(this.ConfigurationTextFileCount.Text);

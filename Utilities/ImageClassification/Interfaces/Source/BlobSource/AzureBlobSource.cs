@@ -55,12 +55,13 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             this.Name = "AzureStorageSource";
             this.SourceType = DataSourceType.Blob;
             this.DeleteSourceFilesWhenComplete = true;
-            this.MultiClass = true;
 
             this.CurrentImage = -1;
 
             // Get the configuration specific to this instance
             this.Configuration = this.LoadConfiguration();
+            this.MultiClass = this.Configuration.MultiClass;
+
 
             // Create the storage utils
             this.AzureStorageUtils = new StorageUtility(this.Configuration);
@@ -314,6 +315,8 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         {
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
+            // Update multi class
+            this.MultiClass = this.Configuration.MultiClass;
             // Update the storage utils
             this.AzureStorageUtils = new StorageUtility(this.Configuration);
             // Notify anyone who wants to be notified
