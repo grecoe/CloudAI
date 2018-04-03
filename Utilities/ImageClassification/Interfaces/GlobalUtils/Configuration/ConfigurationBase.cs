@@ -22,6 +22,10 @@ using System;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
+    /// <summary>
+    /// Base class for any configuration to make loading and saving simple
+    /// </summary>
+    /// <typeparam name="T">A class that is decorated with JSON tags for serialziation</typeparam>
     class ConfigurationBase<T> where T: class,new()
     {
         [Newtonsoft.Json.JsonIgnore]
@@ -30,6 +34,10 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
         [Newtonsoft.Json.JsonIgnore]
         private String FileLocation { get; set; }
 
+        /// <summary>
+        /// Constructor taking the file name ONLY of the configuration file. Location
+        /// of final file is in the applications execution directory.
+        /// </summary>
         public ConfigurationBase(String fileName)
         {
             if(String.IsNullOrEmpty(fileName))

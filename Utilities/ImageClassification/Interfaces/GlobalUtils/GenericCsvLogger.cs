@@ -24,6 +24,9 @@ using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces.GlobalUtils
 {
+    /// <summary>
+    /// A generic logger for CSV functionality
+    /// </summary>
     class GenericCsvLogger
     {
         public string Directory { get; private set; }
@@ -33,6 +36,12 @@ namespace ImageClassifier.Interfaces.GlobalUtils
 
         private object FileLock = new object();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="directory">Directory where the will exist.</param>
+        /// <param name="file">File name not including path</param>
+        /// <param name="header">The list of columns that will exist in the file.</param>
         public GenericCsvLogger(string directory, string file, string[] header)
         {
             this.Directory = directory;
@@ -47,11 +56,17 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             this.FilePath = System.IO.Path.Combine(this.Directory, this.FileName);
         }
 
+        /// <summary>
+        /// Record a list of content. Not checked against header size to ensure proper fit.
+        /// </summary>
         public void Record(string[] content)
         {
             this.Record(String.Join(",", content));
         }
 
+        /// <summary>
+        /// Records a raw string to the file, assumes correct format.
+        /// </summary>
         public void Record(string content)
         {
             lock (FileLock)
@@ -72,6 +87,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             }
         }
 
+        /// <summary>
+        /// Rewrites the entire file with the input parameter. This is a full overwrite. 
+        /// </summary>
         public void Rewrite(IEnumerable<string> fileEntries)
         {
             lock (FileLock)
@@ -95,6 +113,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             }
         }
 
+        /// <summary>
+        /// Read the entire file and return it's content in columnar format.
+        /// </summary>
         public IEnumerable<string[]> GetEntries()
         {
             List<string[]> entries = new List<string[]>();
@@ -115,6 +136,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils
             return entries;
         }
 
+        /// <summary>
+        /// Deletes the current file.
+        /// </summary>
         public void ClearLog()
         {
             lock (FileLock)

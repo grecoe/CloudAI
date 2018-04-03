@@ -25,6 +25,14 @@ namespace ImageClassifier.Interfaces.GenericUI
 {
     class ElementCreation
     {
+        /// <summary>
+        /// Create a WPF Image control based on a memory stream that points to an image file on disk.
+        /// </summary>
+        /// <param name="currentSource">The item being put on screen</param>
+        /// <param name="parentWidth">Width of the parent control for sizing</param>
+        /// <param name="parentHeight">Height of the parent control for sizing</param>
+        /// <param name="stream">Stream to a local image file</param>
+        /// <returns>WPF Image control</returns>
         public static Image CreateUiImage(CurrentItem currentSource, double parentWidth, double parentHeight, System.IO.MemoryStream stream)
         {
             System.Windows.Media.Imaging.BitmapImage bi = new System.Windows.Media.Imaging.BitmapImage();

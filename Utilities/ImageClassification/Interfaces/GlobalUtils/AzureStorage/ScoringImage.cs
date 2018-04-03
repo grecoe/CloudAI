@@ -22,6 +22,10 @@ using System;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
+    /// <summary>
+    /// Class used by Azure Storage sources to track the URL of 
+    /// the image file.
+    /// </summary>
     class ScoringImage
     {
         public String Url { get; set; }

@@ -22,6 +22,11 @@ using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
+    /// <summary>
+    /// Configuration class used for local files configuration used by a data source
+    /// 
+    /// Corresponding control is LocalSourceConfigurationUi
+    /// </summary>
     public class LocalDiskSourceConfiguration
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "fileTypes")]

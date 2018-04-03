@@ -22,6 +22,9 @@ using System.Windows;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
+    /// <summary>
+    /// Base implementation of the IConfigurationControl interface.
+    /// </summary>
     class ConfigurationControlImpl : IConfigurationControl
     {
         public OnUpdateSourceData OnSourceDataUpdated { get; set; }

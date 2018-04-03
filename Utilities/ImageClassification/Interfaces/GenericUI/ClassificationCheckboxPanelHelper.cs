@@ -32,6 +32,9 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// </summary>
     class ClassificationCheckboxPanelHelper
     {
+        /// <summary>
+        /// Marks each ToggleButton in a stack panel that's label matches the classification
+        /// </summary>
         public static void MakeSelection(StackPanel panel, string classification)
         {
             foreach (UIElement ui in panel.Children)
@@ -44,6 +47,10 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Marks all ToggleButtons as clicked in a stack panel where teh label matches any of the classifications
+        /// of the SourceFile
+        /// </summary>
         public static void MakeSelection(StackPanel panel, SourceFile image)
         {
             foreach (UIElement ui in panel.Children)
@@ -56,6 +63,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Returns a list of strings that represent the label value of a toggle button if it is clicekd. 
+        /// </summary>
         public static List<String> CollectSelections(StackPanel panel)
         {
             List<String> annotations = new List<string>();
@@ -75,6 +85,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             return annotations;
         }
 
+        /// <summary>
+        /// Gets a sist of ALL of the labels to ToggleButtons in a stack panel.
+        /// </summary>
         public static List<String> CollectAllOptions(StackPanel panel)
         {
             List<String> annotations = new List<string>();
@@ -91,6 +104,14 @@ namespace ImageClassifier.Interfaces.GenericUI
             return annotations;
         }
 
+        /// <summary>
+        /// Sets up ToggleButtons in a StackPanel
+        /// </summary>
+        /// <param name="source">The source that will be using the panel.</param>
+        /// <param name="panel">The StackPanel to update</param>
+        /// <param name="currentClassifications">List of existing global classifications to add</param>
+        /// <param name="forceUpdate">A delegate that can be used to attach to each ToggleButton when the value changes.</param>
+        /// <returns>A list of toggle buttons that were created for the panel.</returns>
         public static List<System.Windows.Controls.Primitives.ToggleButton> PopulateSelectionPanel(
             IDataSource source, 
             StackPanel panel,

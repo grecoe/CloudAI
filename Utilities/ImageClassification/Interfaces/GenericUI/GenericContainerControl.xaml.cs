@@ -53,6 +53,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.Initialize();
         }
 
+        /// <summary>
+        /// Called when the current selection changes in the container combo box
+        /// </summary>
         private void ContainerSelectionChanged()
         {
             ContainerComboItem item = null;
@@ -65,6 +68,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Initialzes the control by updating the list of containers and firing off the selection changed event.
+        /// </summary>
         private void Initialize()
         {
             this.SourceContainerCombo.Items.Clear();

@@ -29,12 +29,19 @@ namespace ImageClassifier
     public partial class MainWindow
     {
         #region Status Bar Events
+        /// <summary>
+        /// Clears the status of the status bar
+        /// </summary>
         private void StatusBarClearStatus()
         {
             this.StatusBarCollection.Text = String.Empty;
             this.StatusBarLocationStatus.Text = String.Empty;
         }
 
+        /// <summary>
+        /// Hooked to the jump to button on the status bar to jump the current pointer in
+        /// the current IDataSource to another location in it's current collection.
+        /// </summary>
         private void StatusBarJumpToImage()
         {
             String error = String.Empty;
@@ -65,6 +72,10 @@ namespace ImageClassifier
         #endregion
 
         #region Configuration UI Events
+        /// <summary>
+        /// Hooked to the source provider combo box and triggered whent the selected item is 
+        /// changed.
+        /// </summary>
         private void SourceProviderChanged()
         {
             if (this.ConfigurationTabSourceProviderCombo.SelectedItem is DataSourceComboItem)
@@ -122,58 +133,15 @@ namespace ImageClassifier
             }
         }
 
+        /// <summary>
+        /// Hooked for the label change event on the IMultiImageControl, but currently not sure this
+        /// will be useful or not.
+        /// </summary>
+        /// <param name="labels"></param>
         private void MultiImageSourceContainerLabelsChanged(IEnumerable<string> labels)
         {
-            // TODO: What do we do here? I think we might actually just ignore it....
-            int x = 9;
+            // TODO: Currently there is nothing to change whent the labels are updated.
         }
         #endregion
-
-        #region Classification Tab
-        /*
-        private List<String> ClassificationPanelCollectSelections()
-        {
-            List<String> annotations = new List<string>();
-
-            foreach (UIElement ui in this.ClassificationTabSelectionPanel.Children)
-            {
-                System.Windows.Controls.Primitives.ToggleButton childBox = null;
-                if ((childBox = ui as System.Windows.Controls.Primitives.ToggleButton) != null)
-                {
-                    if (childBox.IsChecked.HasValue && childBox.IsChecked.Value)
-                    {
-                        annotations.Add(childBox.Content.ToString());
-                    }
-                }
-            }
-
-            return annotations;
-        }
-
-        private void ClassificationPanelMakeSelections(string classification)
-        {
-            foreach (UIElement ui in this.ClassificationTabSelectionPanel.Children)
-            {
-                System.Windows.Controls.Primitives.ToggleButton childBox = null;
-                if ((childBox = ui as System.Windows.Controls.Primitives.ToggleButton) != null)
-                {
-                    childBox.IsChecked = String.Compare(childBox.Content.ToString(), classification) == 0;
-                }
-            }
-        }
-
-        private void ClassificationPanelMakeSelections(SourceFile image)
-        {
-            foreach (UIElement ui in this.ClassificationTabSelectionPanel.Children)
-            {
-                System.Windows.Controls.Primitives.ToggleButton childBox = null;
-                if ((childBox = ui as System.Windows.Controls.Primitives.ToggleButton) != null)
-                {
-                    childBox.IsChecked = image.Classifications.Contains(childBox.Content.ToString());
-                }
-            }
-        }
-        */
-        #endregion Annotation Tab Events
     }
 }

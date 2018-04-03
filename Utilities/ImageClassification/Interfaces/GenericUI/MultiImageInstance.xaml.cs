@@ -68,11 +68,18 @@ namespace ImageClassifier.Interfaces.GenericUI
             //startThread.Start(null);
         }
 
+        /// <summary>
+        /// Update the list of labels under the image
+        /// </summary>
         public void UpdateLabels()
         {
             this.ImageLabels.Text = String.Join(",", this.Item.CurrentSource.Classifications);
         }
 
+        /// <summary>
+        /// Capture the mouse down on the Image to show the MultiImageDetailWindow so that the user
+        /// can modify the classifications.
+        /// </summary>
         private void ImagePanel_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if(e.ButtonState == MouseButtonState.Pressed)
@@ -85,6 +92,13 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Intended for a thread to collect the image and display it on the screen.
+        /// 
+        /// Using as a thread routine is causing some issues, but there was no need to thread in the 
+        /// first place since the image has already been downloaded.
+        /// </summary>
+        /// <param name="unused"></param>
         private void ThreadCollectImage(object unused)
         {
             // Give up 30% of the height to the text boxes
@@ -107,7 +121,8 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
             catch(Exception ex)
             {
-                int x = 9;
+                // Eat the error as it's likely the file was removed from storage, but interestingly, only got this when I was 
+                // trying to thread this load.
             }
         }
     }

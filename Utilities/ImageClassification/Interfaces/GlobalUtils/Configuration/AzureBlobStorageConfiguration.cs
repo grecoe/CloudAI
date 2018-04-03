@@ -22,6 +22,11 @@ using System;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
+    /// <summary>
+    /// Configuration class used for Azure Blob Storage configuration used by a data source
+    /// 
+    /// Corresponding control is AzureStorageConfigurationUi
+    /// </summary>
     public class AzureBlobStorageConfiguration
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "storageAccount")]

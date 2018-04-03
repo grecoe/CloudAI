@@ -29,7 +29,7 @@ namespace ImageClassifier
         /// <summary>
         /// Called from the ISingleImageControl control when the displayed image changes
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="file">File on display</param>
         private void ISingleImageControlFileChanged(SourceFile file)
         {
             if (this.SelectedDataSource != null)
@@ -51,7 +51,7 @@ namespace ImageClassifier
         /// <summary>
         /// Called from the IMultiImageControl control when the group of images changes.
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="file">Unused as IMultiImageControl uses batches of files.</param>
         private void IMultiImageControlGroupChanged(SourceFile file)
         {
             if (this.SelectedDataSource != null && !String.IsNullOrEmpty(this.SelectedDataSource.CurrentContainer))

@@ -23,7 +23,8 @@ using System.Windows;
 namespace ImageClassifier.Interfaces.GenericUI
 {
     /// <summary>
-    /// Interaction logic for AcquireContentWindow.xaml
+    /// Used as an update window while a data source is collecting catalog information
+    /// from it's backend source.
     /// </summary>
     public partial class AcquireContentWindow : Window
     {

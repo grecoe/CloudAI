@@ -67,6 +67,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.CloseWindow.Click += (o, e) => { this.Close(); };
         }
 
+        /// <summary>
+        /// Zoom image out by 20%
+        /// </summary>
         private void ZoomOut()
         {
             if(this.ItemImage != null)
@@ -76,6 +79,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Zoom image in by 20%
+        /// </summary>
         private void ZoomIn()
         {
             if (this.ItemImage != null)
@@ -85,6 +91,10 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Populate the StackPanel with the classificaitons options then select 
+        /// whatever the image has been tagged with already.
+        /// </summary>
         private void AddPanelItems()
         {
             this.ClassificationPanel.Children.Clear();
@@ -99,15 +109,13 @@ namespace ImageClassifier.Interfaces.GenericUI
                 this.Item.CurrentSource);
         }
 
+        /// <summary>
+        /// Called when ANY ToggleButton is changed for classification purposes.
+        /// </summary>
         private void OnSelectionsChanged()
         {
-            DateTime start = DateTime.Now;
-            TimeSpan collect, classify, update;
-
             this.Item.CurrentSource.Classifications = ClassificationCheckboxPanelHelper.CollectSelections(this.ClassificationPanel);
 
-            collect = DateTime.Now - start;
-            start = DateTime.Now;
 
             if(this.Item.CurrentSource.Classifications.Count == 0)
             {
@@ -115,15 +123,13 @@ namespace ImageClassifier.Interfaces.GenericUI
                 this.Item.CurrentSource.Classifications.Add(this.Source.CurrentContainerAsClassification);
             }
 
-            classify = DateTime.Now - start;
-            start = DateTime.Now;
-
             this.Source.UpdateSourceFile(this.Item.CurrentSource);
-
-            update = DateTime.Now - start;
-            int x = 9;
         }
 
+        /// <summary>
+        /// Scales the image so it will fit in the control and not interfere with 
+        /// other controls on the screen.
+        /// </summary>
         private void ScaleImage()
         {
             // We know the starting size of this screen but let's just do the math

@@ -37,6 +37,10 @@ namespace ImageClassifier.Interfaces.GenericUI
         public IDataSource Provider { get; private set; }
         public LocalDiskSourceConfiguration Configuration { get; private set; }
 
+        /// <summary>
+        /// Additinal constructor with the purpose of being able to use the XAML editor, not to be used
+        /// during execution.
+        /// </summary>
         public LocalSourceConfigurationUi()
         {
             InitializeComponent();
@@ -55,12 +59,18 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.Seed();
         }
 
+        /// <summary>
+        /// Seed the UI with any data
+        /// </summary>
         private void Seed()
         {
             this.ConfigurationTextFileExtension.Text = String.Join(",", this.Configuration.FileTypes);
             this.ConfigurationTextLocalDirectory.Text = this.Configuration.RecordLocation;
         }
 
+        /// <summary>
+        /// Obtain changes and invoke delegates.
+        /// </summary>
         private void Collect()
         {
             if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -77,6 +87,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Directory selector for where the data is coming from.
+        /// </summary>
         private void ConfigurationSelectSourceFolder()
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())

@@ -26,7 +26,7 @@ using System.Windows;
 namespace ImageClassifier.Interfaces.GenericUI
 {
     /// <summary>
-    /// Interaction logic for AzureStorageConfigurationUi.xaml
+    /// Control for collecting azure storage information.
     /// </summary>
     public partial class AzureStorageConfigurationUi : UserControl
     {

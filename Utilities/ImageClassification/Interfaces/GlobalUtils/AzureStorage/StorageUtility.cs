@@ -28,6 +28,9 @@ using System.Windows;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
+    /// <summary>
+    /// Utility class for Azure Storage
+    /// </summary>
     class StorageUtility
     {
         #region Members
@@ -51,6 +54,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 
         }
 
+        /// <summary>
+        /// Connects to the storage account
+        /// </summary>
         public void Connect()
         {
             if (this.StorageAccount == null)
@@ -60,6 +66,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             }
         }
 
+        /// <summary>
+        /// Test a SAS token for the specified container in the storage account.
+        /// </summary>
         public String GetSasToken(String container)
         {
             this.Connect();
@@ -73,6 +82,11 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             return this.ContainerSASToken;
         }
 
+        /// <summary>
+        /// List of all blobs by using the context to determin where to search
+        /// </summary>
+        /// <param name="includeToken">Flag whether to add the SAS token to the blob URL</param>
+        /// <returns>Dictionary of [FileName, URL]</returns>
         public IEnumerable<KeyValuePair<String, String>> ListBlobs(bool includeToken)
         {
             return ListBlobs(
@@ -82,6 +96,13 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
                 includeToken);
         }
 
+        /// <summary>
+        /// Retrieve a list of directories from a storage container
+        /// </summary>
+        /// <param name="container">Azure Blob Storage Container</param>
+        /// <param name="prefix">Optional prefix to step the search out further</param>
+        /// <param name="recurse">Should recurse all folders or only first level chidren of the container/prefix combination</param>
+        /// <returns>List of Azure Storage Directory names</returns>
         public List<String> ListDirectories(String container, String prefix, bool recurse)
         {
             List<String> directories = new List<string>();
@@ -97,6 +118,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             return ListDirectoriesRecurse(blobContainer, prefix, recurse);
         }
 
+        /// <summary>
+        /// Internal helper to recursively search through directories.
+        /// </summary>
         private List<String> ListDirectoriesRecurse(CloudBlobContainer container, string prefix, bool recurse)
         {
             List<String> directories = new List<string>();
@@ -117,7 +141,14 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
         }
 
 
-
+        /// <summary>
+        /// List blobs from storage account.
+        /// </summary>
+        /// <param name="container">Azure Blob Storage Container name</param>
+        /// <param name="prefix">Optional prefix</param>
+        /// <param name="fileType">Optional file extension, i.e. '.jpg'</param>
+        /// <param name="includeToken">Flag whether to add the SAS token to the blob URL</param>
+        /// <returns>Dictionary of [FileName, URL]</returns>
         public IEnumerable<KeyValuePair<String, String>> ListBlobs(String container, String prefix, String fileType, bool includeToken)
         {
             this.Connect();
@@ -187,6 +218,12 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             yield break;
         }
 
+        /// <summary>
+        /// Download a blob from the given url to the given local file location.
+        /// </summary>
+        /// <param name="blobUrl">Full URL to the file blob</param>
+        /// <param name="localFile">Full local file name including path</param>
+        /// <returns>True if downloaded</returns>
         public bool DownloadBlob(String blobUrl, String localFile)
         {
             bool success = true;
@@ -204,6 +241,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             return success;
         }
 
+        /// <summary>
+        /// Retrieves a base64 representation of a storage blob.
+        /// </summary>
         public String GetBlobBase64(String container, String blob)
         {
             this.Connect();

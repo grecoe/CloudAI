@@ -154,6 +154,9 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         #region Navigation
 
+        /// <summary>
+        /// Used by next and previous to display a batch of files.
+        /// </summary>
         private void DisplayImages(IEnumerable<SourceFile> files)
         {
             this.Clear();
@@ -222,6 +225,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ButtonPrevious.IsEnabled = this.MultiImageDataSource.CanMovePrevious;
         }
 
+        /// <summary>
+        /// Builds a WPF Grid control based on number of rows and columns
+        /// </summary>
         private Grid BuildGrid(int rows, int columns)
         {
             Grid imageGrid = new Grid();
@@ -238,7 +244,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             return imageGrid;
         }
 
-        
+        /// <summary>
+        /// Show the next batch of images
+        /// </summary>
         private void NextBatch()
         {
             // Open wait window
@@ -256,6 +264,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             acqWindow.Close();
         }
 
+        /// <summary>
+        /// Show the previous batch of images.
+        /// </summary>
         private void PreviousBatch()
         {
             // Open wait window
@@ -272,6 +283,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             acqWindow.Close();
         }
 
+        /// <summary>
+        /// Create and launch the window to be used while collecting data from the source.
+        /// </summary>
         private AcquireContentWindow LaunchAcquisitionWindow()
         {
             AcquireContentWindow contentWindow = new AcquireContentWindow();
@@ -290,6 +304,13 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         }
 
+        /// <summary>
+        /// Determines if there is anything to show. If not an instance of ImageControlNotificationDisplay is created
+        /// and displayed instead.
+        /// </summary>
+        /// <param name="forward">Next = true, previous = false</param>
+        /// <returns>True if the control should move to the next batch, false if an ImageControlNotificationDisplay was 
+        /// created and displayed.</returns>
         private bool ContinueToImage(bool forward)
         {
             bool continueToImage = true;

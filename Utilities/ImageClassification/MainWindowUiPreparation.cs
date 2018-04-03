@@ -28,6 +28,10 @@ namespace ImageClassifier
 {
     public partial class MainWindow
     {
+        /// <summary>
+        /// Prepares the UI for the new or just selected IDataSource
+        /// </summary>
+        /// <param name="fullInitialization">If fully initializing updates more than just the annotation tab.</param>
         private void InitializeUi(bool fullInitialization)
         {
             PopulateAnnotationsTabAnnotationsPanel();
@@ -74,6 +78,10 @@ namespace ImageClassifier
             this.PrepareAllInputBindings(boxes);
         }
 
+        /// <summary>
+        /// Prepares all key bindings on the UI to allow for quick classification and navigation.
+        /// </summary>
+        /// <param name="boxes"></param>
         private void PrepareAllInputBindings(List<System.Windows.Controls.Primitives.ToggleButton> boxes)
         {
             this.InputBindings.Clear();
@@ -108,6 +116,9 @@ namespace ImageClassifier
             }
         }
 
+        /// <summary>
+        /// Adds a new specific key binding to the InputBindings collection
+        /// </summary>
         private void PrepareInputBindings(ICommand command, System.Windows.Input.Key key)
         {
             KeyBinding binding = new KeyBinding(command, key, ModifierKeys.Control);

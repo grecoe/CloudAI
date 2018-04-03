@@ -127,6 +127,10 @@ namespace ImageClassifier.Interfaces.GenericUI
         #endregion
 
         #region Navigation
+
+        /// <summary>
+        /// Zoom the image in by 20%
+        /// </summary>
         private void ZoomImage()
         {
             foreach (UIElement item in this.ImagePanel.Children)
@@ -143,6 +147,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Zoom the image out by 20%
+        /// </summary>
         private void ZoomOutImage()
         {
             foreach (UIElement item in this.ImagePanel.Children)
@@ -159,6 +166,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Update the size information about this image at the bottom of the panel.
+        /// </summary>
         private void UpdateSizeInformation()
         {
             String imageSizeInfo = String.Empty;
@@ -173,6 +183,10 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ImageSizeData.Text = imageSizeInfo;
         }
 
+        /// <summary>
+        /// Generic move used for both next and previous.
+        /// </summary>
+        /// <param name="file"></param>
         private void MoveImage(SourceFile file)
         {
             this.CurrentSourceFile.CurrentSource = file;
@@ -212,6 +226,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ButtonPrevious.IsEnabled = this.DataSource.CanMovePrevious;
         }
 
+        /// <summary>
+        ///  Move to the previous image (if there is one)
+        /// </summary>
         private void PreviousImage()
         {
             this.DataSource.ClearSourceFiles();
@@ -223,6 +240,9 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Move to the next image (if there is one)
+        /// </summary>
         private void NextImage()
         {
             this.DataSource.ClearSourceFiles();
@@ -233,6 +253,13 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
+        /// <summary>
+        /// Determines if there is anything to show. If not an instance of ImageControlNotificationDisplay is created
+        /// and displayed instead.
+        /// </summary>
+        /// <param name="forward">Next = true, previous = false</param>
+        /// <returns>True if the control should move to the next batch, false if an ImageControlNotificationDisplay was 
+        /// created and displayed.</returns>
         private bool ContinueToImage(bool forward)
         {
             bool continueToImage = true;
