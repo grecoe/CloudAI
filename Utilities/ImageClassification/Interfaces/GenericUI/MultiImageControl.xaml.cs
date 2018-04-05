@@ -76,13 +76,13 @@ namespace ImageClassifier.Interfaces.GenericUI
                 List<KeyBinding> bindings = new List<KeyBinding>();
                 bindings.Add(new KeyBinding(
                     new ImageChangeCommand(this.ButtonNext, this.NextBatch),
-                    Key.N,
-                    ModifierKeys.Control));
+                    Key.OemPlus,
+                    ModifierKeys.None));
 
                 bindings.Add(new KeyBinding(
                     new ImageChangeCommand(this.ButtonPrevious, this.PreviousBatch),
-                    Key.P,
-                    ModifierKeys.Control));
+                    Key.OemMinus,
+                    ModifierKeys.None));
 
                 return bindings;
             }
@@ -174,6 +174,16 @@ namespace ImageClassifier.Interfaces.GenericUI
             int columnConfiguration = (this.CurrentSourceBatch.Count > 9) ? MultiImageControl.MAX_COLUMNS_MORE_THAN_NINE : MultiImageControl.MAX_COLUMNS_TO_NINE;
             int maxRows = this.CurrentSourceBatch.Count / columnConfiguration;
             int maxCols = columnConfiguration;
+
+            // Single image case
+            if(this.CurrentSourceBatch.Count == 1)
+            {
+                maxRows = maxCols = 1;
+            }
+            else if ( maxRows == 0)
+            {
+                maxRows = 1;
+            }
 
             FrameworkElement fe = this.Parent as FrameworkElement;
             if (fe != null)

@@ -46,12 +46,16 @@ namespace ImageClassifier
         /// A list of all known data sources
         /// </summary>
         private List<IDataSource> DataSources { get; set; }
+
+        private bool IsInitialized { get; set; }
         #endregion
 
 
         public MainWindow()
         {
             InitializeComponent();
+
+            this.IsInitialized = false;
 
             // Class Objects
             this.ConfigurationContext = ClassificationContext.LoadConfiguration();
@@ -88,6 +92,7 @@ namespace ImageClassifier
             // Hook the closing event so we can ensure we capture all changes
             this.Closing += WindowClosing;
 
+            this.IsInitialized = true;
             // Initialize with the settings we have.
             InitializeUi(true);
         }

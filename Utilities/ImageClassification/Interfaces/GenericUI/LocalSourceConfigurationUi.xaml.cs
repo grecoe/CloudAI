@@ -38,6 +38,7 @@ namespace ImageClassifier.Interfaces.GenericUI
         public event OnUpdateSourceData OnSourceDataUpdated;
         #endregion 
 
+        private const string DefaultExtensions = ".jpg,.tif,.tiff,.png,.gif";
         private List<ToggleButton> MultiClassSelections { get; set; }
 
         public IDataSource Provider { get; private set; }
@@ -73,6 +74,10 @@ namespace ImageClassifier.Interfaces.GenericUI
         private void Seed()
         {
             this.ConfigurationTextFileExtension.Text = String.Join(",", this.Configuration.FileTypes);
+            if(String.IsNullOrEmpty(this.ConfigurationTextFileExtension.Text))
+            {
+                this.ConfigurationTextFileExtension.Text = DefaultExtensions;
+            }
             this.ConfigurationTextLocalDirectory.Text = this.Configuration.RecordLocation;
             this.MultiClassSelections[(this.Configuration.MultiClass ? 1 : 0)].IsChecked = true;
         }

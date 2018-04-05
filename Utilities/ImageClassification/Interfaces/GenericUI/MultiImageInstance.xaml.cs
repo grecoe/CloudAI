@@ -55,17 +55,12 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             this.Classifications = classifications;
 
-            this.ImageName.Text = this.Item.CurrentSource.Name;
+           // this.ImageName.Text = this.Item.CurrentSource.Name;
             this.UpdateLabels();
 
             this.ImagePanel.MouseDown += ImagePanel_MouseDown;
 
             this.ThreadCollectImage(null);
-
-            // Spin a thread to load image
-            //System.Threading.Thread startThread = new System.Threading.Thread(ThreadCollectImage);
-            //startThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            //startThread.Start(null);
         }
 
         /// <summary>
@@ -73,7 +68,7 @@ namespace ImageClassifier.Interfaces.GenericUI
         /// </summary>
         public void UpdateLabels()
         {
-            this.ImageLabels.Text = String.Join(",", this.Item.CurrentSource.Classifications);
+            this.ImageLabels.Text = String.Join(Environment.NewLine, this.Item.CurrentSource.Classifications);
         }
 
         /// <summary>

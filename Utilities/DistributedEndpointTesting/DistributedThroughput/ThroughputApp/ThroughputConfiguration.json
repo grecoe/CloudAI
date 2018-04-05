@@ -1,5 +1,4 @@
 ﻿{
-
   "execution": {
     "autoScaling": true,
     "autoScaleIncrement": 2,
@@ -10,28 +9,30 @@
     "retryCount": 3,
     "clientName": "Local_App"
   },
-
-  "logDirectory": "[LOCAL_DIRECTORY_FOR_LOGS]",
-  "recordProviderDiskLocation": "[LOCAL_PATH_TO_PROVIDER_DLL]",
+  "logDirectory": "C:\\ImageClassifyGpuLogs",
+  "recordProviderDiskLocation": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\RecordProviderExample\\bin\\Debug",
   "recordProvider": {
     "executionType": "storage",
     "recordCount": 1000,
     "storage": {
-      "storageAccount": "[STORAGE_ACCOUNT_NAME]",
-      "storageKey": "[STORAGE_ACCOUNT_KEY]",
-      "storageContainer": "[STORAGE_ACCOUNT_CONTAINER]",
-      "blobPrefix": "[STORAGE_BLOB_PREFIX]",
-      "fileType": "[FILE_PREFIX i.e. .jpg]"
+      "storageAccount": "jabilpredictiveblobdev",
+      "storageKey": "xm2oQ4EQ8uBL2duX9bzqus9wrXnUWVlSNKDZvGZ91iXVkYuoXihv4XDBOHDWaawTyTjiJjZXINbs7bDOrgjquw==",
+      "storageContainer": "adfspark",
+      "blobPrefix": "processed/",
+      "fileType": ".jpg"
     },
     "local": {
-      "localFile": "[LOCAL_FILE]"
+      "localFile": "C:\\Customers\\Jabil\\Results\\1.jpg"
     }
   },
-
   "defaultProvider": {
-    "endpointUrl": "[SERVICE_ENDPOINT_URL]",
-    "endpointKey": "[SERVICE_ENDPOINT_KEY]",
-    "fileInput": "[LOCAL_FILE_WITH_JSON_PAYLOAD]",
+    "endpointUrl": "http://40.71.172.160/score",
+    "endpointKey": null,
+    "fileInput": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\matpayload.json",
     "recordCount": 1000
+  },
+  "eventHubConfiguration": {
+    "hubName": "throughputhub",
+    "connectionString": "Endpoint=sb://throughputhubsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aRmblOhtQ3nU0xujHFZICtdj0Sh5gdCrRs6AnRtQPGI="
   }
 }

@@ -34,27 +34,30 @@ namespace ImageClassifier
         /// <param name="fullInitialization">If fully initializing updates more than just the annotation tab.</param>
         private void InitializeUi(bool fullInitialization)
         {
-            PopulateAnnotationsTabAnnotationsPanel();
-
-            if (fullInitialization)
+            if (this.IsInitialized)
             {
-                if (this.SelectedDataSource != null)
+                PopulateAnnotationsTabAnnotationsPanel();
+
+                if (fullInitialization)
                 {
-                    // Set up the IImageControl 
-                    this.ImagePanel.Children.Clear();
-                    this.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
-                    this.ImagePanel.Children.Add(this.SelectedDataSource.ImageControl.Control);
-                   // this.SelectedDataSource.ImageControl.FastForward();
+                    if (this.SelectedDataSource != null)
+                    {
+                        // Set up the IImageControl 
+                        this.ImagePanel.Children.Clear();
+                        this.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
+                        this.ImagePanel.Children.Add(this.SelectedDataSource.ImageControl.Control);
+                        // this.SelectedDataSource.ImageControl.FastForward();
 
-                    // Set up the IContainerControl 
-                    this.ContainerPanel.Children.Clear();
-                    this.ContainerPanel.Children.Add(this.SelectedDataSource.ContainerControl.Control);
+                        // Set up the IContainerControl 
+                        this.ContainerPanel.Children.Clear();
+                        this.ContainerPanel.Children.Add(this.SelectedDataSource.ContainerControl.Control);
+                    }
                 }
-            }
 
-            if (this.SelectedDataSource is IMultiImageDataSource)
-            {
-                this.IMultiImageControlGroupChanged(null);
+                if (this.SelectedDataSource is IMultiImageDataSource)
+                {
+                    this.IMultiImageControlGroupChanged(null);
+                }
             }
         }
 
@@ -107,6 +110,8 @@ namespace ImageClassifier
 
             foreach(System.Windows.Controls.Primitives.ToggleButton cb in boxes)
             {
+                cb.ToolTip = string.Format("Use numeric key {0} key to activate", (keyIdx +1).ToString());
+                
                 ToggleButtonCommand cmd = new ToggleButtonCommand(cb);
                 cmd.ClassificationsChanged += this.ForceClassificationUpdate;
                 this.PrepareInputBindings(cmd, keys[keyIdx++]);
@@ -126,7 +131,7 @@ namespace ImageClassifier
         /// </summary>
         private void PrepareInputBindings(ICommand command, System.Windows.Input.Key key)
         {
-            KeyBinding binding = new KeyBinding(command, key, ModifierKeys.Control);
+            KeyBinding binding = new KeyBinding(command, key, ModifierKeys.None);
             this.InputBindings.Add(binding);
         }
     }

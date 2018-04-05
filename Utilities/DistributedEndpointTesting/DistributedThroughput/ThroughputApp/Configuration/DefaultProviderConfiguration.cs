@@ -21,8 +21,9 @@ namespace ThroughputApp.Configuration
             {
                 if(System.IO.File.Exists(this.File))
                 {
-                    returnValue = !String.IsNullOrEmpty(this.Url) &&
-                        !String.IsNullOrEmpty(this.Key);
+                    //returnValue = !String.IsNullOrEmpty(this.Url) &&
+                    //    !String.IsNullOrEmpty(this.Key);
+                    returnValue = !String.IsNullOrEmpty(this.Url);
                 }
             }
 

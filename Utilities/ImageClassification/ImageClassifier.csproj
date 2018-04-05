@@ -225,13 +225,13 @@
     <Content Include="AzureStorageConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="LocalStorageConfiguration.json">
+    <Content Include="LocalMachineConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="LabeledAzureStorageConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="LabelledLocalStorageConfiguration.json">
+    <Content Include="LocalMachineDirectoryConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config">

@@ -35,14 +35,16 @@
                 x:Name="ButtonPrevious"
                 FontSize="14"
                 Margin="10,5,10,5"
-                Width="30">
+                Width="30"
+                ToolTip="Move to previous batch, use - key">
                 <Image Source="pack://application:,,,/Resources/back.png"/>
             </Button>
             <Button 
                 x:Name="ButtonNext"
                 FontSize="14"
                 Margin="10,5,10,5"
-                Width="30">
+                Width="30"
+                ToolTip="Move to next batch, use + key">
                 <Image Source="pack://application:,,,/Resources/forward.png"/>
             </Button>
         </StackPanel>

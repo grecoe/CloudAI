@@ -56,13 +56,13 @@ namespace ImageClassifier.Interfaces.GenericUI
                 List<KeyBinding> bindings = new List<KeyBinding>();
                 bindings.Add(new KeyBinding(
                     new ImageChangeCommand(this.ButtonNext, this.NextImage),
-                    Key.N,
-                    ModifierKeys.Control));
+                    Key.OemPlus,
+                    ModifierKeys.None));
 
                 bindings.Add(new KeyBinding(
                     new ImageChangeCommand(this.ButtonPrevious, this.PreviousImage),
-                    Key.P,
-                    ModifierKeys.Control));
+                    Key.OemMinus,
+                    ModifierKeys.None));
 
                 return bindings;
             }

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:ImageClassifier.Interfaces.GenericUI"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+    <Grid Background="LightBlue" Margin="5,5,5,5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -18,7 +18,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock
+        <!--<TextBlock
             Grid.Row="0"
             Grid.Column="0"
             Grid.ColumnSpan="2"
@@ -27,13 +27,15 @@
             Margin="5,5,5,5"
             FontWeight="Bold">
             Name
-        </TextBlock>
+        </TextBlock> -->
         <StackPanel
             Margin="5,5,5,5"
             Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="2"
-            x:Name="ImagePanel"/>
+            x:Name="ImagePanel"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"/>
 
         <TextBlock
             Grid.Row="2"
@@ -68,7 +70,8 @@
             x:Name="ImageLabels"
             FontSize="13"
             Margin="5,5,5,5"
-            FontWeight="Bold">
+            FontWeight="Bold"
+            TextWrapping="Wrap">
             lbl
         </TextBlock>
 

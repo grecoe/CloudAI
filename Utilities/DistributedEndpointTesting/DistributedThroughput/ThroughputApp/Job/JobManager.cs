@@ -140,7 +140,12 @@ namespace ThroughputApp.Job
         private System.Net.Http.HttpClient CreateClient(string jobId)
         {
             System.Net.Http.HttpClient client = new System.Net.Http.HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this.RecordProvider.EndpointKey);
+
+            if (!String.IsNullOrEmpty(this.RecordProvider.EndpointKey))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this.RecordProvider.EndpointKey);
+            }
+
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.BaseAddress = new Uri(this.RecordProvider.EndpointUrl);
             if (!String.IsNullOrEmpty(this.Context.Execution.ClientName))

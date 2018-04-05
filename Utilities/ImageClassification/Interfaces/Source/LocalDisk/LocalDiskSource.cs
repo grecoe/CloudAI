@@ -45,9 +45,9 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         #endregion
 
         public LocalDiskSource()
-        : base("LocalStorageConfiguration.json")
+        : base("LocalMachineConfiguration.json")
         {
-            this.Name = "LocalStorageService";
+            this.Name = "LocalMachineService";
             this.SourceType = DataSourceType.Disk;
             this.DeleteSourceFilesWhenComplete = false;
 
@@ -61,7 +61,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Local Storage Service",
+            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine",
                 configUi);
 
             this.UpdateInformationRequested(null);

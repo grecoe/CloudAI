@@ -52,7 +52,8 @@
                 Grid.Column="1"
                 Margin="5,5,5,5"
                 FontSize="13">
-            </TextBox>
+            .jpg,.tif,.tiff,.png,.gif
+        </TextBox>
         
         
             <TextBlock 
@@ -72,8 +73,7 @@
                         Grid.Row="0"
                         Grid.Column="0"
                         Margin="5,5,5,5"
-                        FontSize="13"
-                    IsReadOnly="True">
+                        FontSize="13">
                 </TextBox>
                 <Button 
                         Grid.Row="0"
