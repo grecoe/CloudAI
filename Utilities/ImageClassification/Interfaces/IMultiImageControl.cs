@@ -41,5 +41,9 @@ namespace ImageClassifier.Interfaces
         /// The current batch of images that are being shown.
         /// </summary>
         List<CurrentItem> CurrentSourceBatch { get; }
+        /// <summary>
+        /// Resets the view port
+        /// </summary>
+        void ResetGrid();
     }
 }

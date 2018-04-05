@@ -110,8 +110,10 @@ namespace ImageClassifier
 
             foreach(System.Windows.Controls.Primitives.ToggleButton cb in boxes)
             {
+                // Tool tip so user knows what key activates it
                 cb.ToolTip = string.Format("Use numeric key {0} key to activate", (keyIdx +1).ToString());
                 
+                // Prepare the input binding
                 ToggleButtonCommand cmd = new ToggleButtonCommand(cb);
                 cmd.ClassificationsChanged += this.ForceClassificationUpdate;
                 this.PrepareInputBindings(cmd, keys[keyIdx++]);

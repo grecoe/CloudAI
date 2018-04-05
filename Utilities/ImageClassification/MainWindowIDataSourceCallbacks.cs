@@ -47,6 +47,11 @@ namespace ImageClassifier
             // Make sure to capture any changes to the classifications
             if (this.SelectedDataSource != null)
             {
+                if(this.SelectedDataSource is IMultiImageDataSource)
+                {
+                    (this.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();
+                }
+
                 InitializeUi(false);
             }
 

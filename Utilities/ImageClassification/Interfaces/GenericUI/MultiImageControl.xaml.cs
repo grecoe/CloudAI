@@ -115,6 +115,21 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ShowNext();
         }
 
+        public void ResetGrid()
+        {
+            if(this.MultiImageInstanceList.Count > 0)
+            {
+                int jumpIdx = this.MultiImageDataSource.CurrentContainerIndex;
+
+                jumpIdx = ((jumpIdx - this.MultiImageInstanceList.Count + 1) > 0)
+                    ? jumpIdx - this.MultiImageInstanceList.Count
+                    : 1;
+
+                this.MultiImageDataSource.JumpToSourceFile(jumpIdx);
+                this.NextBatch();
+            }
+        }
+
         public void ShowNext()
         {
             this.NextBatch();
