@@ -20,7 +20,7 @@
 
 using System;
 
-namespace ImageClassifier.Interfaces.GenericUI
+namespace ImageClassifier.Interfaces.GenericUI.Utilities
 {
     /// <summary>
     /// UI ComboBox item for source containers.

@@ -22,7 +22,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace ImageClassifier.Interfaces.GlobalUtils
+namespace ImageClassifier.Interfaces.GlobalUtils.Persistence
 {
     /// <summary>
     /// A generic logger for CSV functionality

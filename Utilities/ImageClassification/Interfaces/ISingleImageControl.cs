@@ -17,7 +17,7 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
-using ImageClassifier.UIUtils;
+using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier.Interfaces
 {

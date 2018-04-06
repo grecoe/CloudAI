@@ -21,7 +21,7 @@
 using System;
 using System.Windows.Input;
 
-namespace ImageClassifier.UIUtils
+namespace ImageClassifier.MainWindowUtilities
 {
     public delegate void OnNextImage(bool? jump);
     public delegate void OnPrevImage();

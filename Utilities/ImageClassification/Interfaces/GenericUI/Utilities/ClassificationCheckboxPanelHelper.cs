@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ImageClassifier.Interfaces.GenericUI
+namespace ImageClassifier.Interfaces.GenericUI.Utilities
 {
     delegate void OnForceUpdateDelegate();
 

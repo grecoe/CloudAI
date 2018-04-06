@@ -20,9 +20,9 @@
 
 using System;
 using System.Collections.Generic;
-using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence
 {

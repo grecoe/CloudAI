@@ -18,7 +18,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.UIUtils;
+using ImageClassifier.Interfaces.GenericUI.Utilities;
+using ImageClassifier.MainWindowUtilities;
 using System;
 using System.Collections.Generic;
 using System.Windows;

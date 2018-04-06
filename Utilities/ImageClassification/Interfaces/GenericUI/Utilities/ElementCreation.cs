@@ -18,10 +18,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.UIUtils;
+using ImageClassifier.MainWindowUtilities;
 using System.Windows.Controls;
 
-namespace ImageClassifier.Interfaces.GenericUI
+namespace ImageClassifier.Interfaces.GenericUI.Utilities
 {
     class ElementCreation
     {

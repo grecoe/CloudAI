@@ -20,6 +20,7 @@
 
 using ImageClassifier.Interfaces;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.GenericUI.Utilities;
 using System;
 
 namespace ImageClassifier

@@ -20,7 +20,7 @@
 
 using ImageClassifier.Interfaces;
 
-namespace ImageClassifier.UIUtils
+namespace ImageClassifier.MainWindowUtilities
 {
     /// <summary>
     /// ComboBox item used to display an IDataSource object

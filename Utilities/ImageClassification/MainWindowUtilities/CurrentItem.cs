@@ -21,7 +21,7 @@
 using ImageClassifier.Interfaces;
 using System.Drawing;
 
-namespace ImageClassifier.UIUtils
+namespace ImageClassifier.MainWindowUtilities
 {
     /// <summary>
     /// Class used by the main window to track what the current image being displayed is.

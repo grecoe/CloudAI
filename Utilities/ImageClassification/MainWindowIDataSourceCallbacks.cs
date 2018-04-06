@@ -18,10 +18,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using ImageClassifier.Interfaces;
 
 namespace ImageClassifier
 {
@@ -35,25 +35,28 @@ namespace ImageClassifier
         /// <param name="sender">The provider that made the change</param>
         private void IDataSourceOnConfigurationUdpated(IDataSource sender)
         {
-            this.StatusBarClearStatus();
-
-            // Something changed, make sure we get the annotations saved out
+            // Something changed, make sure we get the annotations saved out because this is relevant
+            // to all, and requires us to update the classifications panel
             this.ConfigurationContext.Classifications =
                 new List<string>(this.ConfigurationTabTextAnnotationTags.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
             this.ConfigurationContext.Save();
 
             this.PopulateAnnotationsTabAnnotationsPanel();
 
-            // Make sure to capture any changes to the classifications
-            if (this.SelectedDataSource != null)
+            // If the service that updated is the current service update the UI
+            if (sender == this.SelectedDataSource)
             {
-                if(this.SelectedDataSource is IMultiImageDataSource)
+                // Clear the status bar
+                this.StatusBarClearStatus();
+
+                if (this.SelectedDataSource is IMultiImageDataSource)
                 {
                     (this.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();
                 }
-
-                InitializeUi(false);
             }
+
+            // False updates only the classification panel
+            InitializeUi(false);
 
             MessageBox.Show("Configuration has been saved", "Save Configuration", MessageBoxButton.OK);
         }
@@ -62,7 +65,8 @@ namespace ImageClassifier
         /// Called by a data source configuration UI to notify that the 
         /// data for the source has changed.
         /// </summary>
-        /// <param name="sender">The provider that made the change</param>
+        /// <param name="sender">The provider that made the change, if it is the current one
+        /// update the UI</param>
         private void IDataSourceOnSourceDataUpdated(IDataSource sender)
         {
             if (sender == this.SelectedDataSource)

@@ -18,9 +18,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.UIUtils;
 using System;
 using System.Collections.Generic;
+using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier.Interfaces
 {

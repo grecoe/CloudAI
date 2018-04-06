@@ -68,9 +68,9 @@
     <Compile Include="Configuration\ClassificationContext.cs" />
     <Compile Include="Interfaces\DataSourceBase.cs" />
     <Compile Include="Interfaces\DataSourceType.cs" />
-    <Compile Include="Interfaces\GenericUI\ClassificationCheckboxPanelHelper.cs" />
+    <Compile Include="Interfaces\GenericUI\Utilities\ClassificationCheckboxPanelHelper.cs" />
     <Compile Include="Interfaces\GenericUI\IConfigurationControlNotifications.cs" />
-    <Compile Include="Interfaces\GenericUI\ElementCreation.cs" />
+    <Compile Include="Interfaces\GenericUI\Utilities\ElementCreation.cs" />
     <Compile Include="Interfaces\GenericUI\GenericContainerControl.xaml.cs">
       <DependentUpon>GenericContainerControl.xaml</DependentUpon>
     </Compile>
@@ -91,8 +91,8 @@
     </Compile>
     <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationBase.cs" />
     <Compile Include="Interfaces\DataSourceFactory.cs" />
-    <Compile Include="Interfaces\GlobalUtils\FileUtils.cs" />
-    <Compile Include="Interfaces\GlobalUtils\GenericCsvLogger.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Persistence\FileUtils.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Persistence\GenericCsvLogger.cs" />
     <Compile Include="Interfaces\IConfigurationControl.cs" />
     <Compile Include="Interfaces\IContainerControl.cs" />
     <Compile Include="Interfaces\IDataSink.cs" />
@@ -138,11 +138,11 @@
     <Compile Include="MainWindowIImageControlCallback.cs" />
     <Compile Include="MainWindowUiNotifications.cs" />
     <Compile Include="MainWindowUiPreparation.cs" />
-    <Compile Include="UIUtils\CurrentItem.cs" />
-    <Compile Include="UIUtils\ToggleButtonCommand.cs" />
-    <Compile Include="UIUtils\DataSourceComboItem.cs" />
-    <Compile Include="Interfaces\GenericUI\ContainerComboItem.cs" />
-    <Compile Include="UIUtils\ImageChangeCommand.cs" />
+    <Compile Include="MainWindowUtilities\CurrentItem.cs" />
+    <Compile Include="MainWindowUtilities\ToggleButtonCommand.cs" />
+    <Compile Include="MainWindowUtilities\DataSourceComboItem.cs" />
+    <Compile Include="Interfaces\GenericUI\Utilities\ContainerComboItem.cs" />
+    <Compile Include="MainWindowUtilities\ImageChangeCommand.cs" />
     <Page Include="Interfaces\GenericUI\GenericContainerControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

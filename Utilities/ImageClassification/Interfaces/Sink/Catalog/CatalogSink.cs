@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImageClassifier.Interfaces.GlobalUtils;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.Sink.Catalog
 {

@@ -18,11 +18,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.UIUtils;
 using System.Windows.Input;
 using System.Collections.Generic;
-using ImageClassifier.Interfaces.GenericUI;
 using ImageClassifier.Interfaces;
+using ImageClassifier.Interfaces.GenericUI.Utilities;
+using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier
 {
@@ -46,7 +46,6 @@ namespace ImageClassifier
                         this.ImagePanel.Children.Clear();
                         this.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
                         this.ImagePanel.Children.Add(this.SelectedDataSource.ImageControl.Control);
-                        // this.SelectedDataSource.ImageControl.FastForward();
 
                         // Set up the IContainerControl 
                         this.ContainerPanel.Children.Clear();

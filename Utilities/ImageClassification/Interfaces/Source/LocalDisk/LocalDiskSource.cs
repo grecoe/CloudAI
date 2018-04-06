@@ -23,8 +23,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.Source.LocalDisk
 {
@@ -227,7 +227,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             this.MultiClass = this.Configuration.MultiClass;
 
             // Update containers
-            this.ContainerControl = new GenericContainerControl(this);
+            this.ContainerControl.Refresh();
 
             // Initialize the list of items
             this.InitializeOnNewContainer();
@@ -271,7 +271,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             if (System.IO.Directory.Exists(this.CurrentContainer))
             {
-                foreach (String file in ImageClassifier.Interfaces.GlobalUtils.FileUtils.ListFile(this.CurrentContainer, this.Configuration.FileTypes))
+                foreach (String file in FileUtils.ListFile(this.CurrentContainer, this.Configuration.FileTypes))
                 {
                     this.CurrentImageList.Add(file);
                 }

@@ -27,6 +27,7 @@ using System.Windows;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
 using ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 {
@@ -274,16 +275,16 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
-            this.UpdateInformationRequested(this);
+            //TODO DELETE this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
 
             // Update multiclass
             this.MultiClass = this.Configuration.LocalConfiguration.MultiClass;
 
             // Update containers
-            this.ContainerControl = new GenericContainerControl(this);
+            this.ContainerControl.Refresh();
 
-            this.UpdateInformationRequested(null);
+            //TODO DELETE this.UpdateInformationRequested(null);
 
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
@@ -307,6 +308,11 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
             // Notify listeners it just happened.
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
+
+            if (this.ImageControl is IMultiImageControl)
+            {
+                (this.ImageControl as IMultiImageControl).ResetGrid();
+            }
         }
 
         /// <summary>
@@ -322,7 +328,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             {
                 if (System.IO.Directory.Exists(this.CurrentContainer))
                 {
-                    foreach (String file in ImageClassifier.Interfaces.GlobalUtils.FileUtils.ListFile(this.CurrentContainer, this.Configuration.LocalConfiguration.FileTypes))
+                    foreach (String file in FileUtils.ListFile(this.CurrentContainer, this.Configuration.LocalConfiguration.FileTypes))
                     {
                         this.CurrentImageList.Add(file);
                     }

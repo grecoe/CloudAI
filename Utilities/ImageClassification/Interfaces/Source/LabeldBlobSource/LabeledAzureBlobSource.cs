@@ -18,17 +18,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
-using ImageClassifier.Interfaces.GlobalUtils.Configuration;
-using ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using ImageClassifier.Interfaces.GlobalUtils;
 using System.Windows;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.Source.LabeldBlobSource.Persistence;
 using ImageClassifier.Interfaces.Source.LabeldBlobSource.Configuration;
 using ImageClassifier.Interfaces.Source.LabeldBlobSource.UI;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 {
@@ -448,6 +448,11 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             this.InitializeOnNewContainer();
 
             this.OnLabelsAcquired?.Invoke(this.GetContainerLabels());
+
+            if (this.ImageControl is IMultiImageControl)
+            {
+                (this.ImageControl as IMultiImageControl).ResetGrid();
+            }
         }
         #endregion
     }

@@ -18,8 +18,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 using System;
-using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource.Persistence
 {

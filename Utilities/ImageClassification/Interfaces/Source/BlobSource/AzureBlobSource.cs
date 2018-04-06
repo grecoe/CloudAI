@@ -23,9 +23,9 @@ using System.Linq;
 using System.Windows;
 using ImageClassifier.Interfaces.GenericUI;
 using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
-using ImageClassifier.Interfaces.GlobalUtils;
 using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource
 {

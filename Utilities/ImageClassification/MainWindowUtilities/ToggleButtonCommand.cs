@@ -21,7 +21,7 @@
 using System;
 using System.Windows.Input;
 
-namespace ImageClassifier.UIUtils
+namespace ImageClassifier.MainWindowUtilities
 {
     public delegate void OnClassifcationsChanged();
     /// <summary>

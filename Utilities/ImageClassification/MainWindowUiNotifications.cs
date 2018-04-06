@@ -18,11 +18,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-using ImageClassifier.UIUtils;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using ImageClassifier.Interfaces;
+using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier
 {
@@ -51,7 +51,6 @@ namespace ImageClassifier
                 {
                     int index = int.Parse(this.StatusTextJumpTo.Text);
                     this.SelectedDataSource.JumpToSourceFile(index);
-                    //TODO:DELETE how to hook this this.ClassificationTabNextImage();
                     this.SelectedDataSource.ImageControl.ShowNext();
                 }
                 catch (Exception)
@@ -82,20 +81,22 @@ namespace ImageClassifier
             {
                 this.StatusBarClearStatus();
 
-                // Unhook control callbacks......
+                // Unhook IImageControl callbacks......
                 if (this.SelectedDataSource != null)
                 {
                     this.SelectedDataSource.ContainerControl.OnContainerChanged -= this.IContainerControlContainerChanged;
 
-                    if (this.SelectedDataSource.ImageControl is ISingleImageControl)
+                    if(this.SelectedDataSource.ImageControl != null)
                     {
-                        ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged -= this.ISingleImageControlFileChanged;
-                    }
-
-                    if(this.SelectedDataSource is IMultiImageDataSource)
-                    {
-                        ((IMultiImageControl)this.SelectedDataSource.ImageControl).ImageChanged -= this.IMultiImageControlGroupChanged;
-                        (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired -= this.MultiImageSourceContainerLabelsChanged;
+                        if (this.SelectedDataSource is ISingleImageDataSource)
+                        {
+                            this.SelectedDataSource.ImageControl.ImageChanged -= this.ISingleImageControlFileChanged;
+                        }
+                        else if(this.SelectedDataSource is IMultiImageDataSource)
+                        {
+                            this.SelectedDataSource.ImageControl.ImageChanged -= this.IMultiImageControlGroupChanged;
+                            (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired -= this.MultiImageSourceContainerLabelsChanged;
+                        }
                     }
                 }
 
@@ -104,22 +105,22 @@ namespace ImageClassifier
                 this.ConfigurationContext.DefaultProvider = this.SelectedDataSource.Name;
                 this.ConfigurationContext.Save();
 
-                // TODO:DELETE this.InitializeUi(true);
 
-                // Hook control callbacks......
+                // Hook IImageControl callbacks......
                 if (this.SelectedDataSource != null)
                 {
-                    if (this.SelectedDataSource.ImageControl is ISingleImageControl)
+                    if (this.SelectedDataSource.ImageControl != null)
                     {
-                        ((ISingleImageControl)this.SelectedDataSource.ImageControl).ImageChanged += this.ISingleImageControlFileChanged;
-                    }
-
-                    if (this.SelectedDataSource is IMultiImageDataSource)
-                    {
-                        
-                        ((IMultiImageControl)this.SelectedDataSource.ImageControl).ImageChanged += this.IMultiImageControlGroupChanged;
-                        ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = this.ConfigurationContext.Classifications;
-                        (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
+                        if (this.SelectedDataSource is ISingleImageDataSource)
+                        {
+                            this.SelectedDataSource.ImageControl.ImageChanged += this.ISingleImageControlFileChanged;
+                        }
+                        else if (this.SelectedDataSource is IMultiImageDataSource)
+                        {
+                            this.SelectedDataSource.ImageControl.ImageChanged += this.IMultiImageControlGroupChanged;
+                            ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = this.ConfigurationContext.Classifications;
+                            (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
+                        }
                     }
                 }
 

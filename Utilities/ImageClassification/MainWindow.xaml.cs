@@ -23,8 +23,8 @@ using System.Collections.Generic;
 using System.Windows;
 using ImageClassifier.Configuration;
 using ImageClassifier.Interfaces;
-using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.UIUtils;
+using ImageClassifier.Interfaces.GenericUI.Utilities;
+using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier
 {

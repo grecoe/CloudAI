@@ -20,6 +20,7 @@
 
 using ImageClassifier.Interfaces;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.GenericUI.Utilities;
 using System;
 
 namespace ImageClassifier
@@ -58,15 +59,19 @@ namespace ImageClassifier
             {
                 String classification = (this.SelectedDataSource as IMultiImageDataSource).CurrentContainerAsClassification;
                 int groupSize = (this.SelectedDataSource as IMultiImageDataSource).BatchSize;
-
                 int currentIndex = this.SelectedDataSource.CurrentContainerIndex+1;
-                int totalGroups = this.SelectedDataSource.CurrentContainerCollectionCount / groupSize;
-                int currentGroup = (currentIndex > 0) ? (int)Math.Round((decimal)currentIndex / (decimal)groupSize) : 1;
+                int containerCount = this.SelectedDataSource.CurrentContainerCollectionCount;
 
-                if(totalGroups == 0 && this.SelectedDataSource.CurrentContainerCollectionCount > 0)
+                double dblgroups = (double)containerCount/ (double)groupSize;
+                int intgroups = containerCount / groupSize;
+
+                if((dblgroups - intgroups) >0)
                 {
-                    totalGroups = 1;
+                    intgroups += 1;
                 }
+
+                int currentGroup = (currentIndex > 0) ? (int)Math.Round((double)currentIndex / (double)groupSize) : 1;
+
 
                 ClassificationCheckboxPanelHelper.MakeSelection(
                     this.ClassificationTabSelectionPanel,
@@ -75,7 +80,7 @@ namespace ImageClassifier
                 this.StatusBarLocationStatus.Text =
                     String.Format("Viewing Group :  {0} of {1}",
                     (currentGroup > 0)?currentGroup : 1,
-                    totalGroups);
+                    intgroups);
             }
         }
 

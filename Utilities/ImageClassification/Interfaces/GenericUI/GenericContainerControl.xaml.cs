@@ -17,6 +17,7 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
+using ImageClassifier.Interfaces.GenericUI.Utilities;
 using System;
 using System.Windows;
 using System.Windows.Controls;

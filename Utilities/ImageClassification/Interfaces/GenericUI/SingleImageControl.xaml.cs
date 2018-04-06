@@ -22,8 +22,9 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ImageClassifier.Interfaces.GlobalUtils;
-using ImageClassifier.UIUtils;
+using ImageClassifier.Interfaces.GenericUI.Utilities;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
+using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier.Interfaces.GenericUI
 {

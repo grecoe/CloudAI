@@ -25,6 +25,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System.Windows;
+using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
