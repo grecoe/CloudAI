@@ -87,17 +87,17 @@ namespace ImageClassifier.Interfaces.GenericUI
             if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
 
-                this.Configuration.StorageAccount = this.ConfigurationTextStorageAccount.Text;
-                this.Configuration.StorageAccountKey = this.ConfigurationTextStorageAccountKey.Text;
-                this.Configuration.StorageContainer = this.ConfigurationTextStorageContainer.Text;
-                this.Configuration.BlobPrefix = this.ConfigurationTextBlobPrefix.Text;
-                this.Configuration.FileType = this.ConfigurationTextFileExtension.Text;
-                this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
+                this.Configuration.StorageAccount = this.ConfigurationTextStorageAccount.Text.Trim();
+                this.Configuration.StorageAccountKey = this.ConfigurationTextStorageAccountKey.Text.Trim();
+                this.Configuration.StorageContainer = this.ConfigurationTextStorageContainer.Text.Trim();
+                this.Configuration.BlobPrefix = this.ConfigurationTextBlobPrefix.Text.Trim();
+                this.Configuration.FileType = this.ConfigurationTextFileExtension.Text.Trim();
+                this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text.Trim();
                 this.Configuration.MultiClass = !this.Negative.IsChecked.Value;
 
                 try
                 {
-                    this.Configuration.FileCount = int.Parse(this.ConfigurationTextFileCount.Text);
+                    this.Configuration.FileCount = int.Parse(this.ConfigurationTextFileCount.Text.Trim());
                 }
                 catch
                 {

@@ -275,7 +275,6 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
-            //TODO DELETE this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
 
             // Update multiclass
@@ -283,8 +282,6 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
             // Update containers
             this.ContainerControl.Refresh();
-
-            //TODO DELETE this.UpdateInformationRequested(null);
 
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);

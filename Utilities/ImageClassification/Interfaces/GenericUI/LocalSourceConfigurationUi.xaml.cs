@@ -89,13 +89,23 @@ namespace ImageClassifier.Interfaces.GenericUI
         {
             if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-                this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text;
-
+                this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Trim().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text.Trim();
                 this.Configuration.MultiClass = !this.Negative.IsChecked.Value;
 
-                this.OnConfigurationSaved?.Invoke(this.Provider);
-                this.OnSourceDataUpdated?.Invoke(this.Provider);
+                if (!System.IO.Directory.Exists(this.Configuration.RecordLocation))
+                {
+                    String message = String.Format("{0}{1}{2}",
+                        "The supplied directory does not exist:",
+                        Environment.NewLine,
+                        this.Configuration.RecordLocation);
+                    MessageBox.Show("Supplied", "Directory Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    this.OnConfigurationSaved?.Invoke(this.Provider);
+                    this.OnSourceDataUpdated?.Invoke(this.Provider);
+                }
             }
             else
             {

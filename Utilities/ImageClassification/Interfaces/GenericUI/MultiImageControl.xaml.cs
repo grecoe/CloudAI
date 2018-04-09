@@ -184,8 +184,6 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
 
             // Get the size of the parent, default it to 300
-            double parentHeight = 300;
-            double parentWidth = 300;
             int columnConfiguration = (this.CurrentSourceBatch.Count > 9) ? MultiImageControl.MAX_COLUMNS_MORE_THAN_NINE : MultiImageControl.MAX_COLUMNS_TO_NINE;
             int maxRows = this.CurrentSourceBatch.Count / columnConfiguration;
             int maxCols = columnConfiguration;
@@ -200,6 +198,9 @@ namespace ImageClassifier.Interfaces.GenericUI
                 maxRows = 1;
             }
 
+            // Set up some defaults in case the UI isn't up yet
+            double parentHeight = 400 / maxRows;
+            double parentWidth = 600 / maxCols;
             FrameworkElement fe = this.Parent as FrameworkElement;
             if (fe != null)
             {

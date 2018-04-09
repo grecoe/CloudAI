@@ -196,8 +196,8 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.Clear();
 
             // Get the size of the parent
-            double height = 100;
-            double width = 100;
+            double height = 450;
+            double width = 600;
 
             FrameworkElement fe = this.Parent as FrameworkElement;
             if(fe != null)
