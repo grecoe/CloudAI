@@ -84,6 +84,8 @@ namespace RecordProviderExample
 
             if (String.Compare(configuration.ExecutionType, "storage", true) == 0)
             {
+                onStatus?.Invoke($"Loading {configuration.RecordCount} records from storage.");
+
                 AzureStorageUtility storageUtility = new AzureStorageUtility(configuration.Storage);
                 List<String> blobList = storageUtility.ListBlobs(
                         configuration.RecordCount,
@@ -102,6 +104,8 @@ namespace RecordProviderExample
             }
             else
             {
+                onStatus?.Invoke($"Creating {configuration.RecordCount} records from local system.");
+
                 // Loading from file - 
                 String fileToLoad = configuration.Local.LocalFile;
                 if (System.IO.File.Exists(fileToLoad))

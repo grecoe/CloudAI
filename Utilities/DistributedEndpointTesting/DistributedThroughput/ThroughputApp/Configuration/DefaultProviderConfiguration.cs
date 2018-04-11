@@ -45,6 +45,12 @@ namespace ThroughputApp.Configuration
                     //    !String.IsNullOrEmpty(this.Key);
                     returnValue = !String.IsNullOrEmpty(this.Url);
                 }
+                else
+                {
+                    Console.WriteLine(
+                        String.Format("Input file for default provider '{0}' is invalid. Default provider is not available.",
+                        this.File));
+                }
             }
 
             return returnValue;

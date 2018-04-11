@@ -51,45 +51,55 @@ namespace ThroughputApp
         /// </summary>
         static IRecordProvider SelectedProvider { get; set;  }
 
-        //static IJobExecutionEngine<ThroughputConfiguration> Engine { get; set; }
-        //static IJobManager<ThroughputConfiguration> Manager { get; set; }
         static JobExecutionEngine Engine { get; set; }
+
         static JobManager Manager { get; set; }
 
         static void Main(string[] args)
         {
-            // Event triggered when everythign has completed
-            Program.ResetEvent = new ManualResetEvent(false);
-
-            // Load the context for the run
-            Program.Context = ThroughputConfiguration.LoadConfiguration();
-
-            // Load the record and default record providers, then select one
-            Program.RecordProviders = ProviderLocationUtility.LoadRecordProviders(Program.Context);
-            Program.SelectedProvider = ProviderLocationUtility.SelectProvider(Program.RecordProviders);
-
-            if (Program.SelectedProvider != null)
+            try
             {
-                // Determine the number of records being sent
-                if(Program.SelectedProvider.GetType().IsAssignableFrom(typeof(DefaultRecordProvider)))
-                {
-                    Program.Context.SelectedRecordCount = Program.Context.DefaultProvider.RecordCount;
-                }
-                else
-                {
-                    Program.Context.SelectedRecordCount = Program.Context.RecordConfiguration.RecordCount;
-                }
+                // Event triggered when everythign has completed
+                Program.ResetEvent = new ManualResetEvent(false);
 
-                // Display a summary of what is about to happen
-                Program.ShowSummary();
+                // Load the context for the run
+                Program.Context = ThroughputConfiguration.LoadConfiguration();
 
-                // Run the jobs then wait until complete.
-                Console.WriteLine("Starting Jobs");
-                Program.StartJobs();
-                while (!WaitHandle.WaitAll(new WaitHandle[] { Program.ResetEvent }, 1000)) ;
-                Console.WriteLine("Test Complete");
-                Console.ReadLine();
+                // Load the record and default record providers, then select one
+                Program.RecordProviders = ProviderLocationUtility.LoadRecordProviders(Program.Context);
+                Program.SelectedProvider = ProviderLocationUtility.SelectProvider(Program.RecordProviders);
+
+                if (Program.SelectedProvider != null)
+                {
+                    // Determine the number of records being sent
+                    if (Program.SelectedProvider.GetType().IsAssignableFrom(typeof(DefaultRecordProvider)))
+                    {
+                        Program.Context.SelectedRecordCount = Program.Context.DefaultProvider.RecordCount;
+                    }
+                    else
+                    {
+                        Program.Context.SelectedRecordCount = Program.Context.RecordConfiguration.RecordCount;
+                    }
+
+                    // Display a summary of what is about to happen
+                    Program.ShowSummary();
+
+                    // Run the jobs then wait until complete.
+                    Console.WriteLine("Starting Jobs");
+                    Program.StartJobs();
+                    while (!WaitHandle.WaitAll(new WaitHandle[] { Program.ResetEvent }, 1000)) ;
+                    Console.WriteLine("Test Complete");
+                }
             }
+            catch(Exception ex)
+            {
+                String msg = String.Format("Exception Caught During Execution{0}{1}",
+                    Environment.NewLine,
+                    ex.Message);
+                Console.WriteLine(msg);
+            }
+
+            Console.ReadLine();
         }
 
         /// <summary>

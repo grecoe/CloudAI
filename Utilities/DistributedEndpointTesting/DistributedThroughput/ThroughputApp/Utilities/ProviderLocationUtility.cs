@@ -44,6 +44,11 @@ namespace ThroughputApp.Utilities
             List<IRecordProvider> returnSelections = new List<IRecordProvider>();
             if (!String.IsNullOrEmpty(providerLocation))
             {
+                if(!System.IO.Directory.Exists(providerLocation))
+                {
+                    throw new Exception(String.Format("Provider location in configuration '{0}' is not a valid directory", providerLocation));
+                }
+
                 // Load all assemblies in the location looking for the interface IRecordProvider
                 System.IO.DirectoryInfo directory = new System.IO.DirectoryInfo(providerLocation);
                 System.IO.FileInfo[] files = directory.GetFiles("*.dll", System.IO.SearchOption.TopDirectoryOnly);

@@ -13,7 +13,7 @@
   "recordProviderDiskLocation": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\RecordProviderExample\\bin\\Debug",
   "recordProvider": {
     "executionType": "storage",
-    "recordCount": 1000,
+    "recordCount": 100,
     "storage": {
       "storageAccount": "jabilpredictiveblobdev",
       "storageKey": "xm2oQ4EQ8uBL2duX9bzqus9wrXnUWVlSNKDZvGZ91iXVkYuoXihv4XDBOHDWaawTyTjiJjZXINbs7bDOrgjquw==",
