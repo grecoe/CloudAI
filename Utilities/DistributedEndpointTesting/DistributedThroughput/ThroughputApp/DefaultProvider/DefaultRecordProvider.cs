@@ -13,11 +13,15 @@ namespace ThroughputApp.DefaultProvider
     /// </summary>
     public class DefaultRecordProvider : IRecordProvider
     {
+        #region Private Members
+        private string FileInput { get; set; }
+        #endregion
+
+        #region IRecordProvider
         public string EndpointUrl { get; private set; }
 
         public string EndpointKey { get; private set; }
 
-        private string FileInput { get; set; }
 
         public IDictionary<int, object> LoadRecords(RecordProviderConfiguration configuration, OnStatusUpdate onStatus = null)
         {
@@ -32,6 +36,7 @@ namespace ThroughputApp.DefaultProvider
 
             return returnValue;
         }
+        #endregion
 
         public DefaultRecordProvider(ThroughputConfiguration context)
         {
