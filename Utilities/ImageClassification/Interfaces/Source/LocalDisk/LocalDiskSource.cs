@@ -47,7 +47,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         public LocalDiskSource()
         : base("LocalMachineConfiguration.json")
         {
-            this.Name = "LocalMachineService";
+            this.Name = "LocalMachine";
             this.SourceType = DataSourceType.Disk;
             this.DeleteSourceFilesWhenComplete = false;
 
@@ -220,22 +220,16 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
 
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
-            this.UpdateInformationRequested(this);
             this.CurrentImage = -1;
 
             // Update multiclass
             this.MultiClass = this.Configuration.MultiClass;
 
-            // Update containers
-            this.ContainerControl.Refresh();
-
-            // Initialize the list of items
-            this.InitializeOnNewContainer();
-
             // Notify anyone who wants to be notified
             this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
             
             // Since there is no new acquisition of data, go and do this too
+            // This will trigger the UpdateInformationRequested()
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
         }
 
@@ -248,14 +242,15 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             // Update class variables
             this.DirectoryListings = new List<string>();
 
-
             // Collect all directories in the configuration
             this.DirectoryListings.AddRange(FileUtils.GetDirectoryHierarchy(this.Configuration.RecordLocation, true, 0));
             this.CurrentContainer = this.DirectoryListings.FirstOrDefault();
-
-
+            
             // Initialize the list of items
             this.InitializeOnNewContainer();
+
+            // Update containers
+            this.ContainerControl?.Refresh();
 
             // Notify listeners it just happened.
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);

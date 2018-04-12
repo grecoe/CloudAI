@@ -50,7 +50,6 @@ namespace ImageClassifier
         private bool IsInitialized { get; set; }
         #endregion
 
-
         public MainWindow()
         {
             InitializeComponent();

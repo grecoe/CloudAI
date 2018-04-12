@@ -52,7 +52,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         public AzureBlobSource()
             :base("AzureStorageConfiguration.json")
         {
-            this.Name = "AzureStorageSource";
+            this.Name = "AzureStorage";
             this.SourceType = DataSourceType.Blob;
             this.DeleteSourceFilesWhenComplete = true;
 

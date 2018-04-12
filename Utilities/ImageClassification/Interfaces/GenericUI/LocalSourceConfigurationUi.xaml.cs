@@ -38,11 +38,24 @@ namespace ImageClassifier.Interfaces.GenericUI
         public event OnUpdateSourceData OnSourceDataUpdated;
         #endregion 
 
+        /// <summary>
+        /// Default file extensions to use if not specified
+        /// </summary>
         private const string DefaultExtensions = ".jpg,.tif,.tiff,.png,.gif";
+
+        /// <summary>
+        /// Toggle buttons for the multi/single class selections
+        /// </summary>
         private List<ToggleButton> MultiClassSelections { get; set; }
 
+        /// <summary>
+        /// Data source provider being used
+        /// </summary>
         public IDataSource Provider { get; private set; }
 
+        /// <summary>
+        /// Configuration object for locak disk source settings
+        /// </summary>
         public LocalDiskSourceConfiguration Configuration { get; private set; }
 
         /// <summary>

@@ -54,7 +54,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         public LabeledAzureBlobSource()
             : base("LabeledAzureStorageConfiguration.json")
         {
-            this.Name = "LabelledAzureStorageSource";
+            this.Name = "AzureStorageCategory";
             this.SourceType = DataSourceType.LabelledBlob;
             this.DeleteSourceFilesWhenComplete = true;
             this.CurrentImage = -1;

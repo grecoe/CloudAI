@@ -101,12 +101,14 @@ namespace ImageClassifier.Interfaces.GenericUI
             double height = this.ParentHeight * .75;
             double width = this.ParentWidth * .75;
 
+            double usable = Math.Min(height, width);
+
             try
             {
                 this.ImagePanel.Dispatcher.Invoke(() =>
                 {
                     System.IO.MemoryStream downloadFile = FileUtils.GetFileStream(this.Item.CurrentSource.DiskLocation);
-                    this.ItemImage = ElementCreation.CreateUiImage(this.Item, height, width, downloadFile);
+                    this.ItemImage = ElementCreation.CreateUiImage(this.Item, usable, usable, downloadFile);
                     this.ImagePanel.Children.Add(this.ItemImage);
                 });
 
