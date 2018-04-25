@@ -172,16 +172,8 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         #endregion
 
         #region IDataSource abstract overrides
-        public override void ClearSourceFiles()
-        {
-            if (this.DeleteSourceFilesWhenComplete)
-            {
-                // We are not cleaning up anything at the moment
-            }
-        }
         public override IEnumerable<string> Containers { get { return this.DirectoryListings; } }
-        public override int CurrentContainerIndex { get { return this.CurrentImage; } }
-        public override int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
+
         public override IEnumerable<string> CurrentContainerCollectionNames
         {
             get
@@ -195,46 +187,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             }
 
         }
-        public override bool CanMoveNext
-        {
-            get
-            {
-                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
-            }
-        }
-        public override bool CanMovePrevious
-        {
-            get
-            {
-                return !(this.CurrentImage <= 0);
-            }
-        }
-        public override bool JumpToSourceFile(int index)
-        {
-            bool returnValue = true;
-            String error = String.Empty;
-
-            if (this.CurrentImageList == null || this.CurrentImageList.Count == 0)
-            {
-                error = "A colleciton must be present to use the Jump To function.";
-            }
-            else if ((index-1) > this.CurrentImageList.Count || index < 1)
-            {
-                error = String.Format("Jump to index must be within the collection size :: 1-{0}", this.CurrentImageList.Count);
-            }
-            else
-            {
-                this.CurrentImage = index - 2; // Have to move past the one before because next increments by 1
-            }
-
-            if (!String.IsNullOrEmpty(error))
-            {
-                System.Windows.MessageBox.Show(error, "Jump To Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                returnValue = false;
-            }
-
-            return returnValue;
-        }
+        
         public override void SetContainer(string container)
         {
             if (this.DirectoryListings.Contains(container) &&
@@ -244,6 +197,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
                 this.InitializeOnNewContainer();
             }
         }
+
         public override void UpdateSourceFile(SourceFile file)
         {
             //throw new NotImplementedException();

@@ -21,6 +21,7 @@
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace ImageClassifier.Interfaces
 {
@@ -68,22 +69,68 @@ namespace ImageClassifier.Interfaces
 
         public string CurrentContainer { get; protected set; }
 
+        public bool CanMoveNext
+        {
+            get
+            {
+                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
+            }
+        }
+
+        public bool CanMovePrevious
+        {
+            get
+            {
+                return !(this.CurrentImage < 0);
+            }
+        }
+
+        public int CurrentContainerIndex { get { return this.CurrentImage; } }
+
+        public int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count; } }
+
+        public bool JumpToSourceFile(int index)
+        {
+            bool returnValue = true;
+            String error = String.Empty;
+
+            if (this.CurrentImageList == null || this.CurrentImageList.Count == 0)
+            {
+                error = "A colleciton must be present to use the Jump To function.";
+            }
+            else if ((index - 1) > this.CurrentImageList.Count || index < 1)
+            {
+                error = String.Format("Jump to index must be within the collection size :: 1-{0}", this.CurrentImageList.Count);
+            }
+            else
+            {
+                this.CurrentImage = index - 2; // Have to move past the one before because next increments by 1
+            }
+
+            if (!String.IsNullOrEmpty(error))
+            {
+                System.Windows.MessageBox.Show(error, "Jump To Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                returnValue = false;
+            }
+
+            return returnValue;
+        }
+
+        #region Virtual
+        public virtual void ClearSourceFiles()
+        {
+            if (this.DeleteSourceFilesWhenComplete)
+            {
+                // We are not cleaning up anything here, base implementation
+                // Anything needing cleaning must override this call
+            }
+        }
+        #endregion
+
         #region Abstracts
         public abstract IEnumerable<string> Containers { get; }
 
-        public abstract int CurrentContainerIndex { get; }
-
-        public abstract int CurrentContainerCollectionCount { get; }
-
         public abstract IEnumerable<string> CurrentContainerCollectionNames { get; }
-
-        public abstract bool CanMovePrevious { get; }
-
-        public abstract bool CanMoveNext { get; }
-
-        public abstract void ClearSourceFiles();
-
-        public abstract bool JumpToSourceFile(int idx);
 
         public abstract void SetContainer(string container);
 

@@ -34,7 +34,7 @@ namespace ImageClassifier
         /// <param name="fullInitialization">If fully initializing updates more than just the annotation tab.</param>
         private void InitializeUi(bool fullInitialization)
         {
-            if (this.IsInitialized)
+            if (this.ConstructorCompleted)
             {
                 PopulateAnnotationsTabAnnotationsPanel();
 
@@ -53,6 +53,7 @@ namespace ImageClassifier
                     }
                 }
 
+                // If IMultiImageDataSource then force it to update the status bar.
                 if (this.SelectedDataSource is IMultiImageDataSource)
                 {
                     this.IMultiImageControlGroupChanged(null);

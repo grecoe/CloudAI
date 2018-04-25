@@ -26,7 +26,7 @@
     }
   },
   "defaultProvider": {
-    "endpointUrl": "http://40.71.172.160/score",
+    "endpointUrl": "http://40.71.249.238/score",
     "endpointKey": null,
     "fileInput": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\matpayload.json",
     "recordCount": 1000

@@ -49,6 +49,7 @@ namespace ImageClassifier
                 // Clear the status bar
                 this.StatusBarClearStatus();
 
+                // Multi image control reset the grid...
                 if (this.SelectedDataSource is IMultiImageDataSource)
                 {
                     (this.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();

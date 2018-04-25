@@ -47,14 +47,14 @@ namespace ImageClassifier
         /// </summary>
         private List<IDataSource> DataSources { get; set; }
 
-        private bool IsInitialized { get; set; }
+        private bool ConstructorCompleted { get; set; }
         #endregion
 
         public MainWindow()
         {
             InitializeComponent();
 
-            this.IsInitialized = false;
+            this.ConstructorCompleted = false;
 
             // Class Objects
             this.ConfigurationContext = ClassificationContext.LoadConfiguration();
@@ -91,7 +91,7 @@ namespace ImageClassifier
             // Hook the closing event so we can ensure we capture all changes
             this.Closing += WindowClosing;
 
-            this.IsInitialized = true;
+            this.ConstructorCompleted = true;
             // Initialize with the settings we have.
             InitializeUi(true);
         }

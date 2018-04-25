@@ -133,7 +133,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         }
         #endregion
 
-        #region IDataSource abstract overrides
+        #region IDataSource Virtual Overrides
         public override void ClearSourceFiles()
         {
             if (this.DeleteSourceFilesWhenComplete && !String.IsNullOrEmpty(this.Configuration.RecordLocation))
@@ -142,7 +142,11 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 FileUtils.DeleteFiles(downloadDirectory, new string[] { this.Configuration.FileType });
             }
         }
+        #endregion
+
+        #region IDataSource abstract overrides
         public override IEnumerable<string> Containers { get { return this.CatalogFiles; } }
+
         public override void SetContainer(string container)
         {
             if (this.CatalogFiles.Contains(container) &&
@@ -152,22 +156,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 this.InitializeOnNewContainer();
             }
         }
-        public override bool CanMoveNext
-        {
-            get
-            {
-                return !(this.CurrentImage >= this.CurrentImageList.Count - 1);
-            }
-        }
-        public override bool CanMovePrevious
-        {
-            get
-            {
-                return !(this.CurrentImage < 0);
-            }
-        }
-        public override int CurrentContainerIndex { get { return this.CurrentImage; } }
-        public override int CurrentContainerCollectionCount { get { return this.CurrentImageList.Count(); } }
+
         public override IEnumerable<string> CurrentContainerCollectionNames
         {
             get
@@ -181,32 +170,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             }
 
         }
-        public override bool JumpToSourceFile(int index)
-        {
-            bool returnValue = true;
-            String error = String.Empty;
 
-            if (this.CurrentImageList == null || this.CurrentImageList.Count == 0)
-            {
-                error = "A colleciton must be present to use the Jump To function.";
-            }
-            else if (index > this.CurrentImageList.Count || index < 1)
-            {
-                error = String.Format("Jump to index must be within the collection size :: 1-{0}", this.CurrentImageList.Count);
-            }
-            else
-            {
-                this.CurrentImage = index - 2; // Have to move past the one before because next increments by 1
-            }
-
-            if (!String.IsNullOrEmpty(error))
-            {
-                System.Windows.MessageBox.Show(error, "Jump To Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                returnValue = false;
-            }
-
-            return returnValue;
-        }
         public override void UpdateSourceFile(SourceFile file)
         {
             ScoringImage image = this.CurrentImageList.FirstOrDefault(x => String.Compare(System.IO.Path.GetFileName(x.Url), file.Name, true) == 0);
