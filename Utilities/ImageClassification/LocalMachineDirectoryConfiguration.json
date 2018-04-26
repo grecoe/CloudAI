@@ -1,7 +1,7 @@
 {
   "batchSize": 3,
   "localConfiguration": {
-    "multiClass": true,
+    "multiClass": false,
     "fileTypes": [
       "*.jpg",
       "*.png"

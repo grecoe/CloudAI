@@ -140,8 +140,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             // If there is only 1 classificaiton and it's the one of the current folder, then ignore it
             // otherwise we'll be updating them all the time.
             // If it's 0 make sure we aren't updating it to nothing.
-            if(classifications.Count == 0 ||
-                (classifications.Count == 1 && String.Compare(classifications[0], this.MultiImageDataSource.CurrentContainerAsClassification) == 0))
+            if(classifications.Count == 0 )
             {
                 return;
             }

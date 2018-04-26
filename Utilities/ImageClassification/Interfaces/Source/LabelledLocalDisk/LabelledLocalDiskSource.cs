@@ -152,7 +152,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
 
                 foreach (SourceFile file in fileBatch)
                 {
-                    string image = this.CurrentImageList.FirstOrDefault(x => String.Compare(x, file.Name, true) == 0);
+                    string image = this.CurrentImageList.FirstOrDefault(x => String.Compare(x, file.DiskLocation, true) == 0);
                     if (image != null && this.Sink != null)
                     {
                         ScoredItem item = new ScoredItem()

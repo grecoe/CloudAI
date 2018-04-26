@@ -19,8 +19,11 @@
 //
 
 using System;
+using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using ImageClassifier.Interfaces.GenericUI;
+using ImageClassifier.Interfaces.GlobalUtils.Processing;
 using ImageClassifier.Interfaces.Source.LabelledLocalDisk.Configuration;
 
 namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
@@ -74,7 +77,64 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
                 }
                 itemidx++;
             }
+
+            // Hook buttons
+            this.PreviewChangesButton.Click += (o, e) => PreviewChanges();
+            this.ProcessChangesButton.Click += (o, e) => ProcessChanges();
+            this.ModifyChangeButtons();
         }
+
+        #region Preview Helpers
+        private void ModifyChangeButtons()
+        {
+            bool enableChanges = !this.Configuration.LocalConfiguration.MultiClass;
+            this.PreviewChangesButton.IsEnabled = enableChanges;
+            this.ProcessChangesButton.IsEnabled = enableChanges;
+        }
+
+        private void PreviewChanges()
+        {
+            if (this.Provider.Sink != null)
+            {
+                SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
+                String status = postProcess.CollectSummary();
+
+                MessageBox.Show(status, "Process Changes Queued", MessageBoxButton.OK);
+            }
+
+        }
+        private void ProcessChanges()
+        {
+            StringBuilder message = new StringBuilder();
+            message.AppendFormat("This action will move images to new locations on your disk. Use the Process Changes button to view the actions that will be taken {0}{0}", Environment.NewLine);
+            message.AppendFormat("If all moves are succesfully completed, the history of your changes will be cleared. {0}{0}", Environment.NewLine);
+            message.AppendFormat("Would you like to continue with this processing step?");
+
+            if(MessageBox.Show(message.ToString(),"Process Changes", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                // Process the changes
+                SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
+                if (postProcess.Process())
+                {
+                    MessageBox.Show("Processing complete, provider will be reset", "Processing Complete", MessageBoxButton.OK);
+
+                    // FOrce updates to clear sink and reset UI
+                    this.ChildConfigurationSaved(this.Provider);
+                    this.ChildSourceUpdated(this.Provider);
+                }
+                else
+                {
+                    StringBuilder errorstatus = new StringBuilder();
+                    foreach (String err in postProcess.Status)
+                    {
+                        errorstatus.AppendFormat(String.Format("{0}{1}", err, Environment.NewLine));
+                    }
+                    MessageBox.Show(errorstatus.ToString(), "Processing Errors Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+        }
+        #endregion
 
         #region Private Helpers - child control hooks
         /// <summary>
@@ -92,6 +152,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
         /// </summary>
         private void ChildConfigurationSaved(IDataSource source)
         {
+            this.ModifyChangeButtons();
             this.Configuration.BatchSize = int.Parse((this.BatchSize.SelectedItem as ComboBoxItem).Content.ToString());
             this.OnConfigurationSaved?.Invoke(source);
         }

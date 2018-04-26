@@ -128,6 +128,24 @@ namespace ImageClassifier.Interfaces.Sink.Catalog
             return returnItem;
         }
 
+        public IEnumerable<String> Containers
+        {
+            get
+            {
+                return new List<String>(this.CollectionMap.Keys);
+            }
+        }
+
+        public IEnumerable<ScoredItem> GetContainerItems(string container)
+        {
+            List<ScoredItem> returnItems = new List<ScoredItem>();
+            if(this.Collections.ContainsKey(container))
+            {
+                returnItems.AddRange(this.Collections[container].Items);
+            }
+            return returnItems;
+        }
+
         public bool ItemHasBeenScored(string container, string name)
         {
             bool returnValue = false;

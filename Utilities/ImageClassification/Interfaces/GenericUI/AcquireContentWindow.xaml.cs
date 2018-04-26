@@ -31,7 +31,13 @@ namespace ImageClassifier.Interfaces.GenericUI
         public String DisplayContent
         {
             get { return this.txtContent.Text; }
-            set { this.txtContent.Text = value; }
+            set
+            {
+               this.txtContent.Dispatcher.Invoke(() =>
+               {
+                   this.txtContent.Text = value;
+               });
+            }
         }
 
         public AcquireContentWindow()

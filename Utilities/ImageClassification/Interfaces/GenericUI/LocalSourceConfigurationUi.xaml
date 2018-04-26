@@ -46,7 +46,7 @@
             </TextBlock>
 
             <TextBox 
-                ToolTip="Select the number of images to show in a group."
+                ToolTip="Enter a comma separated list of file extensions to use."
                 x:Name="ConfigurationTextFileExtension"
                 Grid.Row="1"
                 Grid.Column="1"

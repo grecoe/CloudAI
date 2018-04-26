@@ -24,6 +24,7 @@ using System.Windows;
 using ImageClassifier.Configuration;
 using ImageClassifier.Interfaces;
 using ImageClassifier.Interfaces.GenericUI.Utilities;
+using ImageClassifier.Interfaces.GlobalUtils.Processing;
 using ImageClassifier.MainWindowUtilities;
 
 namespace ImageClassifier
@@ -59,6 +60,12 @@ namespace ImageClassifier
             // Class Objects
             this.ConfigurationContext = ClassificationContext.LoadConfiguration();
 
+            // Make configuration page come up first if the first time
+            //if (String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
+            {
+                this.Dispatcher.BeginInvoke((Action)(() => MasterTabControl.SelectedIndex = 1));
+            }
+
             // Hook events for the status bar
             this.StatusButtonJumpTo.Click += (o, e) => StatusBarJumpToImage();
 
@@ -92,6 +99,7 @@ namespace ImageClassifier
             this.Closing += WindowClosing;
 
             this.ConstructorCompleted = true;
+
             // Initialize with the settings we have.
             InitializeUi(true);
         }
@@ -128,7 +136,7 @@ namespace ImageClassifier
             labelledLocalSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             labelledLocalSource.ConfigurationControl.Parent = this;
 
-            this.DataSources = new List<IDataSource>() { blobSource, localSource, labelledBlobSource, labelledLocalSource };
+            this.DataSources = new List<IDataSource>() { labelledLocalSource, localSource, blobSource, labelledBlobSource };
 
             // Set the UI up but don't select one, happens later after we hook the selection changed.
             foreach (IDataSource source in this.DataSources)

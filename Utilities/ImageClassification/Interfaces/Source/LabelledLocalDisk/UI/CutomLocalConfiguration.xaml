@@ -15,23 +15,24 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <TextBlock 
-            Grid.Row="0" 
-            Grid.Column="0"
-            Margin="5,5,5,5"
-            FontSize="13">
+                Grid.Row="0" 
+                Grid.Column="0"
+                Margin="5,5,5,5"
+                FontSize="13">
             Batch Size
             </TextBlock>
             <ComboBox
                 ToolTip="Select the number of images to show in a group."
-            Grid.Row="0"
-            Grid.Column="1"
-            x:Name="BatchSize"
-            Margin="5,5,5,5"
-            IsEditable="False">
+                Grid.Row="0"
+                Grid.Column="1"
+                x:Name="BatchSize"
+                Margin="5,5,5,5"
+                IsEditable="False">
                 <ComboBoxItem Content="1"></ComboBoxItem>
                 <ComboBoxItem Content="2"></ComboBoxItem>
                 <ComboBoxItem Content="3"></ComboBoxItem>
@@ -42,8 +43,27 @@
             </ComboBox>
 
             <StackPanel x:Name="LocalSourceUiPanel"
-                    Grid.Row =" 1" Grid.Column="0" Grid.ColumnSpan="2" >
+                Grid.Row =" 1" Grid.Column="0" Grid.ColumnSpan="2" >
                 <controls:LocalSourceConfigurationUi />
             </StackPanel>
+            <StackPanel 
+                Margin="20,15,20,15"
+                HorizontalAlignment="Center"
+                Grid.Row =" 2" Grid.Column="1" Orientation="Horizontal" >
+                <Button 
+                    x:Name="PreviewChangesButton"
+                    Margin="0,0,15,0"
+                    FontSize="13"
+                    ToolTip="When using Single Classification, this will preview the changes that have been applied to the image groups.">
+                    Preview Processing
+                </Button>
+                <Button 
+                    x:Name="ProcessChangesButton"
+                    Margin="0,0,15,0"
+                    FontSize="13"
+                    ToolTip="When using Single Classification, this will process the changes that have been applied to the image groups by moving images around on disk.">
+                Process Changes
+                </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

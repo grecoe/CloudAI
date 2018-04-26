@@ -11,7 +11,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0">
+        <TabControl x:Name="MasterTabControl" Grid.Row="0">
         <TabItem Header="Classification">
             <Grid>
                 <Grid.RowDefinitions>

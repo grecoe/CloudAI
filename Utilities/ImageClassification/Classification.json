@@ -1,8 +1,5 @@
 ﻿{
-  "defaultProvider": "LocalMachine",
+  "defaultProvider": "LocalMachineCategory",
   "classifications": [
-    "success",
-    "failure",
-    "other"
   ]
 }

@@ -32,6 +32,14 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         String Name { get; }
         /// <summary>
+        /// Get a list of containers that this sink knows about.
+        /// </summary>
+        IEnumerable<String> Containers { get; }
+        /// <summary>
+        /// Get a list of the items that have been scored for a particular container
+        /// </summary>
+        IEnumerable<ScoredItem> GetContainerItems(string container);
+        /// <summary>
         /// Find an item based on it's location
         /// </summary>
         /// <param name="container">Container the item came from</param>
