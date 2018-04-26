@@ -104,8 +104,8 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
                 String status = postProcess.CollectSummary();
                 MessageBox.Show(status, "Process Changes Queued", MessageBoxButton.OK);
             }
-
         }
+
         private void ProcessChanges()
         {
             SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
