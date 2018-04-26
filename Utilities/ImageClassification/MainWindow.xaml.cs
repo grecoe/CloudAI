@@ -61,7 +61,7 @@ namespace ImageClassifier
             this.ConfigurationContext = ClassificationContext.LoadConfiguration();
 
             // Make configuration page come up first if the first time
-            //if (String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
+            if (String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
             {
                 this.Dispatcher.BeginInvoke((Action)(() => MasterTabControl.SelectedIndex = 1));
             }

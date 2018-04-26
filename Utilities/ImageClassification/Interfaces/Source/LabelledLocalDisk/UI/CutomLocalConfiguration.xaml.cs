@@ -94,42 +94,53 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
 
         private void PreviewChanges()
         {
-            if (this.Provider.Sink != null)
+            SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
+            if (!postProcess.ItemsToProcess)
             {
-                SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
+                MessageBox.Show("There are no items to process at this time.", "Preview Changes", MessageBoxButton.OK);
+            }
+            else
+            {
                 String status = postProcess.CollectSummary();
-
                 MessageBox.Show(status, "Process Changes Queued", MessageBoxButton.OK);
             }
 
         }
         private void ProcessChanges()
         {
-            StringBuilder message = new StringBuilder();
-            message.AppendFormat("This action will move images to new locations on your disk. Use the Process Changes button to view the actions that will be taken {0}{0}", Environment.NewLine);
-            message.AppendFormat("If all moves are succesfully completed, the history of your changes will be cleared. {0}{0}", Environment.NewLine);
-            message.AppendFormat("Would you like to continue with this processing step?");
+            SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
 
-            if(MessageBox.Show(message.ToString(),"Process Changes", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (!postProcess.ItemsToProcess)
             {
-                // Process the changes
-                SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
-                if (postProcess.Process())
-                {
-                    MessageBox.Show("Processing complete, provider will be reset", "Processing Complete", MessageBoxButton.OK);
+                MessageBox.Show("There are no items to process at this time.", "Processing", MessageBoxButton.OK);
+            }
+            else
+            {
+                StringBuilder message = new StringBuilder();
+                message.AppendFormat("This action will move images to new locations on your disk. Use the Process Changes button to view the actions that will be taken {0}{0}", Environment.NewLine);
+                message.AppendFormat("If all moves are succesfully completed, the history of your changes will be cleared. {0}{0}", Environment.NewLine);
+                message.AppendFormat("Would you like to continue with this processing step?");
 
-                    // FOrce updates to clear sink and reset UI
-                    this.ChildConfigurationSaved(this.Provider);
-                    this.ChildSourceUpdated(this.Provider);
-                }
-                else
+                if (MessageBox.Show(message.ToString(), "Process Changes", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    StringBuilder errorstatus = new StringBuilder();
-                    foreach (String err in postProcess.Status)
+                    // Process the changes
+                    if (postProcess.Process())
                     {
-                        errorstatus.AppendFormat(String.Format("{0}{1}", err, Environment.NewLine));
+                        MessageBox.Show("Processing complete, provider will be reset", "Processing Complete", MessageBoxButton.OK);
+
+                        // FOrce updates to clear sink and reset UI
+                        this.ChildConfigurationSaved(this.Provider);
+                        this.ChildSourceUpdated(this.Provider);
                     }
-                    MessageBox.Show(errorstatus.ToString(), "Processing Errors Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                    else
+                    {
+                        StringBuilder errorstatus = new StringBuilder();
+                        foreach (String err in postProcess.Status)
+                        {
+                            errorstatus.AppendFormat(String.Format("{0}{1}", err, Environment.NewLine));
+                        }
+                        MessageBox.Show(errorstatus.ToString(), "Processing Errors Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
 

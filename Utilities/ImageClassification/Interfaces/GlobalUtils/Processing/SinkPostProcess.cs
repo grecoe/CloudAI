@@ -24,6 +24,26 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             this.Status = new List<string>();
         }
 
+        public bool ItemsToProcess
+        {
+            get
+            {
+                Dictionary<String, Dictionary<String, List<ProcessItem>>> processList =
+                    this.GetUpdateList(true);
+
+                int count = 0;
+                foreach (KeyValuePair<String, Dictionary<String, List<ProcessItem>>> kvp in processList)
+                {
+                    foreach (KeyValuePair<String, List<ProcessItem>> kvpInner in kvp.Value)
+                    {
+                        count += kvpInner.Value.Count;
+                    }
+                }
+
+                return count != 0;
+            }
+        }
+
         public String CollectSummary()
         {
             StringBuilder sbReturnSummary = new StringBuilder();
