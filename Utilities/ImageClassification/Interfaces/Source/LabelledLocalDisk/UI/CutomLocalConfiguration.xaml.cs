@@ -79,11 +79,14 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
             }
 
             // Hook buttons
+            /*
             this.PreviewChangesButton.Click += (o, e) => PreviewChanges();
             this.ProcessChangesButton.Click += (o, e) => ProcessChanges();
             this.ModifyChangeButtons();
+            */
         }
 
+        /*
         #region Preview Helpers
         private void ModifyChangeButtons()
         {
@@ -146,6 +149,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
 
         }
         #endregion
+        */
 
         #region Private Helpers - child control hooks
         /// <summary>
@@ -163,7 +167,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk.UI
         /// </summary>
         private void ChildConfigurationSaved(IDataSource source)
         {
-            this.ModifyChangeButtons();
+            //this.ModifyChangeButtons();
             this.Configuration.BatchSize = int.Parse((this.BatchSize.SelectedItem as ComboBoxItem).Content.ToString());
             this.OnConfigurationSaved?.Invoke(source);
         }

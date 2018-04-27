@@ -20,10 +20,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using ImageClassifier.Interfaces.GlobalUtils.Processing;
 
 namespace ImageClassifier.Interfaces.GenericUI
 {
@@ -79,8 +81,77 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.MultiClassSelections = new List<ToggleButton>() { this.Negative, this.Affirmitive };
 
             this.Seed();
+
+            // Hook buttons
+            this.PreviewChangesButton.Click += (o, e) => PreviewChanges();
+            this.ProcessChangesButton.Click += (o, e) => ProcessChanges();
+            this.ModifyChangeButtons();
         }
 
+        #region Preview Helpers
+        private void ModifyChangeButtons()
+        {
+            bool enableChanges = !this.Configuration.MultiClass;
+            this.PreviewChangesButton.IsEnabled = enableChanges;
+            this.ProcessChangesButton.IsEnabled = enableChanges;
+        }
+
+        private void PreviewChanges()
+        {
+            SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
+            if (!postProcess.ItemsToProcess)
+            {
+                MessageBox.Show("There are no items to process at this time.", "Preview Changes", MessageBoxButton.OK);
+            }
+            else
+            {
+                String status = postProcess.CollectSummary();
+                MessageBox.Show(status, "Process Changes Queued", MessageBoxButton.OK);
+            }
+        }
+
+        private void ProcessChanges()
+        {
+            SinkPostProcess postProcess = new SinkPostProcess(this.Provider.Sink);
+
+            if (!postProcess.ItemsToProcess)
+            {
+                MessageBox.Show("There are no items to process at this time.", "Processing", MessageBoxButton.OK);
+            }
+            else
+            {
+                StringBuilder message = new StringBuilder();
+                message.AppendFormat("This action will move images to new locations on your disk. Use the Process Changes button to view the actions that will be taken {0}{0}", Environment.NewLine);
+                message.AppendFormat("If all moves are succesfully completed, the history of your changes will be cleared. {0}{0}", Environment.NewLine);
+                message.AppendFormat("Would you like to continue with this processing step?");
+
+                if (MessageBox.Show(message.ToString(), "Process Changes", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    // Process the changes
+                    if (postProcess.Process())
+                    {
+                        MessageBox.Show("Processing complete, provider will be reset", "Processing Complete", MessageBoxButton.OK);
+
+                        // FOrce updates to clear sink and reset UI
+                        this.OnConfigurationSaved?.Invoke(this.Provider);
+                        this.OnSourceDataUpdated?.Invoke(this.Provider);
+                    }
+                    else
+                    {
+                        StringBuilder errorstatus = new StringBuilder();
+                        foreach (String err in postProcess.Status)
+                        {
+                            errorstatus.AppendFormat(String.Format("{0}{1}", err, Environment.NewLine));
+                        }
+                        MessageBox.Show(errorstatus.ToString(), "Processing Errors Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+
+        }
+        #endregion
+
+        #region Setup and save
         /// <summary>
         /// Seed the UI with any data
         /// </summary>
@@ -119,6 +190,8 @@ namespace ImageClassifier.Interfaces.GenericUI
                     this.OnConfigurationSaved?.Invoke(this.Provider);
                     this.OnSourceDataUpdated?.Invoke(this.Provider);
                 }
+
+                this.ModifyChangeButtons();
             }
             else
             {
@@ -142,6 +215,7 @@ namespace ImageClassifier.Interfaces.GenericUI
                 }
             }
         }
+        #endregion
 
     }
 }

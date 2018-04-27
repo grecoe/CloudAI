@@ -46,6 +46,8 @@
                 Grid.Row =" 1" Grid.Column="0" Grid.ColumnSpan="2" >
                 <controls:LocalSourceConfigurationUi />
             </StackPanel>
+        
+            <!--
             <StackPanel 
                 Margin="20,15,20,15"
                 HorizontalAlignment="Center"
@@ -65,5 +67,6 @@
                 Process Changes
                 </Button>
         </StackPanel>
+        -->
     </Grid>
 </UserControl>
