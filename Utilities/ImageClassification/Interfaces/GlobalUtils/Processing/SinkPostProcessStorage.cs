@@ -1,17 +1,45 @@
 ﻿using ImageClassifier.Interfaces.GenericUI;
-using ImageClassifier.Interfaces.GlobalUtils.Persistence;
+using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
+using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.Processing
 {
-
-    class SinkPostProcess : PostProcessBase
+    class UrlDisassebled
     {
-        public SinkPostProcess(IDataSink sink)
-            :base(sink)
+        public String BaseUrl { get; set; }
+        public List<string> Directories { get; set; }
+        public String FileName {get ;set;}
+
+        public UrlDisassebled()
         {
+            this.Directories = new List<string>();
+        }
+
+        public String BlobPath
+        {
+            get
+            {
+                List<string> parts = new List<string>(this.Directories);
+                parts.Add(this.FileName);
+
+                return String.Join("/", parts);
+            }
+        }
+    }
+
+    class SinkPostProcessStorage : PostProcessBase
+    {
+        private AzureBlobStorageConfiguration Configuration { get; set; }
+
+        public SinkPostProcessStorage(IDataSink sink, AzureBlobStorageConfiguration config)
+            : base(sink)
+        {
+            this.Configuration = config;
         }
 
         public bool ItemsToProcess
@@ -34,6 +62,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             }
         }
 
+
         public String CollectSummary()
         {
             StringBuilder sbReturnSummary = new StringBuilder();
@@ -41,11 +70,11 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             Dictionary<String, Dictionary<String, List<ProcessItem>>> processList =
                 this.GetUpdateList(true);
 
-            foreach(KeyValuePair<String, Dictionary<String,List<ProcessItem>>> kvp in processList)
+            foreach (KeyValuePair<String, Dictionary<String, List<ProcessItem>>> kvp in processList)
             {
                 sbReturnSummary.AppendFormat("Original Classification: {0}{1}", kvp.Key, Environment.NewLine);
 
-                foreach(KeyValuePair<String, List<ProcessItem>> kvpInner in kvp.Value)
+                foreach (KeyValuePair<String, List<ProcessItem>> kvpInner in kvp.Value)
                 {
                     sbReturnSummary.AppendFormat("\tNew Classification: {0}{1}", kvpInner.Key, Environment.NewLine);
                     sbReturnSummary.AppendFormat("\t\tItem Count: {0}{1}", kvpInner.Value.Count, Environment.NewLine);
@@ -72,26 +101,36 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             AcquireContentWindow contentWindow = new AcquireContentWindow();
             contentWindow.DisplayContent = "Processing records.....";
 
+            StorageUtility azureStorageUtility = new StorageUtility(this.Configuration);
+
             foreach (KeyValuePair<String, Dictionary<String, List<ProcessItem>>> kvp in processList)
             {
                 this.RecordStatus(String.Format("Processing Classification : {0}", kvp.Key));
 
                 foreach (KeyValuePair<String, List<ProcessItem>> kvpInner in kvp.Value)
                 {
-                    this.RecordStatus(String.Format("Moving Items: {0} -> {1}",kvp.Key, kvpInner.Key));
+                    this.RecordStatus(String.Format("Moving Items: {0} -> {1}", kvp.Key, kvpInner.Key));
 
-                    foreach(ProcessItem item in kvpInner.Value)
+                    foreach (ProcessItem item in kvpInner.Value)
                     {
                         // Set flag if ANYTHING fails
                         this.RecordStatus(String.Format("\t{0}", item.Name));
                         this.RecordStatus(String.Format("\t{0} ->", item.OriginalLocation));
                         this.RecordStatus(String.Format("\t\t{0}", item.NewLocation));
 
+
+                        UrlDisassebled sourceBlob = this.DisassebleUrl(item.OriginalLocation);
+                        UrlDisassebled destinationBlob = this.DisassebleUrl(item.NewLocation);
+
+                        azureStorageUtility.MoveBlob(sourceBlob.BlobPath, destinationBlob.BlobPath);
+
+                        int x = 9;
+                        /*
                         try
                         {
                             // Because we may have files with the same name already in the new location,
                             // just make sure it's ok...
-                            if(System.IO.File.Exists(item.NewLocation))
+                            if (System.IO.File.Exists(item.NewLocation))
                             {
                                 int attempt = 0;
                                 String fileFormat = this.GetFileFormatDuplicate(item.NewLocation);
@@ -103,7 +142,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
 
                             System.IO.File.Move(item.OriginalLocation, item.NewLocation);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             returnValue = false;
                             String message = String.Format("Failed to move {0} -> {1}", item.Name, ex.Message);
@@ -111,6 +150,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
                             this.Status.Add(message);
                             this.RecordStatus(message);
                         }
+                        */
                     }
                 }
             }
@@ -122,10 +162,6 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
 
         #region Private Helpers
 
-        private void RecordStatus(String message)
-        {
-            Console.WriteLine(message);
-        }
 
         /// <summary>
         /// Gets a list of all the items to move broken down
@@ -142,7 +178,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
         ///     new directories, just print out what WOULD happen. 
         /// </param>
         /// <returns></returns>
-        private Dictionary<String,Dictionary<String,List<ProcessItem>>>  GetUpdateList(bool summary)
+        private Dictionary<String, Dictionary<String, List<ProcessItem>>> GetUpdateList(bool summary)
         {
             Dictionary<String, Dictionary<String, List<ProcessItem>>> returnCollection = new Dictionary<String, Dictionary<String, List<ProcessItem>>>();
 
@@ -165,27 +201,34 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
                         String.Compare(item.Classifications[0], friendlyContainer) != 0)
                     {
                         // Is it still there? 
-                        if (System.IO.File.Exists(item.Name))
+                        // Start the list of items
+                        if (!returnCollection[friendlyContainer].ContainsKey(item.Classifications[0]))
                         {
-                            // Start the list of items
-                            if(!returnCollection[friendlyContainer].ContainsKey(item.Classifications[0]))
-                            {
-                                returnCollection[friendlyContainer][item.Classifications[0]] = new List<ProcessItem>(); 
-                            }
-
-                            // item.Name holds the current location of the file
-                            String newLocation = this.CreatePathToNewContainer(item.Name, item.Classifications[0], summary);
-
-                            // Create the new item to process and add it to the list.
-                            ProcessItem newItem = new ProcessItem()
-                            {
-                                Name = System.IO.Path.GetFileName(item.Name),
-                                OriginalLocation = item.Name,
-                                NewLocation = newLocation
-                            };
-
-                            returnCollection[friendlyContainer][item.Classifications[0]].Add(newItem);
+                            returnCollection[friendlyContainer][item.Classifications[0]] = new List<ProcessItem>();
                         }
+
+                        // Break down the URL and build the base to it.
+                        UrlDisassebled disassebled = this.DisassebleUrl(item.Name);
+                        String newUrlLocation = disassebled.BaseUrl;
+                        if(!String.IsNullOrEmpty(this.Configuration.BlobPrefix))
+                        {
+                            string prefix = this.Configuration.BlobPrefix.Trim(new char[] { '/' });
+                            newUrlLocation = String.Format("{0}/{1}", newUrlLocation, prefix);
+                        }
+
+                        // Add on the part of the path that identifies the new location
+                        newUrlLocation = String.Format("{0}/{1}/{2}", newUrlLocation, item.Classifications[0], disassebled.FileName);
+
+
+                        // Create the new item to process and add it to the list.
+                        ProcessItem newItem = new ProcessItem()
+                        {
+                            Name = System.IO.Path.GetFileName(item.Name),
+                            OriginalLocation = item.Name,
+                            NewLocation = newUrlLocation
+                        };
+
+                        returnCollection[friendlyContainer][item.Classifications[0]].Add(newItem);
                     }
                 }
             }
@@ -194,54 +237,29 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
         }
 
         /// <summary>
-        /// Given the path of an existing item, create a new disk path based on the new container name.
+        /// Breaks down the URL of the original item so we can rebuild a new path to it in storage.
         /// </summary>
-        /// <param name="exisitingPath">Existing full disk path to a file on disk</param>
-        /// <param name="newContainer">New directory to place the item into</param>
-        /// <param name="summary">If true, we are summarizing, if false it ensures that the new
-        /// directory specified exists on disk.</param>
-        /// <returns>Modified path to new location.</returns>
-        private String CreatePathToNewContainer(String exisitingPath, String newContainer, bool summary)
+        /// <param name="originalUrl"></param>
+        /// <returns></returns>
+        private UrlDisassebled DisassebleUrl(String originalUrl)
         {
-            String currentFile = System.IO.Path.GetFileName(exisitingPath);
-            String currentDirectory = System.IO.Path.GetDirectoryName(exisitingPath);
-            String newDirectory = String.Empty;
+            UrlDisassebled returnValue = new UrlDisassebled();
+            int idxContainer = originalUrl.IndexOf(this.Configuration.StorageContainer) + this.Configuration.StorageContainer.Length;
 
-            int idx = currentDirectory.LastIndexOf('\\');
-            if (idx == -1)
-            {
-                idx = currentDirectory.LastIndexOf('/');
-            }
+            // Get the file name
+            returnValue.FileName = System.IO.Path.GetFileName(originalUrl);
+            // Get the URL to account/container
+            returnValue.BaseUrl = originalUrl.Substring(0, idxContainer);
 
-            if(idx != -1)
-            {
-                newDirectory = currentDirectory.Substring(0, idx);
-            }
-            else
-            {
-                throw new Exception("Something is wrong with the path in SinkPostProcess.cs");
-            }
+            // Split up the rest of it as it is directory paths
+            string remainder = originalUrl.Substring(idxContainer + 1);
+            returnValue.Directories = new List<string>(remainder.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries));
+            returnValue.Directories.Remove(returnValue.FileName);
 
-            newDirectory = System.IO.Path.Combine(newDirectory, newContainer.Trim());
-
-            if (!summary)
-            {
-                FileUtils.EnsureDirectoryExists(newDirectory);
-            }
-
-            String newFile = System.IO.Path.Combine(newDirectory, currentFile);
-            if(System.IO.File.Exists(newFile))
-            {
-                int attempt = 0;
-                String fileFormat = this.GetFileFormatDuplicate(newFile);
-                do
-                {
-                    newFile = String.Format(fileFormat, ++attempt);
-                } while (System.IO.File.Exists(newFile));
-            }
-            return newFile;
+            return returnValue;
         }
 
+ 
         /// <summary>
         /// If duplicate file names are found then modify the path to be file(n).ext where n is
         /// a placeholder for string.format() which typically would be an integer. 
@@ -253,7 +271,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             String returnFileFormat = String.Empty;
             int idx = fileName.LastIndexOf('.');
 
-            if(idx != -1)
+            if (idx != -1)
             {
                 returnFileFormat = String.Format("{0}{1}{2}",
                     fileName.Substring(0, idx),
@@ -270,7 +288,6 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             return returnFileFormat;
         }
 
- 
         #endregion
 
     }

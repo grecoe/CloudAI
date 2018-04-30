@@ -93,7 +93,9 @@
     <Compile Include="Interfaces\DataSourceFactory.cs" />
     <Compile Include="Interfaces\GlobalUtils\Persistence\FileUtils.cs" />
     <Compile Include="Interfaces\GlobalUtils\Persistence\GenericCsvLogger.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Processing\PostProcessBase.cs" />
     <Compile Include="Interfaces\GlobalUtils\Processing\SinkPostProcess.cs" />
+    <Compile Include="Interfaces\GlobalUtils\Processing\SinkPostProcessStorage.cs" />
     <Compile Include="Interfaces\IConfigurationControl.cs" />
     <Compile Include="Interfaces\IContainerControl.cs" />
     <Compile Include="Interfaces\IDataSink.cs" />

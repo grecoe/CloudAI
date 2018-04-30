@@ -31,7 +31,7 @@ namespace ImageClassifier.Interfaces
     /// </summary>
     /// <typeparam name="T">Class that identifies the configuration type used by the source.</typeparam>
     /// <typeparam name="I">Class that identifies what is kept in the internal image list</typeparam>
-    abstract class DataSourceBase<T,I>: ConfigurationBase<T>, IDataSource where T:class, new() where I: class
+    abstract class DataSourceBase<T, I> : ConfigurationBase<T>, IDataSource where T : class, new() where I : class
     {
         #region Common Collection Information
         /// <summary>
@@ -45,7 +45,7 @@ namespace ImageClassifier.Interfaces
         #endregion
 
         public DataSourceBase(String name)
-            :base(name)
+            : base(name)
         {
             this.CurrentImageList = new List<I>();
         }
@@ -128,6 +128,7 @@ namespace ImageClassifier.Interfaces
         #endregion
 
         #region Abstracts
+        public abstract object SourceConfiguration {get; }
         public abstract IEnumerable<string> Containers { get; }
 
         public abstract IEnumerable<string> CurrentContainerCollectionNames { get; }

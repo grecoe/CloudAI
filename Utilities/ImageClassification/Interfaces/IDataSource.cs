@@ -41,6 +41,10 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         DataSourceType SourceType { get;  }
         /// <summary>
+        /// COnfiguration data for this source
+        /// </summary>
+        object SourceConfiguration { get; }
+        /// <summary>
         /// Indicates whether the file at SourceFile.DiskLocation can 
         /// be deleted when complted
         /// </summary>

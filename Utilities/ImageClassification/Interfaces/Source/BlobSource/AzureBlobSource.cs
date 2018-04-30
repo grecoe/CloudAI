@@ -72,7 +72,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
             this.ConfigurationControl = 
-                new ConfigurationControlImpl("Azure Storage Service",
+                new ConfigurationControlImpl("Azure Storage - Unlabelled Dataset",
                 configUi);
 
             // Load the catalogs and initialize if already configured
@@ -145,6 +145,8 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         #endregion
 
         #region IDataSource abstract overrides
+        public override object SourceConfiguration { get { return this.Configuration; } }
+
         public override IEnumerable<string> Containers { get { return this.CatalogFiles; } }
 
         public override void SetContainer(string container)

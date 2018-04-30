@@ -45,7 +45,6 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
         private String ContainerSASToken { get; set; }
         #endregion
 
-
         public StorageUtility(AzureBlobStorageConfiguration context)
         {
             this.Context = context;
@@ -219,6 +218,33 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             yield break;
         }
 
+        public bool MoveBlob(string originalBlob, string newBlob)
+        {
+            bool returnValue = true;
+
+            this.Connect();
+            CloudBlobContainer blobContainer = this.BlobClient.GetContainerReference(this.Context.StorageContainer);
+
+            CloudBlockBlob sourceBlob = blobContainer.GetBlockBlobReference(originalBlob);
+            CloudBlockBlob targetBlob = blobContainer.GetBlockBlobReference(newBlob);
+
+            // Deal with case where the file already exists....
+
+            // Do the copy
+            // wait for it to complete
+            // If succesful, then go ahead and delete the source.
+
+            // https://stackoverflow.com/questions/14152087/copying-one-azure-blob-to-another-blob-in-azure-storage-client-2-0?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Downloads a blob to a specific directory but is given a GUID for a name.
+        /// </summary>
+        /// <param name="blobUrl">Blob URL</param>
+        /// <param name="directory">Local Directory Path</param>
+        /// <returns>Full path to the copied blob on disk</returns>
         public String DownloadImageBlob(string blobUrl, string directory)
         {
             FileUtils.EnsureDirectoryExists(directory);

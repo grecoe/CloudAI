@@ -61,7 +61,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine",
+            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Unlabelled Dataset",
                 configUi);
 
             this.UpdateInformationRequested(null);
@@ -116,6 +116,8 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         #endregion
 
         #region IDataSource abstract overrides
+        public override object SourceConfiguration { get { return this.Configuration; } }
+
         public override IEnumerable<string> Containers { get { return this.DirectoryListings; } }
 
         public override IEnumerable<string> CurrentContainerCollectionNames

@@ -61,7 +61,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Directory Classification",
+            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Labelled Dataset",
                 configUi);
 
             this.UpdateInformationRequested(null);
@@ -172,6 +172,8 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         #endregion
 
         #region IDataSource abstract overrides
+        public override object SourceConfiguration { get { return this.Configuration; } }
+
         public override IEnumerable<string> Containers { get { return this.DirectoryListings; } }
 
         public override IEnumerable<string> CurrentContainerCollectionNames

@@ -24,6 +24,9 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Collections.Generic;
 using System.Windows.Controls.Primitives;
+using ImageClassifier.Interfaces.GlobalUtils.Processing;
+using System.Text;
+using ImageClassifier.Interfaces.Source.LabeldBlobSource.Configuration;
 
 namespace ImageClassifier.Interfaces.GenericUI
 {
@@ -61,7 +64,81 @@ namespace ImageClassifier.Interfaces.GenericUI
 
 
             this.Seed();
+
+            // Hook Process buttons
+            this.PreviewChangesButton.Click += (o, e) => PreviewChanges();
+            this.ProcessChangesButton.Click += (o, e) => ProcessChanges();
+            this.ModifyChangeButtons();
         }
+
+        #region Processing
+        private void ModifyChangeButtons()
+        {
+            bool enableChanges = !this.Configuration.MultiClass;
+            this.PreviewChangesButton.IsEnabled = enableChanges;
+            this.ProcessChangesButton.IsEnabled = enableChanges;
+        }
+
+        private void PreviewChanges()
+        {
+            if (this.Configuration != null)
+            {
+                SinkPostProcessStorage postProcess = new SinkPostProcessStorage(this.Provider.Sink, this.Configuration);
+                if (!postProcess.ItemsToProcess)
+                {
+                    MessageBox.Show("There are no items to process at this time.", "Preview Changes", MessageBoxButton.OK);
+                }
+                else
+                {
+                    String status = postProcess.CollectSummary();
+                    MessageBox.Show(status, "Process Changes Queued", MessageBoxButton.OK);
+                }
+            }
+        }
+
+        private void ProcessChanges()
+        {
+            if (this.Configuration != null)
+            {
+                SinkPostProcessStorage postProcess = new SinkPostProcessStorage(this.Provider.Sink, this.Configuration);
+
+                if (!postProcess.ItemsToProcess)
+                {
+                    MessageBox.Show("There are no items to process at this time.", "Processing", MessageBoxButton.OK);
+                }
+                else
+                {
+                    StringBuilder message = new StringBuilder();
+                    message.AppendFormat("This action will move images to new locations on your disk. Use the Process Changes button to view the actions that will be taken {0}{0}", Environment.NewLine);
+                    message.AppendFormat("If all moves are succesfully completed, the history of your changes will be cleared. {0}{0}", Environment.NewLine);
+                    message.AppendFormat("Would you like to continue with this processing step?");
+
+                    if (MessageBox.Show(message.ToString(), "Process Changes", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        // Process the changes
+                        if (postProcess.Process())
+                        {
+                            MessageBox.Show("Processing complete, provider will be reset", "Processing Complete", MessageBoxButton.OK);
+
+                            // FOrce updates to clear sink and reset UI
+                            //this.OnConfigurationSaved?.Invoke(this.Provider);
+                            //this.OnSourceDataUpdated?.Invoke(this.Provider);
+                        }
+                        else
+                        {
+                            StringBuilder errorstatus = new StringBuilder();
+                            foreach (String err in postProcess.Status)
+                            {
+                                errorstatus.AppendFormat(String.Format("{0}{1}", err, Environment.NewLine));
+                            }
+                            MessageBox.Show(errorstatus.ToString(), "Processing Errors Occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+            }
+
+        }
+        #endregion
 
         private void AcquireContent()
         {
@@ -107,6 +184,8 @@ namespace ImageClassifier.Interfaces.GenericUI
                 }
 
                 OnConfigurationSaved?.Invoke(this.Provider);
+
+                this.ModifyChangeButtons();
             }
             else
             {

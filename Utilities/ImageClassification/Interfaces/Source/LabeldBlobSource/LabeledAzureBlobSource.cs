@@ -79,7 +79,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             configUi.OnSourceDataUpdated += AcquireContent;
 
             this.ConfigurationControl =
-                new ConfigurationControlImpl("Azure Storage Service - Directory Classification",
+                new ConfigurationControlImpl("Azure Storage - Labelled Dataset",
                 configUi);
 
             // Get a list of containers through the persistence logger 
@@ -215,6 +215,8 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         #endregion
 
         #region IDataSource abstract Overrides
+        public override object SourceConfiguration { get { return this.Configuration; } }
+
         public override IEnumerable<string> Containers
         {
             get {

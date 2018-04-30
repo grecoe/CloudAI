@@ -185,5 +185,25 @@
                 Start Classifying
             </Button>
 
+            <StackPanel 
+                Margin="20,15,20,15"
+                HorizontalAlignment="Center"
+                Grid.Row ="12" Grid.Column="1" Orientation="Horizontal" >
+            <Button 
+                    x:Name="PreviewChangesButton"
+                    Margin="0,0,15,0"
+                    FontSize="13"
+                    ToolTip="When using Single Classification, this will preview the changes that have been applied to the image groups.">
+                Preview Processing
+            </Button>
+            <Button 
+                    x:Name="ProcessChangesButton"
+                    Margin="0,0,15,0"
+                    FontSize="13"
+                    ToolTip="When using Single Classification, this will process the changes that have been applied to the image groups by moving images around on disk.">
+                Process Changes
+            </Button>
+        </StackPanel>
+
     </Grid>
 </UserControl>
