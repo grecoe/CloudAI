@@ -88,7 +88,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
         /// Processes the changes. If anything fails, a false is returned.
         /// </summary>
         /// <returns></returns>
-        public bool Process()
+        public async Task<bool> Process()
         {
             // Clear any past status
             this.Status = new List<string>();
@@ -122,35 +122,26 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
                         UrlDisassebled sourceBlob = this.DisassebleUrl(item.OriginalLocation);
                         UrlDisassebled destinationBlob = this.DisassebleUrl(item.NewLocation);
 
-                        azureStorageUtility.MoveBlob(sourceBlob.BlobPath, destinationBlob.BlobPath);
-
-                        int x = 9;
-                        /*
+                        String message = String.Empty;
                         try
                         {
-                            // Because we may have files with the same name already in the new location,
-                            // just make sure it's ok...
-                            if (System.IO.File.Exists(item.NewLocation))
+                            bool result = await azureStorageUtility.MoveBlob(sourceBlob.BlobPath, destinationBlob.BlobPath);
+                            if(!result)
                             {
-                                int attempt = 0;
-                                String fileFormat = this.GetFileFormatDuplicate(item.NewLocation);
-                                do
-                                {
-                                    item.NewLocation = String.Format(fileFormat, ++attempt);
-                                } while (System.IO.File.Exists(item.NewLocation));
+                                message = String.Format("Failed to move {0}", item.Name);
                             }
-
-                            System.IO.File.Move(item.OriginalLocation, item.NewLocation);
                         }
-                        catch (Exception ex)
+                        catch(Exception ex)
+                        {
+                            message = String.Format("Failed to move {0} -> {1}", item.Name, ex.Message);
+                        }
+
+                        if(!String.IsNullOrEmpty(message))
                         {
                             returnValue = false;
-                            String message = String.Format("Failed to move {0} -> {1}", item.Name, ex.Message);
-
                             this.Status.Add(message);
                             this.RecordStatus(message);
                         }
-                        */
                     }
                 }
             }

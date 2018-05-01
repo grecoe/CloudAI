@@ -96,7 +96,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
         }
 
-        private void ProcessChanges()
+        private async void ProcessChanges()
         {
             if (this.Configuration != null)
             {
@@ -116,13 +116,13 @@ namespace ImageClassifier.Interfaces.GenericUI
                     if (MessageBox.Show(message.ToString(), "Process Changes", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         // Process the changes
-                        if (postProcess.Process())
+                        if (await postProcess.Process())
                         {
                             MessageBox.Show("Processing complete, provider will be reset", "Processing Complete", MessageBoxButton.OK);
 
                             // FOrce updates to clear sink and reset UI
-                            //this.OnConfigurationSaved?.Invoke(this.Provider);
-                            //this.OnSourceDataUpdated?.Invoke(this.Provider);
+                            this.OnConfigurationSaved?.Invoke(this.Provider);
+                            this.OnSourceDataUpdated?.Invoke(this.Provider);
                         }
                         else
                         {
@@ -161,7 +161,19 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void Collect()
         {
-            if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if(String.IsNullOrEmpty(this.ConfigurationTextStorageAccount.Text) || String.IsNullOrEmpty(this.ConfigurationTextStorageAccountKey.Text))
+            {
+                MessageBox.Show("Invalid storage account information supplied for image source. Check the setting and try again.", "Invalid Storage Account", MessageBoxButton.OK);
+            }
+            else if (String.IsNullOrEmpty(this.ConfigurationTextBlobPrefix.Text))
+            {
+                MessageBox.Show("Invalid storage account container supplied. Check the setting and try again.", "Invalid Storage Account Container", MessageBoxButton.OK);
+            }
+            else if (String.IsNullOrEmpty(this.ConfigurationTextFileExtension.Text))
+            {
+                MessageBox.Show("Supply one file extension to filter storage account information.", "Invalid File Extension", MessageBoxButton.OK);
+            }
+            else if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
 
                 this.Configuration.StorageAccount = this.ConfigurationTextStorageAccount.Text.Trim();

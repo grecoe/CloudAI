@@ -171,7 +171,15 @@ namespace ImageClassifier.Interfaces.GenericUI
         /// </summary>
         private void Collect()
         {
-            if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if(String.IsNullOrEmpty(this.ConfigurationTextLocalDirectory.Text) || !System.IO.Directory.Exists(this.ConfigurationTextLocalDirectory.Text))
+            {
+                MessageBox.Show("Invalid directory supplied for image sources. Check the setting and try again.", "Invalid Directory", MessageBoxButton.OK);
+            }
+            else if (String.IsNullOrEmpty(this.ConfigurationTextFileExtension.Text))
+            {
+                MessageBox.Show("Supply at least one file extension. Many entries are separated with a comma.", "Invalid File Extension", MessageBoxButton.OK);
+            }
+            else if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Trim().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
                 this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text.Trim();

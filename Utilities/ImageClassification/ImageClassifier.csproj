@@ -234,7 +234,7 @@
     <Content Include="LabeledAzureStorageConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="LocalMachineDirectoryConfiguration.json">
+    <Content Include="LabeledLocalMachineConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config">

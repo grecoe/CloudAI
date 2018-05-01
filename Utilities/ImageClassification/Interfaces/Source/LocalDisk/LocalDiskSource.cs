@@ -61,7 +61,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
             configUi.OnConfigurationSaved += ConfigurationSaved;
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Unlabelled Dataset",
+            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Unlabeled Dataset",
                 configUi);
 
             this.UpdateInformationRequested(null);

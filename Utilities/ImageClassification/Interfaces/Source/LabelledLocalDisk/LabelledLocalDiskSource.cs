@@ -45,9 +45,9 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
         #endregion
 
         public LabelledLocalDiskSource()
-        : base("LocalMachineDirectoryConfiguration.json")
+        : base("LabeledLocalMachineConfiguration.json")
         {
-            this.Name = "LocalMachineCategory";
+            this.Name = "LabeledLocalMachine";
             this.SourceType = DataSourceType.LabelledDisk;
             this.DeleteSourceFilesWhenComplete = false;
 
@@ -61,7 +61,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
 
-            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Labelled Dataset",
+            this.ConfigurationControl = new ConfigurationControlImpl("Local Machine - Labeled Dataset",
                 configUi);
 
             this.UpdateInformationRequested(null);

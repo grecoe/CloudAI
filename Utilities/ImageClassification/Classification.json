@@ -1,5 +1,5 @@
 ﻿{
-  "defaultProvider": "LocalMachineCategory",
+  "defaultProvider": "LabeledLocalMachine",
   "classifications": [
   ]
 }

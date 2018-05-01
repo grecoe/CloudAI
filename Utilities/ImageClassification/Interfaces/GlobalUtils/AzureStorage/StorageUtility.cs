@@ -26,6 +26,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using System.Windows;
 using ImageClassifier.Interfaces.GlobalUtils.Persistence;
+using System.Threading.Tasks;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
 {
@@ -218,7 +219,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             yield break;
         }
 
-        public bool MoveBlob(string originalBlob, string newBlob)
+        public async Task<bool> MoveBlob(string originalBlob, string newBlob)
         {
             bool returnValue = true;
 
@@ -228,13 +229,39 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
             CloudBlockBlob sourceBlob = blobContainer.GetBlockBlobReference(originalBlob);
             CloudBlockBlob targetBlob = blobContainer.GetBlockBlobReference(newBlob);
 
+
             // Deal with case where the file already exists....
+            if(targetBlob.Exists())
+            {
+                // Have to add on to the name
+                int path = newBlob.LastIndexOf('/');
+                string dirPath = newBlob.Substring(0, path);
+                string file = newBlob.Substring(path + 1);
+                int extension = file.LastIndexOf('.');
 
-            // Do the copy
-            // wait for it to complete
-            // If succesful, then go ahead and delete the source.
+                int additionalSuffix = 1;
+                do
+                {
+                    String newBlobName = String.Format("{3}/{0}({1}){2}", 
+                        file.Substring(0, extension), 
+                        additionalSuffix++, 
+                        file.Substring(extension + 1),
+                        dirPath);
+                    targetBlob = blobContainer.GetBlockBlobReference(newBlobName);
+                } while (targetBlob.Exists());
+            }
 
-            // https://stackoverflow.com/questions/14152087/copying-one-azure-blob-to-another-blob-in-azure-storage-client-2-0?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+            // Copy the file
+            string result = await targetBlob.StartCopyAsync(sourceBlob.Uri);
+
+            if(String.IsNullOrEmpty(result) || targetBlob.CopyState.Status != CopyStatus.Success)
+            {
+                returnValue = false;
+                throw new Exception("Copy failed: " + targetBlob.CopyState.Status);
+            }
+
+            // Since an exception is thrown before here, we must be OK
+            sourceBlob.Delete();
 
             return returnValue;
         }

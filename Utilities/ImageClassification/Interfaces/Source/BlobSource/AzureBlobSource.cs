@@ -72,7 +72,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
             this.ConfigurationControl = 
-                new ConfigurationControlImpl("Azure Storage - Unlabelled Dataset",
+                new ConfigurationControlImpl("Azure Storage - Unlabeled Dataset",
                 configUi);
 
             // Load the catalogs and initialize if already configured

@@ -53,6 +53,7 @@ namespace ImageClassifier
                 if (this.SelectedDataSource is IMultiImageDataSource)
                 {
                     (this.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();
+                    ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = this.ConfigurationContext.Classifications;
                 }
             }
 

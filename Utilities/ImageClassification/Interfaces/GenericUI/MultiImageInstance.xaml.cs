@@ -23,11 +23,15 @@ using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 using ImageClassifier.MainWindowUtilities;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ImageClassifier.Interfaces.GenericUI
 {
+    public delegate void OnImageGroupSelectedHandler(CurrentItem item);
+
     /// <summary>
     /// The grid element in the multiimagecontrol
     /// </summary>
@@ -39,6 +43,8 @@ namespace ImageClassifier.Interfaces.GenericUI
         private double ParentHeight { get; set; }
         private double ParentWidth { get; set; }
         private List<String> Classifications { get; set; }
+
+        public event OnImageGroupSelectedHandler OnImageGroupSelected;
 
         public MultiImageInstance(
             IMultiImageDataSource source, 
@@ -59,7 +65,8 @@ namespace ImageClassifier.Interfaces.GenericUI
            // this.ImageName.Text = this.Item.CurrentSource.Name;
             this.UpdateLabels();
 
-            this.ImagePanel.MouseDown += ImagePanel_MouseDown;
+            this.ImageGrid.MouseDown += ImageSelected;
+            //this.ImagePanel.MouseDown += ImageSelected;
 
             this.ThreadCollectImage(null);
         }
@@ -72,19 +79,35 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.ImageLabels.Text = String.Join(Environment.NewLine, this.Item.CurrentSource.Classifications);
         }
 
+        public void ResetBackground()
+        {
+            this.ImageGrid.Background = new SolidColorBrush(Colors.LightBlue);
+        }
+
         /// <summary>
         /// Capture the mouse down on the Image to show the MultiImageDetailWindow so that the user
         /// can modify the classifications.
         /// </summary>
-        private void ImagePanel_MouseDown(object sender, MouseButtonEventArgs e)
+        private void ImageSelected(object sender, MouseButtonEventArgs e)
         {
             if(e.ButtonState == MouseButtonState.Pressed)
             {
-                MultiInstanceDetailWindow window = 
-                    new MultiInstanceDetailWindow(this.Source,this.Item, this.ItemImage, this.Classifications);
-                window.ShowDialog();
+                // If control is selected, notify parent, otherwise show image
+                if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    OnImageGroupSelected?.Invoke(this.Item);
+                    this.ImageGrid.Background = new SolidColorBrush(Colors.CornflowerBlue);
+                }
+                else
+                {
+                    OnImageGroupSelected?.Invoke(null);
 
-                this.UpdateLabels();
+                    MultiInstanceDetailWindow window =
+                        new MultiInstanceDetailWindow(this.Source, this.Item, this.ItemImage, this.Classifications);
+                    window.ShowDialog();
+
+                    this.UpdateLabels();
+                }
             }
         }
 

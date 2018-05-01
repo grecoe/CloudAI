@@ -38,6 +38,8 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private IMultiImageDataSource MultiImageDataSource { get; set; }
         private List<MultiImageInstance> MultiImageInstanceList { get; set; }
+        private List<CurrentItem> CurrentGroupBatch { get; set; }
+
         #endregion
 
         public MultiImageControl(IDataSource source)
@@ -52,6 +54,7 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             this.MultiImageInstanceList = new List<MultiImageInstance>();
             this.Classifications = new List<string>();
+            this.CurrentGroupBatch = new List<CurrentItem>();
         }
 
         #region IMultiImageControl
@@ -147,7 +150,13 @@ namespace ImageClassifier.Interfaces.GenericUI
 
             // Otherwise, update EVERYTHING and save it.
             List<SourceFile> updateList = new List<SourceFile>();
-            foreach(CurrentItem item in this.CurrentSourceBatch)
+            List<CurrentItem> updateItems = this.CurrentSourceBatch;
+            if(this.CurrentGroupBatch.Count > 0)
+            {
+                updateItems = this.CurrentGroupBatch;
+            }
+
+            foreach(CurrentItem item in updateItems)
             {
                 item.CurrentSource.Classifications.Clear();
                 item.CurrentSource.Classifications.AddRange(classifications);
@@ -156,16 +165,36 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
             this.MultiImageDataSource.UpdateSourceBatch(updateList);
 
+            // Make sure CurrentGroupBatch is cleared
+            this.CurrentGroupBatch.Clear();
 
             // Now force all of the instances to update
             foreach (MultiImageInstance instance in this.MultiImageInstanceList)
             {
+                instance.ResetBackground();
                 instance.UpdateLabels();
             }
         }
         #endregion
 
         #region Navigation
+
+        private void ImageGroupStarted(CurrentItem item)
+        {
+            if(item == null)
+            {
+                this.CurrentGroupBatch.Clear();
+                foreach(MultiImageInstance instance in this.MultiImageInstanceList)
+                {
+                    instance.ResetBackground();
+                }
+
+            }
+            else if (!this.CurrentGroupBatch.Contains(item))
+            {
+                this.CurrentGroupBatch.Add(item);
+            }
+        }
 
         /// <summary>
         /// Used by next and previous to display a batch of files.
@@ -186,6 +215,13 @@ namespace ImageClassifier.Interfaces.GenericUI
             int columnConfiguration = (this.CurrentSourceBatch.Count > 9) ? MultiImageControl.MAX_COLUMNS_MORE_THAN_NINE : MultiImageControl.MAX_COLUMNS_TO_NINE;
             int maxRows = this.CurrentSourceBatch.Count / columnConfiguration;
             int maxCols = columnConfiguration;
+
+            // In the event there are more images than spaces, add a row.
+            if((maxRows * maxCols) < this.CurrentSourceBatch.Count)
+            {
+                maxRows++;
+            }
+            
 
             // Single image case
             if(this.CurrentSourceBatch.Count == 1)
@@ -221,6 +257,8 @@ namespace ImageClassifier.Interfaces.GenericUI
                         parentHeight, 
                         parentWidth, 
                         this.Classifications);
+
+                instance.OnImageGroupSelected += ImageGroupStarted;
 
                 // Place it in the grid
                 int thisRow = curRow % maxRows;

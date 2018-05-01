@@ -54,7 +54,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         public LabeledAzureBlobSource()
             : base("LabeledAzureStorageConfiguration.json")
         {
-            this.Name = "AzureStorageCategory";
+            this.Name = "LabeledAzureStorage";
             this.SourceType = DataSourceType.LabelledBlob;
             this.DeleteSourceFilesWhenComplete = true;
             this.CurrentImage = -1;
@@ -79,7 +79,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             configUi.OnSourceDataUpdated += AcquireContent;
 
             this.ConfigurationControl =
-                new ConfigurationControlImpl("Azure Storage - Labelled Dataset",
+                new ConfigurationControlImpl("Azure Storage - Labeled Dataset",
                 configUi);
 
             // Get a list of containers through the persistence logger 

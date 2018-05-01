@@ -122,11 +122,6 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
 
         #region Private Helpers
 
-        private void RecordStatus(String message)
-        {
-            Console.WriteLine(message);
-        }
-
         /// <summary>
         /// Gets a list of all the items to move broken down
         /// D1:String -> Original Container
