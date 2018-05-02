@@ -35,11 +35,6 @@ namespace ImageClassifier
         /// <param name="sender">The provider that made the change</param>
         private void IDataSourceOnConfigurationUdpated(IDataSource sender)
         {
-            // Something changed, make sure we get the annotations saved out because this is relevant
-            // to all, and requires us to update the classifications panel
-            this.ConfigurationContext.Classifications =
-                new List<string>(this.ConfigurationTabTextAnnotationTags.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-            this.ConfigurationContext.Save();
 
             this.PopulateAnnotationsTabAnnotationsPanel();
 
@@ -53,7 +48,7 @@ namespace ImageClassifier
                 if (this.SelectedDataSource is IMultiImageDataSource)
                 {
                     (this.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();
-                    ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = this.ConfigurationContext.Classifications;
+                    ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = new List<string>(this.SelectedDataSource.Classifications);
                 }
             }
 

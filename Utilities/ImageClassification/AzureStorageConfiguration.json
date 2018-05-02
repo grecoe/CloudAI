@@ -1,5 +1,7 @@
 {
   "multiClass": false,
+  "classifications": [
+  ],
   "storageAccount": "dpumpdata",
   "storageKey": "vZ6sZv42bel+GcdU1egYbJ+cO3JOLN9oJB5PD1v8fNsaMJPNJMxsxmuBojTzWv4DK9p1IfLKzWs+OajOXnpaNw==",
   "storageContainer": "preprocessedtaggeddatasets",

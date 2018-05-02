@@ -116,7 +116,7 @@ namespace ImageClassifier.Interfaces.Source.LocalDisk
         #endregion
 
         #region IDataSource abstract overrides
-        public override object SourceConfiguration { get { return this.Configuration; } }
+        public override IEnumerable<string> Classifications { get { return this.Configuration.Classifications; } }
 
         public override IEnumerable<string> Containers { get { return this.DirectoryListings; } }
 

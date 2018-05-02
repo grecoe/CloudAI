@@ -148,12 +148,12 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         private void Seed()
         {
+            this.ConfigurationTabTextAnnotationTags.Text = string.Join(",", this.Configuration.Classifications);
             this.ConfigurationTextStorageAccount.Text = this.Configuration.StorageAccount;
             this.ConfigurationTextStorageAccountKey.Text = this.Configuration.StorageAccountKey;
             this.ConfigurationTextStorageContainer.Text = this.Configuration.StorageContainer;
             this.ConfigurationTextBlobPrefix.Text = this.Configuration.BlobPrefix;
             this.ConfigurationTextFileExtension.Text = this.Configuration.FileType;
-            this.ConfigurationTextFileCount.Text = this.Configuration.FileCount.ToString();
             this.ConfigurationTextLocalDirectory.Text = this.Configuration.RecordLocation;
 
             this.MultiClassSelections[(this.Configuration.MultiClass ? 1 : 0)].IsChecked = true;
@@ -175,7 +175,8 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
             else if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-
+                this.Configuration.Classifications =
+                    new List<string>(this.ConfigurationTabTextAnnotationTags.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
                 this.Configuration.StorageAccount = this.ConfigurationTextStorageAccount.Text.Trim();
                 this.Configuration.StorageAccountKey = this.ConfigurationTextStorageAccountKey.Text.Trim();
                 this.Configuration.StorageContainer = this.ConfigurationTextStorageContainer.Text.Trim();
@@ -183,17 +184,6 @@ namespace ImageClassifier.Interfaces.GenericUI
                 this.Configuration.FileType = this.ConfigurationTextFileExtension.Text.Trim();
                 this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text.Trim();
                 this.Configuration.MultiClass = !this.Negative.IsChecked.Value;
-
-                try
-                {
-                    this.Configuration.FileCount = int.Parse(this.ConfigurationTextFileCount.Text.Trim());
-                }
-                catch
-                {
-                    // Just set a default and seed it
-                    this.Configuration.FileCount = 1000;
-                    this.Seed();
-                }
 
                 OnConfigurationSaved?.Invoke(this.Provider);
 

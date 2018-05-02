@@ -36,6 +36,13 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
     {
         #region PrivateMembers
         /// <summary>
+        /// How many entries to put into each catalog
+        /// </summary>
+        private const int MAX_ENTRIES_PER_FILE = 10000;
+        private const int DEFAULT_FILE_COUNT = -1;
+        private const int DEFAULT_DOWNLOAD_COUNT = 1024 * 1024;
+
+        /// <summary>
         /// The Azure Storage Account configuration information
         /// </summary>
         private AzureBlobStorageConfiguration Configuration { get; set; }
@@ -145,7 +152,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         #endregion
 
         #region IDataSource abstract overrides
-        public override object SourceConfiguration { get { return this.Configuration; } }
+        public override IEnumerable<string> Classifications { get { return this.Configuration.Classifications; } }
 
         public override IEnumerable<string> Containers { get { return this.CatalogFiles; } }
 
@@ -232,6 +239,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             // Load data from storage
             int fileLabel = 1;
             int recordCount = 0;
+            int totalDownloadCount = (this.Configuration.FileCount == AzureBlobSource.DEFAULT_FILE_COUNT) ? AzureBlobSource.DEFAULT_DOWNLOAD_COUNT : this.Configuration.FileCount;
             BlobPersistenceLogger logger = new BlobPersistenceLogger(this.Configuration, fileLabel);
             try
             {
@@ -240,12 +248,12 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                     logger.Record(new string[] { kvp.Value });
 
                     // Too many?
-                    if (++recordCount >= this.Configuration.FileCount)
+                    if (++recordCount >= totalDownloadCount)
                     {
                         break;
                     }
                     // Have to roll the file?
-                    if (recordCount % 100 == 0)
+                    if (recordCount % AzureBlobSource.MAX_ENTRIES_PER_FILE == 0)
                     {
                         logger = new BlobPersistenceLogger(this.Configuration, ++fileLabel);
                     }

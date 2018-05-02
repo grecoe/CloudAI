@@ -29,6 +29,8 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
     /// </summary>
     public class LocalDiskSourceConfiguration
     {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "classifications")]
+        public List<String> Classifications { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "multiClass")]
         public bool MultiClass { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "fileTypes")]
@@ -40,6 +42,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
         public LocalDiskSourceConfiguration()
         {
             this.FileTypes = new List<string>();
+            this.Classifications = new List<string>();
         }
     }
 }

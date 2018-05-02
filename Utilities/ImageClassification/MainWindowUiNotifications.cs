@@ -118,7 +118,7 @@ namespace ImageClassifier
                         else if (this.SelectedDataSource is IMultiImageDataSource)
                         {
                             this.SelectedDataSource.ImageControl.ImageChanged += this.IMultiImageControlGroupChanged;
-                            ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = this.ConfigurationContext.Classifications;
+                            ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = new List<string>(this.SelectedDataSource.Classifications);
                             (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
                         }
                     }

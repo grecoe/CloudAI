@@ -128,7 +128,8 @@ namespace ImageClassifier.Interfaces
         #endregion
 
         #region Abstracts
-        public abstract object SourceConfiguration {get; }
+        public abstract IEnumerable<string> Classifications { get; }
+
         public abstract IEnumerable<string> Containers { get; }
 
         public abstract IEnumerable<string> CurrentContainerCollectionNames { get; }

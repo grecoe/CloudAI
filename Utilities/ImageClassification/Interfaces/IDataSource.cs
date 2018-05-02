@@ -41,10 +41,6 @@ namespace ImageClassifier.Interfaces
         /// </summary>
         DataSourceType SourceType { get;  }
         /// <summary>
-        /// COnfiguration data for this source
-        /// </summary>
-        object SourceConfiguration { get; }
-        /// <summary>
         /// Indicates whether the file at SourceFile.DiskLocation can 
         /// be deleted when complted
         /// </summary>
@@ -53,6 +49,10 @@ namespace ImageClassifier.Interfaces
         /// Flag indicating if multi class is supported for items
         /// </summary>
         bool MultiClass { get; }
+        /// <summary>
+        /// Classifications to apply for this provider
+        /// </summary>
+        IEnumerable<string> Classifications { get; }
         /// <summary>
         /// Configuration UI with delegates for notifying
         /// parent when changes occur

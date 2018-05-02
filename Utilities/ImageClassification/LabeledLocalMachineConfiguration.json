@@ -2,6 +2,8 @@
   "batchSize": 3,
   "localConfiguration": {
     "multiClass": false,
+    "classifications": [
+    ],
     "fileTypes": [
       "*.jpg",
       "*.png"

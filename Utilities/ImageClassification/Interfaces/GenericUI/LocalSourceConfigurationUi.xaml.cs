@@ -157,6 +157,7 @@ namespace ImageClassifier.Interfaces.GenericUI
         /// </summary>
         private void Seed()
         {
+            this.ConfigurationTabTextAnnotationTags.Text = string.Join(",", this.Configuration.Classifications);
             this.ConfigurationTextFileExtension.Text = String.Join(",", this.Configuration.FileTypes);
             if(String.IsNullOrEmpty(this.ConfigurationTextFileExtension.Text))
             {
@@ -181,6 +182,8 @@ namespace ImageClassifier.Interfaces.GenericUI
             }
             else if (MessageBox.Show("Saving configuration will delete the information saved by this source, do you want to continue?", "Save Configuration", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
+                this.Configuration.Classifications =
+                    new List<string>(this.ConfigurationTabTextAnnotationTags.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
                 this.Configuration.FileTypes = new System.Collections.Generic.List<string>(this.ConfigurationTextFileExtension.Text.Trim().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
                 this.Configuration.RecordLocation = this.ConfigurationTextLocalDirectory.Text.Trim();
                 this.Configuration.MultiClass = !this.Negative.IsChecked.Value;

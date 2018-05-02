@@ -215,7 +215,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         #endregion
 
         #region IDataSource abstract Overrides
-        public override object SourceConfiguration { get { return this.Configuration; } }
+        public override IEnumerable<string> Classifications { get { return this.Configuration.StorageConfiguration.Classifications; } }
 
         public override IEnumerable<string> Containers
         {

@@ -93,23 +93,6 @@
                 </ComboBox>
 
                 <TextBlock 
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Margin="5,5,5,20"
-                    FontSize="13">
-                    Classification Tags
-                </TextBlock>
-                
-                <TextBox 
-                    x:Name="ConfigurationTabTextAnnotationTags"
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Margin="5,5,5,20"
-                    FontSize="13"
-                    ToolTip="Enter in classifications as a comma separated list with no spaces.">
-                </TextBox>
-                    
-                <TextBlock 
                     x:Name="SourceProviderConfigTitle"
                     Grid.Row="4"
                     Grid.Column="0"

@@ -28,8 +28,8 @@ namespace ImageClassifier.Configuration
         /// <summary>
         /// A list of possible classifications to label images with
         /// </summary>
-        [Newtonsoft.Json.JsonProperty(PropertyName = "classifications")]
-        public List<String> Classifications { get; set; }
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "classifications")]
+        //public List<String> Classifications { get; set; }
 
         /// <summary>
         /// The name of the provider last used so it can be set as the 
@@ -40,7 +40,7 @@ namespace ImageClassifier.Configuration
 
         public ClassificationContext()
         {
-            this.Classifications = new List<string>();
+            //this.Classifications = new List<string>();
         }
 
         public void Save()

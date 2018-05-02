@@ -19,6 +19,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
 {
@@ -29,6 +30,8 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
     /// </summary>
     public class AzureBlobStorageConfiguration
     {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "classifications")]
+        public List<String> Classifications { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "multiClass")]
         public bool MultiClass { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "storageAccount")]
@@ -47,6 +50,12 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Configuration
         public int FileCount { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "recordLocation")]
         public string RecordLocation { get; set; }
+
+        public AzureBlobStorageConfiguration()
+        {
+            this.Classifications = new List<string>();
+            this.FileCount = -1;
+        }
         
     }
 }
