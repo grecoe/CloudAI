@@ -52,7 +52,7 @@
                     Grid.Column="1"
                     Margin="5,5,5,5"
                     FontSize="13"
-                    ToolTip="Enter in classifications as a comma separated list with no spaces.">
+                    ToolTip="Enter in classifications as a comma separated list with no spaces. These are required for unlabeled datasets but act as additional classifications for labeled datasets.">
             </TextBox>
 
             <TextBlock 

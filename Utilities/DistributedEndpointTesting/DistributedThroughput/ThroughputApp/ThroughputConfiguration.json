@@ -26,8 +26,8 @@
     }
   },
   "defaultProvider": {
-    "endpointUrl": "http://40.71.249.238/score",
-    "endpointKey": null,
+    "endpointUrl": "http://52.187.132.69:80/api/v1/service/jabilseaclussrvc/score",
+    "endpointKey": "77ad11b7c36a4acb8bec6ebc93b7ba24",
     "fileInput": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\matpayload.json",
     "recordCount": 1000
   },
