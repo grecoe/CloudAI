@@ -38,6 +38,12 @@ namespace ImageClassifier.Interfaces.GlobalUtils.AzureStorage
         #region Members
         public const String StorageConnectionStringFormat = "DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net";
 
+        /// <summary>
+        /// How many entries to put into each catalog
+        /// </summary>
+        public const int DEFAULT_FILE_COUNT = -1;
+        public const int DEFAULT_DOWNLOAD_COUNT = 1024 * 1024;
+
         private AzureBlobStorageConfiguration Context { get; set; }
         private String ConnectionString { get; set; }
         private CloudStorageAccount StorageAccount { get; set; }

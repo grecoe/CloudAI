@@ -76,7 +76,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             // Prepare the UI control with the right hooks.
             CustomStorageConfiguration configUi = new CustomStorageConfiguration(this, this.Configuration);
             configUi.OnConfigurationSaved += ConfigurationSaved;
-            configUi.OnSourceDataUpdated += AcquireContent;
+            configUi.OnSourceDataUpdated += UpdateInformationRequested;
 
             this.ConfigurationControl =
                 new ConfigurationControlImpl("Azure Storage - Labeled Dataset",
@@ -289,14 +289,21 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         {
             // Save the configuration
             this.SaveConfiguration(this.Configuration);
+
             // Update Multiclass
             this.MultiClass = this.Configuration.StorageConfiguration.MultiClass;
-            // Update the storage utils
+            
+            // Update the storage utils - may have new settings
             this.AzureStorageUtils = new StorageUtility(this.Configuration.StorageConfiguration);
-            // Notify anyone who wants to be notified
-            this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
+
+            // Clean the labels for the UI
             this.OnLabelsAcquired?.Invoke(this.GetContainerLabels());
 
+            // Update containers
+            this.ContainerControl.Refresh();
+
+            // Notify anyone who wants to be notified
+            this.ConfigurationControl.OnConfigurationUdpated?.Invoke(this);
         }
 
         /// <summary>
@@ -330,7 +337,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
         /// 
         /// After cleaning re-builds local catalogs with new data.
         /// </summary>
-        private void AcquireContent(object caller)
+        private void UpdateInformationRequested(object caller)
         {
             // Update the data source
             if (System.Windows.MessageBox.Show(
@@ -350,13 +357,13 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             }
 
             // add in the window to let them know we're working, see AzureBlobSource:260
-            AcquireContentWindow contentWindow = new AcquireContentWindow();
-            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}", /*this.Configuration.FileCount*/ "all", this.Configuration.StorageConfiguration.StorageAccount);
-            if (this.ConfigurationControl.Parent != null)
-            {
-                contentWindow.Top = this.ConfigurationControl.Parent.Top + (this.ConfigurationControl.Parent.Height - contentWindow.Height) / 2;
-                contentWindow.Left = this.ConfigurationControl.Parent.Left + (this.ConfigurationControl.Parent.Width - contentWindow.Width) / 2;
-            }
+            AcquireContentWindow contentWindow = new AcquireContentWindow(this.ConfigurationControl.Parent);
+            int totalDownloadCount = (this.Configuration.StorageConfiguration.FileCount == StorageUtility.DEFAULT_FILE_COUNT) ? StorageUtility.DEFAULT_DOWNLOAD_COUNT : this.Configuration.StorageConfiguration.FileCount;
+
+            contentWindow.DisplayContent = String.Format("Acquiring (max) {0} files from {1}{2}This may take a long time, please bear with us.....", 
+                totalDownloadCount, 
+                this.Configuration.StorageConfiguration.StorageAccount,
+                Environment.NewLine);
             contentWindow.Show();
              
             // Clean up current catalog data and reget the persistence logger
@@ -401,11 +408,19 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             // Update class variables
             this.CurrentContainer = this.Containers.FirstOrDefault();
 
+            // Update containers
+            this.ContainerControl?.Refresh();
+
+            // Clean labels
+            this.OnLabelsAcquired?.Invoke(this.GetContainerLabels());
+
             // Get the new data
             this.InitializeOnNewContainer();
 
-            this.OnLabelsAcquired?.Invoke(this.GetContainerLabels());
+            // Notify listeners it just happened.
+            this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
 
+            // Reset the grid
             if (this.ImageControl is IMultiImageControl)
             {
                 (this.ImageControl as IMultiImageControl).ResetGrid();

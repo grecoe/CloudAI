@@ -15,6 +15,7 @@
             x:Name="txtContent" 
             FontSize="16"
             HorizontalAlignment="Center"
+            TextWrapping="Wrap"
             VerticalAlignment="Center">Acquiring 10000 files from superlongstorageaccountnameineurope</TextBlock>
     </Grid>
 </Window>

@@ -265,6 +265,7 @@ namespace ImageClassifier.Interfaces.Source.LabelledLocalDisk
             // Notify listeners it just happened.
             this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
 
+            // Update the grid
             if (this.ImageControl is IMultiImageControl)
             {
                 (this.ImageControl as IMultiImageControl).ResetGrid();

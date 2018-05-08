@@ -15,7 +15,7 @@
     "blobPrefix": "",
 
     "fileType": ".jpg",
-    "fileCount": 100,
+    "fileCount": -1,
     "recordLocation": "C:\\ImageClassify_Labelled_RECORDS"
   }
 }

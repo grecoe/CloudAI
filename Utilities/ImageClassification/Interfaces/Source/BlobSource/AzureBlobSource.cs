@@ -26,6 +26,8 @@ using ImageClassifier.Interfaces.Source.BlobSource.Persistence;
 using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
 using ImageClassifier.Interfaces.GlobalUtils.Persistence;
+using System.Threading;
+using ImageClassifier.Interfaces.GlobalUtils.Processing;
 
 namespace ImageClassifier.Interfaces.Source.BlobSource
 {
@@ -39,8 +41,6 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         /// How many entries to put into each catalog
         /// </summary>
         private const int MAX_ENTRIES_PER_FILE = 10000;
-        private const int DEFAULT_FILE_COUNT = -1;
-        private const int DEFAULT_DOWNLOAD_COUNT = 1024 * 1024;
 
         /// <summary>
         /// The Azure Storage Account configuration information
@@ -197,6 +197,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         #endregion
 
         #region Support Methods
+
         /// <summary>
         /// Triggered by the configuration UI when the underlying source catalog is updated.
         /// 
@@ -205,6 +206,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
         /// <param name="caller">unused</param>
         private void UpdateInformationRequested(object caller)
         {
+
             // Update the data source
             if (System.Windows.MessageBox.Show(
                 String.Format("This action will delete all files in : {0}{1}Further, the configuation will be updated.{1}Would you like to continue?",
@@ -223,13 +225,12 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             }
 
             // Create an overlay window so we can at least show something while we do work. 
-            AcquireContentWindow contentWindow = new AcquireContentWindow();
-            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}", this.Configuration.FileCount, this.Configuration.StorageAccount);
-            if (this.ConfigurationControl.Parent != null)
-            {
-                contentWindow.Top = this.ConfigurationControl.Parent.Top + (this.ConfigurationControl.Parent.Height - contentWindow.Height) / 2;
-                contentWindow.Left = this.ConfigurationControl.Parent.Left + (this.ConfigurationControl.Parent.Width - contentWindow.Width) / 2;
-            }
+            AcquireContentWindow contentWindow = new AcquireContentWindow(this.ConfigurationControl.Parent);
+            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}{2}This may take a long time, please bear with us.....", 
+                this.Configuration.FileCount, 
+                this.Configuration.StorageAccount,
+                Environment.NewLine);
+
             contentWindow.Show();
 
             // Clean up current catalog data
@@ -239,7 +240,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             // Load data from storage
             int fileLabel = 1;
             int recordCount = 0;
-            int totalDownloadCount = (this.Configuration.FileCount == AzureBlobSource.DEFAULT_FILE_COUNT) ? AzureBlobSource.DEFAULT_DOWNLOAD_COUNT : this.Configuration.FileCount;
+            int totalDownloadCount = (this.Configuration.FileCount == StorageUtility.DEFAULT_FILE_COUNT) ? StorageUtility.DEFAULT_DOWNLOAD_COUNT : this.Configuration.FileCount;
             BlobPersistenceLogger logger = new BlobPersistenceLogger(this.Configuration, fileLabel);
             try
             {
@@ -270,6 +271,10 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             this.CatalogFiles = new List<string>(BlobPersistenceLogger.GetAcquisitionFiles(this.Configuration));
             this.CurrentContainer = this.CatalogFiles.FirstOrDefault();
 
+            // Update containers
+            this.ContainerControl?.Refresh();
+
+            // Initialize with new data
             this.InitializeOnNewContainer();
 
             // Notify listeners it just happened.

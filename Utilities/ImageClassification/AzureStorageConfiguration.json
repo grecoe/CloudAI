@@ -7,6 +7,6 @@
   "storageContainer": "preprocessedtaggeddatasets",
   "blobPrefix": "",
   "fileType": ".png",
-  "fileCount": 100,
+  "fileCount": 1000,
   "recordLocation": "C:\\ImageClassify_RECORDS"
 }

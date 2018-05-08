@@ -98,8 +98,9 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             Dictionary<String, Dictionary<String, List<ProcessItem>>> processList =
                 this.GetUpdateList(false);
 
-            AcquireContentWindow contentWindow = new AcquireContentWindow();
+            AcquireContentWindow contentWindow = new AcquireContentWindow(null);
             contentWindow.DisplayContent = "Processing records.....";
+            contentWindow.Show();
 
             StorageUtility azureStorageUtility = new StorageUtility(this.Configuration);
 

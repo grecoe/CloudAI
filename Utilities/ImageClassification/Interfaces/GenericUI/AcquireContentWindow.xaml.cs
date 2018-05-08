@@ -36,13 +36,20 @@ namespace ImageClassifier.Interfaces.GenericUI
                this.txtContent.Dispatcher.Invoke(() =>
                {
                    this.txtContent.Text = value;
-               });
+               }, 
+               System.Windows.Threading.DispatcherPriority.Render);
             }
         }
 
-        public AcquireContentWindow()
+        public AcquireContentWindow(Window parent)
         {
             InitializeComponent();
+
+            if(parent != null)
+            {
+                this.Top = parent.Top + (parent.Height - this.Height) / 2;
+                this.Left = parent.Left + (parent.Width - this.Width) / 2;
+            }
         }
     }
 }

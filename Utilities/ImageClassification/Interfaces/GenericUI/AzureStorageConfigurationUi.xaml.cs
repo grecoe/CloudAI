@@ -165,7 +165,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             {
                 MessageBox.Show("Invalid storage account information supplied for image source. Check the setting and try again.", "Invalid Storage Account", MessageBoxButton.OK);
             }
-            else if (String.IsNullOrEmpty(this.ConfigurationTextBlobPrefix.Text))
+            else if (String.IsNullOrEmpty(this.ConfigurationTextStorageContainer.Text))
             {
                 MessageBox.Show("Invalid storage account container supplied. Check the setting and try again.", "Invalid Storage Account Container", MessageBoxButton.OK);
             }
