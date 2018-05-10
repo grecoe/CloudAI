@@ -69,7 +69,7 @@ namespace ImageClassifier.Interfaces.GlobalUtils.Processing
             Dictionary<String, Dictionary<String, List<ProcessItem>>> processList =
                 this.GetUpdateList(false);
 
-            AcquireContentWindow contentWindow = new AcquireContentWindow(null);
+            AcquireContentWindow contentWindow = new AcquireContentWindow(null, false);
             contentWindow.DisplayContent = "Processing records.....";
 
             foreach (KeyValuePair<String, Dictionary<String, List<ProcessItem>>> kvp in processList)

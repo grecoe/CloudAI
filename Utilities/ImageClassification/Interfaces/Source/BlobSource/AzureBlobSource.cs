@@ -198,6 +198,7 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
 
         #region Support Methods
 
+        #region Data Collection
         /// <summary>
         /// Triggered by the configuration UI when the underlying source catalog is updated.
         /// 
@@ -224,50 +225,18 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
                 this.Sink.Purge();
             }
 
-            // Create an overlay window so we can at least show something while we do work. 
-            AcquireContentWindow contentWindow = new AcquireContentWindow(this.ConfigurationControl.Parent);
-            contentWindow.DisplayContent = String.Format("Acquiring {0} files from {1}{2}This may take a long time, please bear with us.....", 
-                this.Configuration.FileCount, 
-                this.Configuration.StorageAccount,
-                Environment.NewLine);
+            // Create an overlay window so we can at least show something while we do work. This window threads out the data collection
+            // so that we can show the user what is going on, otherwise it seems like it's hung when storage is pretty populated.
+            AcquireContentWindow contentWindow = new AcquireContentWindow(this.ConfigurationControl.Parent, true);
+            contentWindow.JobCompleted += this.DataCollectionJobCompleted;
+            contentWindow.StartLongRunningPRocess(this.DataCollectionThread);
+        }
 
-            contentWindow.Show();
-
-            // Clean up current catalog data
-            FileUtils.DeleteFiles(this.Configuration.RecordLocation, new string[] { "*.csv" });
-
-
-            // Load data from storage
-            int fileLabel = 1;
-            int recordCount = 0;
-            int totalDownloadCount = (this.Configuration.FileCount == StorageUtility.DEFAULT_FILE_COUNT) ? StorageUtility.DEFAULT_DOWNLOAD_COUNT : this.Configuration.FileCount;
-            BlobPersistenceLogger logger = new BlobPersistenceLogger(this.Configuration, fileLabel);
-            try
-            {
-                foreach (KeyValuePair<String, String> kvp in this.AzureStorageUtils.ListBlobs(false))
-                {
-                    logger.Record(new string[] { kvp.Value });
-
-                    // Too many?
-                    if (++recordCount >= totalDownloadCount)
-                    {
-                        break;
-                    }
-                    // Have to roll the file?
-                    if (recordCount % AzureBlobSource.MAX_ENTRIES_PER_FILE == 0)
-                    {
-                        logger = new BlobPersistenceLogger(this.Configuration, ++fileLabel);
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Azure Storage Exception");
-            }
-
-            contentWindow.Close();
-
-            // Update class variables
+        /// <summary>
+        /// Triggered when the data collection routine completes either by completion or cancel.
+        /// </summary>
+        private void DataCollectionJobCompleted()
+        {
             this.CatalogFiles = new List<string>(BlobPersistenceLogger.GetAcquisitionFiles(this.Configuration));
             this.CurrentContainer = this.CatalogFiles.FirstOrDefault();
 
@@ -278,8 +247,72 @@ namespace ImageClassifier.Interfaces.Source.BlobSource
             this.InitializeOnNewContainer();
 
             // Notify listeners it just happened.
-            this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
+            if(this.ConfigurationControl != null )
+            {
+                this.ConfigurationControl.Control.Dispatcher.Invoke(() =>
+                {
+                    this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
+                });
+            }
         }
+
+        /// <summary>
+        /// Routine called in a ThreadPool thread from the AcquireContentWindow to collect the data
+        /// </summary>
+        /// <param name="cancelEvent">Hooked to the UI cancel button</param>
+        /// <param name="statusHandler">Ability to write to the window to show status of the request</param>
+        private void DataCollectionThread(ManualResetEvent cancelEvent, Action<string> statusHandler)
+        {
+            statusHandler?.Invoke(String.Format("Acquiring {0} files from {1}",
+                this.Configuration.FileCount,
+                this.Configuration.StorageAccount));
+
+            // Clean up current catalog data
+            FileUtils.DeleteFiles(this.Configuration.RecordLocation, new string[] { "*.csv" });
+
+            // Load data from storage
+            int fileLabel = 1;
+            int recordCount = 0;
+            int totalDownloadCount = (this.Configuration.FileCount == StorageUtility.DEFAULT_FILE_COUNT) ? StorageUtility.DEFAULT_DOWNLOAD_COUNT : this.Configuration.FileCount;
+            BlobPersistenceLogger logger = new BlobPersistenceLogger(this.Configuration, fileLabel);
+            try
+            {
+                foreach (KeyValuePair<String, String> kvp in this.AzureStorageUtils.ListBlobs(false))
+                {
+                    // Check cancellation
+                    if (cancelEvent != null && cancelEvent.WaitOne(10))
+                    {
+                        statusHandler?.Invoke("Cancel recieved");
+                        break;
+                    }
+
+                    logger.Record(new string[] { kvp.Value });
+
+                    // Too many?
+                    if (++recordCount >= totalDownloadCount)
+                    {
+                        break;
+                    }
+
+                    // Have to roll the file?
+                    if (recordCount % AzureBlobSource.MAX_ENTRIES_PER_FILE == 0)
+                    {
+                        logger = new BlobPersistenceLogger(this.Configuration, ++fileLabel);
+                    }
+
+                    // Update any status?
+                    if(recordCount % 50 == 0)
+                    {
+                        statusHandler?.Invoke(String.Format("Currently detected files - {0}", recordCount));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Azure Storage Exception");
+            }
+        }
+        #endregion
 
         /// <summary>
         /// Triggered by the configuration UI when the underlying configuration is updated.

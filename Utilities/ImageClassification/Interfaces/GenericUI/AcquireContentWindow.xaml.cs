@@ -17,7 +17,9 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SAMPLE CODE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //
+using ImageClassifier.Interfaces.GenericUI.Utilities;
 using System;
+using System.Threading;
 using System.Windows;
 
 namespace ImageClassifier.Interfaces.GenericUI
@@ -28,6 +30,13 @@ namespace ImageClassifier.Interfaces.GenericUI
     /// </summary>
     public partial class AcquireContentWindow : Window
     {
+        #region Private Members
+        private ManualResetEvent Cancel { get; set; }
+        #endregion
+
+        #region Public Properties
+        public event OnLongRunningProcessCompleteHandler JobCompleted;
+
         public String DisplayContent
         {
             get { return this.txtContent.Text; }
@@ -40,16 +49,76 @@ namespace ImageClassifier.Interfaces.GenericUI
                System.Windows.Threading.DispatcherPriority.Render);
             }
         }
+        #endregion
 
-        public AcquireContentWindow(Window parent)
+        public AcquireContentWindow(Window parent, bool showCancel)
         {
             InitializeComponent();
 
-            if(parent != null)
+            this.Cancel = new ManualResetEvent(false);
+            this.ButtonCancel.Click += (o, e) => this.CancelTransaction();
+
+            if (parent != null)
             {
                 this.Top = parent.Top + (parent.Height - this.Height) / 2;
                 this.Left = parent.Left + (parent.Width - this.Width) / 2;
             }
+
+            if (!showCancel)
+            {
+                this.ButtonCancel.Visibility = Visibility.Collapsed;
+            }
         }
+
+        public void StartLongRunningPRocess(Action<ManualResetEvent, Action<string>> action)
+        {
+            LongRunningProcessData threadData = new LongRunningProcessData()
+            {
+                Event = this.Cancel,
+                Work = action,
+                OnStatusUpdate = this.StatusUpdate
+            };
+
+            this.Show();
+            System.Threading.ThreadPool.QueueUserWorkItem(this.ThreadRoutine, threadData);
+        }
+
+        #region Private Helpers
+        private void CancelTransaction()
+        {
+            this.Cancel.Set();
+        }
+
+        private void StatusUpdate(string message)
+        {
+            this.DisplayContent = message;
+        }
+
+        private void SafeClose()
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                this.Close();
+            });
+        }
+
+        private void ThreadRoutine(object obj)
+        {
+            if (obj is LongRunningProcessData)
+            {
+                LongRunningProcessData data = obj as LongRunningProcessData;
+                data.OnStatusUpdate?.Invoke("Starting job");
+
+                data.Work(data.Event, data.OnStatusUpdate);
+
+                data.OnStatusUpdate?.Invoke("Completing job");
+
+                this.JobCompleted?.Invoke();
+            }
+
+            this.SafeClose();
+        }
+
+        #endregion
     }
 }

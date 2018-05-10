@@ -29,6 +29,7 @@ using ImageClassifier.Interfaces.Source.LabeldBlobSource.UI;
 using ImageClassifier.Interfaces.GlobalUtils.Persistence;
 using ImageClassifier.Interfaces.GlobalUtils.AzureStorage;
 using ImageClassifier.Interfaces.GlobalUtils.Configuration;
+using System.Threading;
 
 namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
 {
@@ -332,6 +333,7 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             return returnValue;
         }
 
+        #region Data Collection
         /// <summary>
         /// Call to load data from the storage account. This call will delete all other data that has been acquired, downloaded, or scored locally. 
         /// 
@@ -356,55 +358,18 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
                 this.Sink.Purge();
             }
 
-            // add in the window to let them know we're working, see AzureBlobSource:260
-            AcquireContentWindow contentWindow = new AcquireContentWindow(this.ConfigurationControl.Parent);
-            int totalDownloadCount = (this.Configuration.StorageConfiguration.FileCount == StorageUtility.DEFAULT_FILE_COUNT) ? StorageUtility.DEFAULT_DOWNLOAD_COUNT : this.Configuration.StorageConfiguration.FileCount;
+            // Create an overlay window so we can at least show something while we do work. This window threads out the data collection
+            // so that we can show the user what is going on, otherwise it seems like it's hung when storage is pretty populated.
+            AcquireContentWindow contentWindow = new AcquireContentWindow(this.ConfigurationControl.Parent, true);
+            contentWindow.JobCompleted += this.DataCollectionJobCompleted;
+            contentWindow.StartLongRunningPRocess(this.DataCollectionThread);
+        }
 
-            contentWindow.DisplayContent = String.Format("Acquiring (max) {0} files from {1}{2}This may take a long time, please bear with us.....", 
-                totalDownloadCount, 
-                this.Configuration.StorageConfiguration.StorageAccount,
-                Environment.NewLine);
-            contentWindow.Show();
-             
-            // Clean up current catalog data and reget the persistence logger
-            FileUtils.DeleteFiles(this.Configuration.StorageConfiguration.RecordLocation, new string[] { "*.csv" });
-            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
-
-            List<String> directories = new List<string>();
-            try
-            {
-                foreach (String dir in this.AzureStorageUtils.ListDirectories(this.Configuration.StorageConfiguration.StorageContainer, this.Configuration.StorageConfiguration.BlobPrefix, false))
-                {
-                    directories.Add(dir);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Azure Storage Exception");
-            }
-
-            try
-            {
-                foreach (string directory in directories)
-                {
-                    foreach (KeyValuePair<string, string> kvp in this.AzureStorageUtils.ListBlobs(this.Configuration.StorageConfiguration.StorageContainer,
-                        directory,
-                        this.Configuration.StorageConfiguration.FileType,
-                        false))
-                    {
-                        this.PersistenceLogger.RecordStorageImage(directory, kvp.Value);
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Azure Storage Error");
-            }
-
-            // Close window saying we are downloading 
-            contentWindow.Close();
-
-
+        /// <summary>
+        /// Triggered when the data collection routine completes either by completion or cancel.
+        /// </summary>
+        private void DataCollectionJobCompleted()
+        {
             // Update class variables
             this.CurrentContainer = this.Containers.FirstOrDefault();
 
@@ -418,14 +383,104 @@ namespace ImageClassifier.Interfaces.Source.LabeldBlobSource
             this.InitializeOnNewContainer();
 
             // Notify listeners it just happened.
-            this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
+            if (this.ConfigurationControl != null)
+            {
+                this.ConfigurationControl.Control.Dispatcher.Invoke(() =>
+                {
+                    this.ConfigurationControl.OnSourceDataUpdated?.Invoke(this);
+                });
+            }
 
-            // Reset the grid
             if (this.ImageControl is IMultiImageControl)
             {
-                (this.ImageControl as IMultiImageControl).ResetGrid();
+                (this.ImageControl as IMultiImageControl).Control.Dispatcher.Invoke( () =>
+                {
+                    (this.ImageControl as IMultiImageControl).ResetGrid();
+                });
             }
         }
+
+        /// <summary>
+        /// Routine called in a ThreadPool thread from the AcquireContentWindow to collect the data
+        /// </summary>
+        /// <param name="cancelEvent">Hooked to the UI cancel button</param>
+        /// <param name="statusHandler">Ability to write to the window to show status of the request</param>
+        private void DataCollectionThread(ManualResetEvent cancelEvent, Action<string> statusHandler)
+        {
+            int totalDownloadCount = (this.Configuration.StorageConfiguration.FileCount == StorageUtility.DEFAULT_FILE_COUNT) ? StorageUtility.DEFAULT_DOWNLOAD_COUNT : this.Configuration.StorageConfiguration.FileCount;
+
+            statusHandler?.Invoke(String.Format("Acquiring (max) {0} files from {1}",
+                totalDownloadCount,
+                this.Configuration.StorageConfiguration.StorageAccount));
+
+            // Clean up current catalog data and reget the persistence logger
+            FileUtils.DeleteFiles(this.Configuration.StorageConfiguration.RecordLocation, new string[] { "*.csv" });
+            this.PersistenceLogger = new LabelledBlobPersisteceLogger(this.Configuration.StorageConfiguration);
+
+            List<String> directories = new List<string>();
+            try
+            {
+                foreach (String dir in this.AzureStorageUtils.ListDirectories(this.Configuration.StorageConfiguration.StorageContainer, this.Configuration.StorageConfiguration.BlobPrefix, false))
+                {
+                    // Check cancellation
+                    if (cancelEvent != null && cancelEvent.WaitOne(10))
+                    {
+                        statusHandler?.Invoke("Cancel recieved");
+                        break;
+                    }
+
+                    directories.Add(dir);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Azure Storage Exception");
+            }
+
+            try
+            {
+                int totalCounter = 0;
+                foreach (string directory in directories)
+                {
+                    int directoryCounter = 0;
+
+                    foreach (KeyValuePair<string, string> kvp in this.AzureStorageUtils.ListBlobs(this.Configuration.StorageConfiguration.StorageContainer,
+                        directory,
+                        this.Configuration.StorageConfiguration.FileType,
+                        false))
+                    {
+                        // Check cancellation
+                        if (cancelEvent != null && cancelEvent.WaitOne(10))
+                        {
+                            statusHandler?.Invoke("Cancel recieved");
+                            break;
+                        }
+
+                        this.PersistenceLogger.RecordStorageImage(directory, kvp.Value);
+
+                        ++totalCounter;
+
+                        // Update any status?
+                        if (++directoryCounter % 50 == 0)
+                        {
+                            statusHandler?.Invoke(String.Format("Path Files ({0}) - {1}, Total Files {2}", 
+                                directory,
+                                directoryCounter,
+                                totalCounter));
+                        }
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Azure Storage Error");
+            }
+        }
+
+
+        #endregion
+
         #endregion
     }
 }

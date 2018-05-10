@@ -40,7 +40,10 @@ namespace ImageClassifier.Interfaces.GenericUI
 
         public void Refresh()
         {
-            this.Initialize();
+           this.Dispatcher.Invoke(() =>
+           {
+               this.Initialize();
+           });
         }
 
         #endregion

@@ -11,11 +11,23 @@
         AllowsTransparency="True"
         Height="70" Width="550">
     <Grid>
-        <TextBlock 
+        <StackPanel 
+            VerticalAlignment="Center"
+            Orientation="Vertical">
+            <TextBlock 
             x:Name="txtContent" 
             FontSize="16"
             HorizontalAlignment="Center"
             TextWrapping="Wrap"
             VerticalAlignment="Center">Acquiring 10000 files from superlongstorageaccountnameineurope</TextBlock>
+
+            <Button
+                x:Name="ButtonCancel"
+                Margin="0,5,0,0"
+                Width="50"
+                HorizontalAlignment="Center">
+                Cancel
+            </Button>
+        </StackPanel>
     </Grid>
 </Window>

@@ -89,6 +89,7 @@
     <Compile Include="Interfaces\GenericUI\ImageControlNotificationDisplay.xaml.cs">
       <DependentUpon>ImageControlNotificationDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\GenericUI\Utilities\LongRunningProcessData.cs" />
     <Compile Include="Interfaces\GlobalUtils\Configuration\ConfigurationBase.cs" />
     <Compile Include="Interfaces\DataSourceFactory.cs" />
     <Compile Include="Interfaces\GlobalUtils\Persistence\FileUtils.cs" />

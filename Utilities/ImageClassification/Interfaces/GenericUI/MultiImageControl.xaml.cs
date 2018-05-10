@@ -350,7 +350,7 @@ namespace ImageClassifier.Interfaces.GenericUI
         /// </summary>
         private AcquireContentWindow LaunchAcquisitionWindow()
         {
-            AcquireContentWindow contentWindow = new AcquireContentWindow(Window.GetWindow(this));
+            AcquireContentWindow contentWindow = new AcquireContentWindow(Window.GetWindow(this), false);
             contentWindow.DisplayContent = String.Format("Acquiring next batch.....");
             contentWindow.Show();
 

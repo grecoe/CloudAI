@@ -235,7 +235,7 @@ namespace ImageClassifier.Interfaces.GenericUI
             this.DataSource.ClearSourceFiles();
 
 
-            if (this.ContinueToImage(true) && this.DataSource is ISingleImageDataSource)
+            if (this.ContinueToImage(false) && this.DataSource is ISingleImageDataSource)
             {
                 this.MoveImage((this.DataSource as ISingleImageDataSource).PreviousSourceFile());
             }
