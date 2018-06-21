@@ -65,7 +65,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Configuration\ClassificationContext.cs" />
+    <Compile Include="Configuration\ApplicationConfiguration.cs" />
+    <Compile Include="Configuration\ApplicationContext.cs" />
     <Compile Include="Interfaces\DataSourceBase.cs" />
     <Compile Include="Interfaces\DataSourceType.cs" />
     <Compile Include="Interfaces\GenericUI\Utilities\ClassificationCheckboxPanelHelper.cs" />

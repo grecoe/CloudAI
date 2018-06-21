@@ -45,13 +45,13 @@ namespace ImageClassifier
         private void StatusBarJumpToImage()
         {
             String error = String.Empty;
-            if (this.SelectedDataSource != null)
+            if (this.ApplicationContext.SelectedDataSource != null)
             {
                 try
                 {
                     int index = int.Parse(this.StatusTextJumpTo.Text);
-                    this.SelectedDataSource.JumpToSourceFile(index);
-                    this.SelectedDataSource.ImageControl.ShowNext();
+                    this.ApplicationContext.SelectedDataSource.JumpToSourceFile(index);
+                    this.ApplicationContext.SelectedDataSource.ImageControl.ShowNext();
                 }
                 catch (Exception)
                 {
@@ -82,57 +82,58 @@ namespace ImageClassifier
                 this.StatusBarClearStatus();
 
                 // Unhook IImageControl callbacks......
-                if (this.SelectedDataSource != null)
+                if (this.ApplicationContext.SelectedDataSource != null)
                 {
-                    this.SelectedDataSource.ContainerControl.OnContainerChanged -= this.IContainerControlContainerChanged;
+                    this.ApplicationContext.SelectedDataSource.ContainerControl.OnContainerChanged -= this.IContainerControlContainerChanged;
 
-                    if(this.SelectedDataSource.ImageControl != null)
+                    if(this.ApplicationContext.SelectedDataSource.ImageControl != null)
                     {
-                        if (this.SelectedDataSource is ISingleImageDataSource)
+                        if (this.ApplicationContext.IsMultiImageDataSource)
                         {
-                            this.SelectedDataSource.ImageControl.ImageChanged -= this.ISingleImageControlFileChanged;
+                            this.ApplicationContext.SelectedDataSource.ImageControl.ImageChanged -= this.IMultiImageControlGroupChanged;
+                            (this.ApplicationContext.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired -= this.MultiImageSourceContainerLabelsChanged;
                         }
-                        else if(this.SelectedDataSource is IMultiImageDataSource)
+                        else
                         {
-                            this.SelectedDataSource.ImageControl.ImageChanged -= this.IMultiImageControlGroupChanged;
-                            (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired -= this.MultiImageSourceContainerLabelsChanged;
+                            this.ApplicationContext.SelectedDataSource.ImageControl.ImageChanged -= this.ISingleImageControlFileChanged;
                         }
                     }
                 }
 
-                this.SelectedDataSource = (this.ConfigurationTabSourceProviderCombo.SelectedItem as DataSourceComboItem).Source;
+                this.ApplicationContext.SelectedDataSource = (this.ConfigurationTabSourceProviderCombo.SelectedItem as DataSourceComboItem).Source;
 
-                this.ConfigurationContext.DefaultProvider = this.SelectedDataSource.Name;
-                this.ConfigurationContext.Save();
+                this.ApplicationContext.AppConfiguration.DefaultProvider = this.ApplicationContext.SelectedDataSource.Name;
+                this.ApplicationContext.AppConfiguration.Save();
 
 
                 // Hook IImageControl callbacks......
-                if (this.SelectedDataSource != null)
+                if (this.ApplicationContext.SelectedDataSource != null)
                 {
-                    if (this.SelectedDataSource.ImageControl != null)
+                    if (this.ApplicationContext.SelectedDataSource.ImageControl != null)
                     {
-                        if (this.SelectedDataSource is ISingleImageDataSource)
+                        if (this.ApplicationContext.IsMultiImageDataSource)
                         {
-                            this.SelectedDataSource.ImageControl.ImageChanged += this.ISingleImageControlFileChanged;
+                            this.ApplicationContext.SelectedDataSource.ImageControl.ImageChanged += this.IMultiImageControlGroupChanged;
+                            ((IMultiImageControl)this.ApplicationContext.SelectedDataSource.ImageControl).Classifications = 
+                                new List<string>(this.ApplicationContext.SelectedDataSource.Classifications);
+                            (this.ApplicationContext.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
                         }
-                        else if (this.SelectedDataSource is IMultiImageDataSource)
+                        else 
                         {
-                            this.SelectedDataSource.ImageControl.ImageChanged += this.IMultiImageControlGroupChanged;
-                            ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = new List<string>(this.SelectedDataSource.Classifications);
-                            (this.SelectedDataSource as IMultiImageDataSource).OnLabelsAcquired += this.MultiImageSourceContainerLabelsChanged;
+                            this.ApplicationContext.SelectedDataSource.ImageControl.ImageChanged += this.ISingleImageControlFileChanged;
                         }
                     }
                 }
 
-                this.SelectedDataSource.ContainerControl.OnContainerChanged += this.IContainerControlContainerChanged;
-                this.SelectedDataSource.ContainerControl.Refresh();
+                this.ApplicationContext.SelectedDataSource.ContainerControl.OnContainerChanged += this.IContainerControlContainerChanged;
+                this.ApplicationContext.SelectedDataSource.ContainerControl.Refresh();
 
                 this.InitializeUi(true);
 
                 // Now set up the configuration
-                this.SourceProviderConfigTitle.Text = String.Format("{0} Configuration", this.SelectedDataSource.ConfigurationControl.Title);
+                this.SourceProviderConfigTitle.Text = String.Format("{0} Configuration", this.ApplicationContext.SelectedDataSource.ConfigurationControl.Title);
                 this.ProviderConfigurationPanel.Children.Clear();
-                this.ProviderConfigurationPanel.Children.Add(this.SelectedDataSource.ConfigurationControl.Control);
+                this.ProviderConfigurationPanel.Children.Add(this.ApplicationContext.SelectedDataSource.ConfigurationControl.Control);
             }
         }
 

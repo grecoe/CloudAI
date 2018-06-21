@@ -34,27 +34,27 @@ namespace ImageClassifier
         /// <param name="fullInitialization">If fully initializing updates more than just the annotation tab.</param>
         private void InitializeUi(bool fullInitialization)
         {
-            if (this.ConstructorCompleted)
+            if (this.ApplicationContext.ConstructorCompleted)
             {
                 PopulateAnnotationsTabAnnotationsPanel();
 
                 if (fullInitialization)
                 {
-                    if (this.SelectedDataSource != null)
+                    if (this.ApplicationContext.SelectedDataSource != null)
                     {
                         // Set up the IImageControl 
                         this.ImagePanel.Children.Clear();
-                        this.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
-                        this.ImagePanel.Children.Add(this.SelectedDataSource.ImageControl.Control);
+                        this.ApplicationContext.SelectedDataSource.ImageControl.ParentControl = this.ImagePanel;
+                        this.ImagePanel.Children.Add(this.ApplicationContext.SelectedDataSource.ImageControl.Control);
 
                         // Set up the IContainerControl 
                         this.ContainerPanel.Children.Clear();
-                        this.ContainerPanel.Children.Add(this.SelectedDataSource.ContainerControl.Control);
+                        this.ContainerPanel.Children.Add(this.ApplicationContext.SelectedDataSource.ContainerControl.Control);
                     }
                 }
 
                 // If IMultiImageDataSource then force it to update the status bar.
-                if (this.SelectedDataSource is IMultiImageDataSource)
+                if (this.ApplicationContext.IsMultiImageDataSource)
                 {
                     this.IMultiImageControlGroupChanged(null);
                 }
@@ -72,9 +72,9 @@ namespace ImageClassifier
 
             // Set up all the boxes
             List<System.Windows.Controls.Primitives.ToggleButton> boxes = ClassificationCheckboxPanelHelper.PopulateSelectionPanel(
-                this.SelectedDataSource,
+                this.ApplicationContext.SelectedDataSource,
                 this.ClassificationTabSelectionPanel,
-                this.SelectedDataSource.Classifications,
+                this.ApplicationContext.SelectedDataSource.Classifications,
                 this.ForceClassificationUpdate);
 
             // Now set up all of the key bindings 
@@ -114,9 +114,9 @@ namespace ImageClassifier
                 this.PrepareInputBindings(cmd, keys[keyIdx++]);
             }
 
-            if (this.SelectedDataSource != null && this.SelectedDataSource.ImageControl != null)
+            if (this.ApplicationContext.SelectedDataSource != null && this.ApplicationContext.SelectedDataSource.ImageControl != null)
             {
-                foreach (KeyBinding binding in this.SelectedDataSource.ImageControl.Bindings)
+                foreach (KeyBinding binding in this.ApplicationContext.SelectedDataSource.ImageControl.Bindings)
                 {
                     this.InputBindings.Add(binding);
                 }

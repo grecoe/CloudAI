@@ -28,12 +28,12 @@ namespace ImageClassifier
     {
         private void IContainerControlContainerChanged(IContainerControl source, object container)
         {
-            if(this.SelectedDataSource == null || this.SelectedDataSource.ImageControl == null)
+            if(this.ApplicationContext.SelectedDataSource == null || this.ApplicationContext.SelectedDataSource.ImageControl == null)
             {
                 return; 
             }
 
-            this.SelectedDataSource.ImageControl.Clear();
+            this.ApplicationContext.SelectedDataSource.ImageControl.Clear();
 
             // Get the container label, whatever it is
             string containerLabel = String.Empty;
@@ -51,7 +51,7 @@ namespace ImageClassifier
             this.ForceClassificationUpdate();
 
             // Move to the first un-tagged item
-            this.SelectedDataSource.ImageControl.FastForward();
+            this.ApplicationContext.SelectedDataSource.ImageControl.FastForward();
         }
     }
 }

@@ -39,16 +39,16 @@ namespace ImageClassifier
             this.PopulateAnnotationsTabAnnotationsPanel();
 
             // If the service that updated is the current service update the UI
-            if (sender == this.SelectedDataSource)
+            if (sender == this.ApplicationContext.SelectedDataSource)
             {
                 // Clear the status bar
                 this.StatusBarClearStatus();
 
                 // Multi image control reset the grid...
-                if (this.SelectedDataSource is IMultiImageDataSource)
+                if (this.ApplicationContext.IsMultiImageDataSource)
                 {
-                    (this.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();
-                    ((IMultiImageControl)this.SelectedDataSource.ImageControl).Classifications = new List<string>(this.SelectedDataSource.Classifications);
+                    (this.ApplicationContext.SelectedDataSource.ImageControl as IMultiImageControl).ResetGrid();
+                    ((IMultiImageControl)this.ApplicationContext.SelectedDataSource.ImageControl).Classifications = new List<string>(this.ApplicationContext.SelectedDataSource.Classifications);
                 }
             }
 
@@ -66,7 +66,7 @@ namespace ImageClassifier
         /// update the UI</param>
         private void IDataSourceOnSourceDataUpdated(IDataSource sender)
         {
-            if (sender == this.SelectedDataSource)
+            if (sender == this.ApplicationContext.SelectedDataSource)
             {
                 InitializeUi(true);
             }

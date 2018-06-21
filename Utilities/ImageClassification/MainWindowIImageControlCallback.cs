@@ -33,7 +33,7 @@ namespace ImageClassifier
         /// <param name="file">File on display</param>
         private void ISingleImageControlFileChanged(SourceFile file)
         {
-            if (this.SelectedDataSource != null)
+            if (this.ApplicationContext.SelectedDataSource != null)
             {
                 if (file != null)
                 {
@@ -44,8 +44,8 @@ namespace ImageClassifier
 
                 this.StatusBarLocationStatus.Text =
                     String.Format("Viewing {0} of {1} ",
-                    this.SelectedDataSource.CurrentContainerIndex + 1,
-                    this.SelectedDataSource.CurrentContainerCollectionCount);
+                    this.ApplicationContext.SelectedDataSource.CurrentContainerIndex + 1,
+                    this.ApplicationContext.SelectedDataSource.CurrentContainerCollectionCount);
             }
         }
 
@@ -55,12 +55,12 @@ namespace ImageClassifier
         /// <param name="file">Unused as IMultiImageControl uses batches of files.</param>
         private void IMultiImageControlGroupChanged(SourceFile file)
         {
-            if (this.SelectedDataSource != null && !String.IsNullOrEmpty(this.SelectedDataSource.CurrentContainer))
+            if (this.ApplicationContext.SelectedDataSource != null && !String.IsNullOrEmpty(this.ApplicationContext.SelectedDataSource.CurrentContainer))
             {
-                String classification = (this.SelectedDataSource as IMultiImageDataSource).CurrentContainerAsClassification;
-                int groupSize = (this.SelectedDataSource as IMultiImageDataSource).BatchSize;
-                int currentIndex = this.SelectedDataSource.CurrentContainerIndex+1;
-                int containerCount = this.SelectedDataSource.CurrentContainerCollectionCount;
+                String classification = (this.ApplicationContext.SelectedDataSource as IMultiImageDataSource).CurrentContainerAsClassification;
+                int groupSize = (this.ApplicationContext.SelectedDataSource as IMultiImageDataSource).BatchSize;
+                int currentIndex = this.ApplicationContext.SelectedDataSource.CurrentContainerIndex+1;
+                int containerCount = this.ApplicationContext.SelectedDataSource.CurrentContainerCollectionCount;
 
                 double dblgroups = (double)containerCount/ (double)groupSize;
                 int intgroups = containerCount / groupSize;

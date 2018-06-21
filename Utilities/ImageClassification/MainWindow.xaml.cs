@@ -35,33 +35,18 @@ namespace ImageClassifier
     public partial class MainWindow : Window
     {
         #region Private Properties
-        /// <summary>
-        /// Configuration settings from Classification.json
-        /// </summary>
-        private ClassificationContext ConfigurationContext { get; set; }
-        /// <summary>
-        /// The current data source provider
-        /// </summary>
-        private IDataSource SelectedDataSource { get; set; }
-        /// <summary>
-        /// A list of all known data sources
-        /// </summary>
-        private List<IDataSource> DataSources { get; set; }
-
-        private bool ConstructorCompleted { get; set; }
+        private ApplicationContext ApplicationContext { get; set; }
         #endregion
 
         public MainWindow()
         {
             InitializeComponent();
 
-            this.ConstructorCompleted = false;
-
-            // Class Objects
-            this.ConfigurationContext = ClassificationContext.LoadConfiguration();
+            this.ApplicationContext = new ApplicationContext();
+            this.ApplicationContext.ConstructorCompleted = false;
 
             // Make configuration page come up first if the first time
-            if (String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
+            if (String.IsNullOrEmpty(this.ApplicationContext.AppConfiguration.DefaultProvider))
             {
                 this.Dispatcher.BeginInvoke((Action)(() => MasterTabControl.SelectedIndex = 1));
             }
@@ -77,12 +62,12 @@ namespace ImageClassifier
             // the default, which is set every time the user changes it, if it's not
             // set just set the first one, but it has to happen here to get the right
             // context for the UI before initializing
-            if (!String.IsNullOrEmpty(this.ConfigurationContext.DefaultProvider))
+            if (!String.IsNullOrEmpty(this.ApplicationContext.AppConfiguration.DefaultProvider))
             {
                 foreach(object child in this.ConfigurationTabSourceProviderCombo.Items)
                 {
                     DataSourceComboItem comboItem = child as DataSourceComboItem;
-                    if (comboItem != null && String.Compare(comboItem.Source.Name, this.ConfigurationContext.DefaultProvider) == 0)
+                    if (comboItem != null && String.Compare(comboItem.Source.Name, this.ApplicationContext.AppConfiguration.DefaultProvider) == 0)
                     {
                         this.ConfigurationTabSourceProviderCombo.SelectedIndex =
                             this.ConfigurationTabSourceProviderCombo.Items.IndexOf(child);
@@ -98,7 +83,7 @@ namespace ImageClassifier
             // Hook the closing event so we can ensure we capture all changes
             this.Closing += WindowClosing;
 
-            this.ConstructorCompleted = true;
+            this.ApplicationContext.ConstructorCompleted = true;
 
             // Initialize with the settings we have.
             InitializeUi(true);
@@ -136,10 +121,10 @@ namespace ImageClassifier
             labelledLocalSource.ConfigurationControl.OnSourceDataUpdated = this.IDataSourceOnSourceDataUpdated;
             labelledLocalSource.ConfigurationControl.Parent = this;
 
-            this.DataSources = new List<IDataSource>() { labelledLocalSource, localSource, blobSource, labelledBlobSource };
+            this.ApplicationContext.DataSources = new List<IDataSource>() { labelledLocalSource, localSource, blobSource, labelledBlobSource };
 
             // Set the UI up but don't select one, happens later after we hook the selection changed.
-            foreach (IDataSource source in this.DataSources)
+            foreach (IDataSource source in this.ApplicationContext.DataSources)
             {
                 this.ConfigurationTabSourceProviderCombo.Items.Add(new DataSourceComboItem(source));
             }
@@ -159,9 +144,9 @@ namespace ImageClassifier
         /// </summary>
         private void ForceClassificationUpdate()
         {
-            if (this.SelectedDataSource != null && this.SelectedDataSource.ImageControl != null)
+            if (this.ApplicationContext.SelectedDataSource != null && this.ApplicationContext.SelectedDataSource.ImageControl != null)
             {
-                this.SelectedDataSource.ImageControl.UpdateClassifications(
+                this.ApplicationContext.SelectedDataSource.ImageControl.UpdateClassifications(
                     ClassificationCheckboxPanelHelper.CollectSelections(this.ClassificationTabSelectionPanel)
                     );
             }

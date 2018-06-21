@@ -19,17 +19,12 @@
 //
 
 using System;
-using System.Collections.Generic;
 
 namespace ImageClassifier.Configuration
 {
-    class ClassificationContext
+    class ApplicationConfiguration
     {
-        /// <summary>
-        /// A list of possible classifications to label images with
-        /// </summary>
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "classifications")]
-        //public List<String> Classifications { get; set; }
+        private const String ConfigurationFileName = "Classification.json";
 
         /// <summary>
         /// The name of the provider last used so it can be set as the 
@@ -38,25 +33,24 @@ namespace ImageClassifier.Configuration
         [Newtonsoft.Json.JsonProperty(PropertyName = "defaultProvider")]
         public String DefaultProvider { get; set; }
 
-        public ClassificationContext()
+        public ApplicationConfiguration()
         {
-            //this.Classifications = new List<string>();
         }
 
         public void Save()
         {
-            String path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Classification.json");
+            String path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ApplicationConfiguration.ConfigurationFileName);
             System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented));
         }
 
-        public static ClassificationContext LoadConfiguration()
+        public static ApplicationConfiguration LoadConfiguration()
         {
-            ClassificationContext returnConfig = new ClassificationContext();
+            ApplicationConfiguration returnConfig = new ApplicationConfiguration();
 
-            String path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Classification.json");
+            String path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ApplicationConfiguration.ConfigurationFileName);
             if(System.IO.File.Exists(path))
             {
-                returnConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<ClassificationContext>(System.IO.File.ReadAllText(path));
+                returnConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<ApplicationConfiguration>(System.IO.File.ReadAllText(path));
             }
             else
             {
