@@ -2,14 +2,14 @@
   "execution": {
     "autoScaling": true,
     "autoScaleIncrement": 2,
-    "threadCount": 10,
+    "threadCount": 100,
     "maxThreadCount": 100,
     "testCountPerThreadStep": 500,
     "threadStep": 2,
     "retryCount": 3,
     "clientName": "Local_App"
   },
-  "logDirectory": "C:\\ImageClassifyGpuLogs",
+  "logDirectory": "C:\\______Demos\\factorylogs\\10K",
   "recordProviderDiskLocation": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\RecordProviderExample\\bin\\Debug",
   "recordProvider": {
     "executionType": "storage",
@@ -26,10 +26,10 @@
     }
   },
   "defaultProvider": {
-    "endpointUrl": "http://52.187.132.69:80/api/v1/service/jabilseaclussrvc/score",
-    "endpointKey": "77ad11b7c36a4acb8bec6ebc93b7ba24",
-    "fileInput": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\matpayload.json",
-    "recordCount": 1000
+    "endpointUrl": "http://52.174.166.230/api/v1/service/dangreadysvc/score",
+    "endpointKey": "8fa1faf4a5884d4da42978dee4eb44e2",
+    "fileInput": "C:\\______Demos\\factoryinput.json",
+    "recordCount": 10000
   },
   "eventHubConfiguration": {
     "hubName": "throughputhub",

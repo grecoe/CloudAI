@@ -49,6 +49,13 @@ namespace ThroughputApp.Job.Utilities
             this.AITimes = new List<double>();
         }
 
+        public void ResetStatistics()
+        {
+            this.AITimes = new List<double>();
+            this.RecordsInRun = 0;
+            this.FailureCount = 0;
+        }
+
         public double AverageAITime()
         {
             double total = 0.0;

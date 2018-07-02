@@ -66,7 +66,12 @@ namespace ThroughputApp.Job
 
         public void StartExecution()
         {
-            this.Statistics = new RunStatistics();
+            if(this.Statistics == null)
+            {
+                this.Statistics = new RunStatistics();
+            }
+
+            this.Statistics.ResetStatistics();
             this.Statistics.RecordsInRun = this.Context.SelectedRecordCount;
 
             this.Manager.AllThreadsCompleted += ManagerAllThreadsCompleted;
@@ -103,7 +108,9 @@ namespace ThroughputApp.Job
 
             HistoryLog.RecordHistory(
                 this.Context,
-                String.Format("{0},{1},{2},{3},{4},{5},{6},{7}",
+                String.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}",
+                    this.Statistics.ExecutionCount,
+                    this.Context.Execution.TestCountPerThreadStep,
                     this.Context.Execution.ThreadCount,
                     this.Statistics.RecordsInRun,
                     this.Statistics.FailureCount,

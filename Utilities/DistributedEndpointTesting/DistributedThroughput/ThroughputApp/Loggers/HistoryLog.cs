@@ -41,7 +41,7 @@ namespace ThroughputApp.Loggers
                         System.IO.Directory.CreateDirectory(context.LogDirectory);
                     }
 
-                    String header = "ThreadCount,Records,Failures,AITime,TotalTime,RPS,MaxRecords,MinRecords";
+                    String header = "TestNo,TestCountTotal,ThreadCount,Records,Failures,AITime,TotalTime,RPS,MaxRecords,MinRecords";
                     String path = System.IO.Path.Combine(context.LogDirectory, "history.csv");
 
                     bool exists = System.IO.File.Exists(path);

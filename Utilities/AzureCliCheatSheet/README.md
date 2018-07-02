@@ -168,6 +168,10 @@ Once the ml environment is set, navigate the command prompt to the directory car
 ```
 > az ml env get-credentials -n [cn] -g [rg] -i
 ```
+or
+```
+az aks get-credentials --resource-group=$(resource_group) --name=$(aks_name) 
+```
 
 ## Setting the context in kubectl
 With the config file updated, navigate the command prompt to the directory that has the file kubectl.ext which on the Windows DSVM is C:\users\[user]\bin
