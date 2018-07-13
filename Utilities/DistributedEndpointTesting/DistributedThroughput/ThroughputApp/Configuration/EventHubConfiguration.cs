@@ -28,5 +28,15 @@ namespace ThroughputApp.Configuration
         public String EventHubName { get; set; }
         [Newtonsoft.Json.JsonProperty(PropertyName = "connectionString")]
         public String ServiceBusConnectionString { get; set; }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                return !String.IsNullOrEmpty(this.EventHubName) && !String.IsNullOrEmpty(this.ServiceBusConnectionString);
+            }
+        }
+
     }
 }

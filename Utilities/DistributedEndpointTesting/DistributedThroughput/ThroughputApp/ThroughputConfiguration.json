@@ -2,14 +2,14 @@
   "execution": {
     "autoScaling": true,
     "autoScaleIncrement": 2,
-    "threadCount": 100,
-    "maxThreadCount": 100,
+    "threadCount": 50,
+    "maxThreadCount": 50,
     "testCountPerThreadStep": 500,
     "threadStep": 2,
     "retryCount": 3,
     "clientName": "Local_App"
   },
-  "logDirectory": "C:\\______Demos\\factorylogs\\10K",
+  "logDirectory": "C:\\______Demos\\factorylogs\\testtiminghubnorecordlog",
   "recordProviderDiskLocation": "C:\\gitrepogrecoe\\CloudAI\\Utilities\\DistributedEndpointTesting\\DistributedThroughput\\RecordProviderExample\\bin\\Debug",
   "recordProvider": {
     "executionType": "storage",
@@ -29,7 +29,7 @@
     "endpointUrl": "http://52.174.166.230/api/v1/service/dangreadysvc/score",
     "endpointKey": "8fa1faf4a5884d4da42978dee4eb44e2",
     "fileInput": "C:\\______Demos\\factoryinput.json",
-    "recordCount": 10000
+    "recordCount": 1000
   },
   "eventHubConfiguration": {
     "hubName": "throughputhub",

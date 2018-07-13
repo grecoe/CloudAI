@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.ServiceBus.Messaging;
 using ThroughputApp.Configuration;
+using ThroughputApp.Loggers;
 
 namespace ThroughputApp.Utilities
 {

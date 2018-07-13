@@ -82,19 +82,23 @@ namespace ThroughputApp.Job
         #region Callbacks from manager
         private void ManagerRecordCompleted(string jobId, int recordId, ScoringExecutionSummary runTime)
         {
-            String output = String.Format("{0},{1},{2},{3},{4},{5},{6}",
-                recordId,
-                runTime.PayloadSize.ToString(),
-                (runTime.State == false ? "0" : "1"),
-                runTime.Attempts,
-                runTime.Response,
-                runTime.ExecutionTime.TotalSeconds.ToString(),
-                runTime.AITime.TotalSeconds.ToString());
-
             this.Statistics.AITimes.Add(runTime.AITime.TotalSeconds);
             this.Statistics.FailureCount += (runTime.State == false ? 1 : 0);
 
-            TimingLog.RecordTiming(this.Context, output);
+            // If the Event Hub is not configured, save the data locally
+            if(!this.Context.HubConfiguration.IsValid)
+            {
+                String output = String.Format("{0},{1},{2},{3},{4},{5},{6}",
+                    recordId,
+                    runTime.PayloadSize.ToString(),
+                    (runTime.State == false ? "0" : "1"),
+                    runTime.Attempts,
+                    runTime.Response,
+                    runTime.ExecutionTime.TotalSeconds.ToString(),
+                    runTime.AITime.TotalSeconds.ToString());
+
+                TimingLog.RecordTiming(this.Context, output);
+            }
         }
 
         private void ManagerAllThreadsCompleted()

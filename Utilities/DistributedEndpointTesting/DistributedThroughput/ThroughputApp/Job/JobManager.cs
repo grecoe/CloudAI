@@ -110,6 +110,9 @@ namespace ThroughputApp.Job
                 System.Threading.Thread newThread = new System.Threading.Thread(Job.ScoreRecord);
                 newThread.Start(threadData);
                 this.Threads.Add(newThread);
+
+                this.StatusUpdate?.Invoke("Starting job : " + jobId);
+
             }
         }
 
