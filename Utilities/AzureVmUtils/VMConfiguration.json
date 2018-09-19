@@ -1,0 +1,23 @@
+{
+	"Subscriptions" : [
+		{
+			"SubscriptionId" : "<your-subscription-id>",
+			"ResourceGroups" : [
+				{
+					"Name" : "<resource-group-name>",
+					"VirtualMachines" : [
+						"<virtual-machine-name>",
+						"<virtual-machine-name>"
+						]
+				} ,
+				{
+					"Name" : "<resource-group-name2>",
+					"VirtualMachines" : [
+						"<virtual-machine-name>",
+						"<virtual-machine-name>"
+						]
+				} 
+			]
+		}
+	]
+}
