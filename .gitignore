@@ -4,6 +4,14 @@
 /Demos/AmlWorkbenchFullExample/Client/obj/*
 /Demos/AmlWorkbenchFullExample/Client/packages/*
 
+# Cognitive Services
+/Demos/CognitiveServices/RssGenerator/.vs/*
+/Demos/CognitiveServices/RssGenerator/bin/*
+/Demos/CognitiveServices/RssGenerator/obj/*
+/Demos/CognitiveServices/RssGenerator/packages/*
+/Demos/CognitiveServices/wwwroot/bin/*
+
+
 
 # Image Classification
 /Utilities/ImageClassification/.vs/*

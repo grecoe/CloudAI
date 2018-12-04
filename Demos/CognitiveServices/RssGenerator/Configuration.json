@@ -1,0 +1,13 @@
+﻿{
+  "cosmos_db_uri": "<YOUR_COSMOS_URI>",
+  "cosmos_db_key": "<YOUR_COSMOS_KEY>",
+  "cosmos_db_database": "Articles",
+  "cosmos_db_collection": "Ingest",
+  "azure_storage_connection": "<YOUR_STORAGE_KEY>",
+  "azure_storage_container": "scraped",
+  "rss_feeds": [
+    "https://www.nasa.gov/rss/dyn/breaking_news.rss",
+    "https://www.france24.com/fr/europe/rss",
+    "http://newsfeed.zeit.de/index"
+  ]
+}
