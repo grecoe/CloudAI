@@ -73,7 +73,7 @@ namespace RssGenerator.CosmosDBHelper
             }
         }
 
-        protected async Task CreateCollection(String database, String collection)
+        public async Task CreateCollection(String database, String collection)
         {
             if (String.IsNullOrEmpty(database))
             {

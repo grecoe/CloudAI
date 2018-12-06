@@ -1,50 +1,56 @@
 ## CARRY OVER FROM MAIN DRIVER
-$resourceGroupName="dangauto"
+$resourceGroupName="dangtest2"
 $locationString = "eastus"
 
 
 #######################################################################
-# Service Bus
+# Function App Deployment
 #######################################################################
-$serviceBusDeploymentName = "servicebuscreate22"
-$serviceBusNamespace = "cosmossb"
-$translationQueue = "translationqueue"
-$ocrQueue = "ocrqueue"
-$faceQueue = "faceapiqueue"
-$inspectionQueue = "inspectionqueue"
+$fnAppDeploymentName = "functionappcreate"
+$fnAppName = "cosmosfn"
+$fnStgType = "Standard_LRS"
+
 
 #Set up parameters to create CosmosDB account.
-$serviceBusCreateParameters = @{}
-$serviceBusCreateParameters.Add("serviceBusNamespaceName", $serviceBusNamespace)
-$serviceBusCreateParameters.Add("serviceBusTranslationQueueName",$translationQueue)
-$serviceBusCreateParameters.Add("serviceBusOCRQueueName",$ocrQueue)
-$serviceBusCreateParameters.Add("serviceBusFaceQueueName",$faceQueue)
-$serviceBusCreateParameters.Add("serviceBusInspectionQueueName",$inspectionQueue)
-$serviceBusCreateParameters.Add("location",$locationString)
+$fnAppCreateParameters = @{}
+$fnAppCreateParameters.Add("appName", $fnAppName)
+$fnAppCreateParameters.Add("storageAccountType",$fnStgType)
+$fnAppCreateParameters.Add("location",$locationString)
+
+#later we need to get these from other outputs.
 
 
 #######################################################################
-# Create Service Bus and Queues
+# Create Function App
 #######################################################################
-Write-Host("Creating Service Bus and Queues")
-New-AzureRmResourceGroupDeployment -Name $serviceBusDeploymentName -ResourceGroupName $resourceGroupName -TemplateFile ".\ServiceBus.json" -TemplateParameterObject $serviceBusCreateParameters
+Write-Host("Creating Function App")
 
-$serviceBusInfo = @{}
-$serviceBusInfo.Add("connectionstring", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $serviceBusDeploymentName).Outputs.namespaceConnectionString.value)
-$serviceBusInfo.Add("primarykey", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $serviceBusDeploymentName).Outputs.sharedAccessPolicyPrimaryKey.value)
-$serviceBusInfo.Add("name", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $serviceBusDeploymentName).Outputs.namespaceName.value)
-$serviceBusInfo.Add("translationQueue",$translationQueue)
-$serviceBusInfo.Add("ocrQueue",$ocrQueue)
-$serviceBusInfo.Add("faceQueue",$faceQueue)
-$serviceBusInfo.Add("inspectionQueue",$inspectionQueue)
+$fnAppCreateParameters.Add("cosmosConnectionString","asdf")
+$fnAppCreateParameters.Add("cosmosDatabase","sdf")
+$fnAppCreateParameters.Add("cosmosInspectionCollection","sdf")
+$fnAppCreateParameters.Add("cosmosProcessedCollection","asdf")
+$fnAppCreateParameters.Add("cosmosIngestCollection","asdf")
+$fnAppCreateParameters.Add("sbConnectionString","asdf")
+$fnAppCreateParameters.Add("faceKey","asdf")
+$fnAppCreateParameters.Add("faceURI","asdf")
+$fnAppCreateParameters.Add("textKey","asdf")
+$fnAppCreateParameters.Add("textURI","asdf")
+$fnAppCreateParameters.Add("translationKey","asdf")
+$fnAppCreateParameters.Add("translationURI","asdf")
+$fnAppCreateParameters.Add("translationLang","asdf")
+$fnAppCreateParameters.Add("visionKey","asdf")
+$fnAppCreateParameters.Add("visionURI","asdf")
+
+New-AzureRmResourceGroupDeployment -Name $fnAppDeploymentName -ResourceGroupName $resourceGroupName -TemplateFile ".\FunctionApp.json" -TemplateParameterObject $fnAppCreateParameters
+
+$functionAppInfo = @{}
+$functionAppInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageKey.value)
+$functionAppInfo.Add("storageName", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageName.value)
+$functionAppInfo.Add("fnappname", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.functionAppName.value)
 
 
-Write-Host ( $serviceBusInfo["connectionstring"])
-Write-Host ( $serviceBusInfo["primarykey"])
-Write-Host ( $serviceBusInfo["name"])
-Write-Host ( $serviceBusInfo["translationQueue"])
-Write-Host ( $serviceBusInfo["ocrQueue"])
-Write-Host ( $serviceBusInfo["faceQueue"])
-Write-Host ( $serviceBusInfo["inspectionQueue"])
+Write-Host ( $functionAppInfo["storageKey"])
+Write-Host ( $functionAppInfo["storageName"])
+Write-Host ( $functionAppInfo["fnappname"])
 
 

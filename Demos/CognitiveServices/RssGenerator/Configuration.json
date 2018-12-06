@@ -1,9 +1,14 @@
 ﻿{
-  "cosmos_db_uri": "YOUR_COMSOS_URI",
-  "cosmos_db_key": "YOUR_COMSOS_KEY",
+  "cosmos_db_uri": "YOUR_COSMOS_URI",
+  "cosmos_db_key": "YOUR_COSMOS_KEY",
   "cosmos_db_database": "Articles",
-  "cosmos_db_collection": "Ingest",
-  "azure_storage_connection": "YOUR_STORAGE_CONNECTION_STRING",
+  "cosmos_db_ingest_collection": "Ingest",
+  "cosmos_db_collections": [
+    "Ingest",
+    "Processed",
+    "Inspection"
+  ],
+  "azure_storage_connection": "YOUR_ADDITIONAL_STORAGE",
   "azure_storage_container": "scraped",
   "rss_feeds": [
     {

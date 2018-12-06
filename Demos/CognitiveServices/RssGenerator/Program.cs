@@ -40,11 +40,21 @@ namespace RssGenerator
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             AzureStorageUtility storageUtility = new AzureStorageUtility(config.StorageConnectionString);
 
+
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             // Create the CosmosDB Client
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             using (CosmosDbClient client = new CosmosDbClient(config.CosmosUri, config.CosmosKey))
             {
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                // Create the database and collections if needed
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                Console.WriteLine("Verifying CosmosDB database and collections");
+                foreach (String coll in config.CosmosCollectionList)
+                {
+                    client.CreateCollection(config.CosmosDatabase, coll).Wait();
+                }
+
                 /////////////////////////////////////////////////////////////////////////////////////////////////
                 // Looop through each of the RSS feeds, collect the articles, then upload them.
                 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,14 +122,14 @@ namespace RssGenerator
                             // Insert the media files first
                             foreach (Article imageArticle in imageContent)
                             {
-                                bool imageResult = client.CreateDocument(config.CosmosDatabase, config.CosmosCollection, imageArticle).Result;
+                                bool imageResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, imageArticle).Result;
                                 Console.WriteLine("Image Insert: " + imageResult.ToString());
                             }
 
                             // Wait briefly....
                             System.Threading.Thread.Sleep(500);
 
-                            bool articleResult = client.CreateDocument(config.CosmosDatabase, config.CosmosCollection, mainArticle).Result;
+                            bool articleResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, mainArticle).Result;
                             Console.WriteLine("Article Insert: " + articleResult.ToString());
 
                             // Only allow one for each feed for now

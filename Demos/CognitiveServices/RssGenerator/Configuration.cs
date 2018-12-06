@@ -65,9 +65,14 @@ namespace RssGenerator
         /// CosmosDB Collection to use for ingest. This will be the one
         /// that has the ingest trigger associated with it.
         /// </summary>
-        [JsonProperty(PropertyName = "cosmos_db_collection")]
-        public String CosmosCollection { get; set; }
+        [JsonProperty(PropertyName = "cosmos_db_ingest_collection")]
+        public String CosmosIngestCollection { get; set; }
+
+        [JsonProperty(PropertyName = "cosmos_db_collections")]
+        public List<String> CosmosCollectionList { get; set; }
+
         
+
         /// <summary>
         /// The RSS feeds to read and insert.
         /// </summary>
@@ -77,6 +82,7 @@ namespace RssGenerator
         protected Configuration()
         {
             this.Feeds = new List<RssFeedInfo>();
+            this.CosmosCollectionList = new List<string>();
         }
 
         public static Configuration GetConfiguration()

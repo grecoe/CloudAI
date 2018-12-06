@@ -121,6 +121,20 @@ $serviceBusCreateParameters.Add("serviceBusFaceQueueName",$faceQueue)
 $serviceBusCreateParameters.Add("serviceBusInspectionQueueName",$inspectionQueue)
 $serviceBusCreateParameters.Add("location",$locationString)
 
+#######################################################################
+# Function App
+#######################################################################
+$fnAppDeploymentName = "functionappcreate"
+$fnAppName = "cosmosfn"
+$fnStgType = "Standard_LRS"
+
+
+#Set up parameters to create CosmosDB account.
+$fnAppCreateParameters = @{}
+$fnAppCreateParameters.Add("appName", $fnAppName)
+$fnAppCreateParameters.Add("storageAccountType",$fnStgType)
+$fnAppCreateParameters.Add("location",$locationString)
+
 
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -218,15 +232,34 @@ $serviceBusInfo.Add("ocrQueue",$ocrQueue)
 $serviceBusInfo.Add("faceQueue",$faceQueue)
 $serviceBusInfo.Add("inspectionQueue",$inspectionQueue)
 
+#######################################################################
+# Create Function App
+#######################################################################
+Write-Host("Creating Function App")
 
-Write-Host ( $serviceBusInfo["connectionstring"])
-Write-Host ( $serviceBusInfo["primarykey"])
-Write-Host ( $serviceBusInfo["name"])
-Write-Host ( $serviceBusInfo["translationQueue"])
-Write-Host ( $serviceBusInfo["ocrQueue"])
-Write-Host ( $serviceBusInfo["faceQueue"])
-Write-Host ( $serviceBusInfo["inspectionQueue"])
+$fnAppCreateParameters.Add("cosmosConnectionString",$cosmosAccountInfo["connectionString"])
+$fnAppCreateParameters.Add("cosmosDatabase","Articles")
+$fnAppCreateParameters.Add("cosmosInspectionCollection","Inspection")
+$fnAppCreateParameters.Add("cosmosProcessedCollection","Processed")
+$fnAppCreateParameters.Add("cosmosIngestCollection","Ingest")
+$fnAppCreateParameters.Add("sbConnectionString",$serviceBusInfo["connectionstring"])
+$fnAppCreateParameters.Add("faceKey",$faceAccountInfo["apiKey"])
+$fnAppCreateParameters.Add("faceURI",$faceAccountInfo["endpoint"])
+$fnAppCreateParameters.Add("textKey",$textAccountInfo["apiKey"])
+$fnAppCreateParameters.Add("textURI",$textAccountInfo["endpoint"])
+$fnAppCreateParameters.Add("translationKey",$translationAccountInfo["apiKey"])
+$fnAppCreateParameters.Add("translationURI",$translationAccountInfo["globalEndpoint"])
+$fnAppCreateParameters.Add("translationLang","en")
+$fnAppCreateParameters.Add("visionKey",$computerVisionAccountInfo["apiKey"])
+$fnAppCreateParameters.Add("visionURI",$computerVisionAccountInfo["endpoint"])
 
+New-AzureRmResourceGroupDeployment -Name $fnAppDeploymentName -ResourceGroupName $resourceGroupName -TemplateFile ".\FunctionApp.json" -TemplateParameterObject $fnAppCreateParameters
+
+$functionAppInfo = @{}
+$functionAppInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageKey.value)
+$functionAppInfo.Add("storageName", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageName.value)
+$functionAppInfo.Add("fnappname", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.functionAppName.value)
+$functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;AccountName=" + $functionAppInfo["storageName"] + ";AccountKey=" +  $functionAppInfo["storageKey"])
 
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -266,7 +299,6 @@ Write-Host ( $cosmosAccountInfo["name"])
 # ArticleIngestTrigger_ConnectionString
 Write-Host ( $cosmosAccountInfo["connectionString"])
 
-
 Write-Host ("Service bus")
 Write-Host ( $serviceBusInfo["connectionstring"])
 Write-Host ( $serviceBusInfo["primarykey"])
@@ -275,3 +307,10 @@ Write-Host ( $serviceBusInfo["translationQueue"])
 Write-Host ( $serviceBusInfo["ocrQueue"])
 Write-Host ( $serviceBusInfo["faceQueue"])
 Write-Host ( $serviceBusInfo["inspectionQueue"])
+
+Write-Host ("Function App")
+Write-Host ( $functionAppInfo["storageKey"])
+Write-Host ( $functionAppInfo["storageName"])
+Write-Host ( $functionAppInfo["fnappname"])
+Write-Host ( $functionAppInfo["stgConnectionString"])
+

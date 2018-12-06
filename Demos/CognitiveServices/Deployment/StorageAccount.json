@@ -36,7 +36,7 @@
 		},
 		"storageName": {
 			"type": "string",
-			"value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('usableStorageName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+			"value": "[variables('usableStorageName')]"
 		}
 	}
 }
