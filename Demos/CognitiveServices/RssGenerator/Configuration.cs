@@ -24,6 +24,14 @@ using Newtonsoft.Json;
 
 namespace RssGenerator
 {
+    class RssFeedInfo
+    {
+        [JsonProperty(PropertyName = "storage_container")]
+        public String AzureStorageContainer { get; set; }
+        [JsonProperty(PropertyName = "feed")]
+        public String RSSFeed { get; set; }
+    }
+
     class Configuration
     {
         [JsonIgnore]
@@ -54,12 +62,6 @@ namespace RssGenerator
         public String StorageConnectionString { get; set; }
         
         /// <summary>
-        /// Azure Storage container to put image attachments in
-        /// </summary>
-        [JsonProperty(PropertyName = "azure_storage_container")]
-        public String StorageContainer { get; set; }
-        
-        /// <summary>
         /// CosmosDB Collection to use for ingest. This will be the one
         /// that has the ingest trigger associated with it.
         /// </summary>
@@ -70,11 +72,11 @@ namespace RssGenerator
         /// The RSS feeds to read and insert.
         /// </summary>
         [JsonProperty(PropertyName = "rss_feeds")]
-        public List<String> Feeds { get; set; }
+        public List<RssFeedInfo> Feeds { get; set; }
 
         protected Configuration()
         {
-            this.Feeds = new List<string>();
+            this.Feeds = new List<RssFeedInfo>();
         }
 
         public static Configuration GetConfiguration()

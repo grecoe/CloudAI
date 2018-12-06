@@ -1,13 +1,22 @@
 ﻿{
-  "cosmos_db_uri": "<YOUR_COSMOS_URI>",
-  "cosmos_db_key": "<YOUR_COSMOS_KEY>",
+  "cosmos_db_uri": "YOUR_COMSOS_URI",
+  "cosmos_db_key": "YOUR_COMSOS_KEY",
   "cosmos_db_database": "Articles",
   "cosmos_db_collection": "Ingest",
-  "azure_storage_connection": "<YOUR_STORAGE_KEY>",
+  "azure_storage_connection": "YOUR_STORAGE_CONNECTION_STRING",
   "azure_storage_container": "scraped",
   "rss_feeds": [
-    "https://www.nasa.gov/rss/dyn/breaking_news.rss",
-    "https://www.france24.com/fr/europe/rss",
-    "http://newsfeed.zeit.de/index"
+    {
+      "storage_container": "nasa",
+      "feed": "https://www.nasa.gov/rss/dyn/breaking_news.rss"
+    },
+    {
+      "storage_container": "france24",
+      "feed": "https://www.france24.com/fr/europe/rss"
+    },
+    {
+      "storage_container": "zeit",
+      "feed": "http://newsfeed.zeit.de/index"
+    }
   ]
 }

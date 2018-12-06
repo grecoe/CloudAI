@@ -30,41 +30,43 @@ namespace RssGenerator.StorageHelper
     {
         private CloudStorageAccount StorageAccount { get; set; }
         private CloudBlobClient BlobClient { get; set; }
-        private CloudBlobContainer BlobContainer { get; set; }
 
         public String ConnectionString { get; private set;}
-        public String Container { get; private set; }
 
-        public AzureStorageUtility(String connection, String container)
+        public AzureStorageUtility(String connection)
         {
             this.ConnectionString = connection;
-            this.Container = container;
 
             this.StorageAccount = CloudStorageAccount.Parse(this.ConnectionString);
             this.BlobClient = this.StorageAccount.CreateCloudBlobClient();
+        }
 
-            this.BlobContainer = this.BlobClient.GetContainerReference(this.Container);
-            if(!this.BlobContainer.Exists())
+        public async Task<String> UploadBlob(String path, String container)
+        {
+            String returnValue = String.Empty;
+
+            CloudBlobContainer blobContainer = this.GetContainer(container);
+            CloudBlockBlob cloudBlockBlob = blobContainer.GetBlockBlobReference(System.IO.Path.GetFileName(path));
+            await cloudBlockBlob.UploadFromFileAsync(path);
+
+            return cloudBlockBlob.Uri.AbsoluteUri;
+        }
+
+        private CloudBlobContainer GetContainer(String container)
+        {
+            CloudBlobContainer returnContainer  = this.BlobClient.GetContainerReference(container);
+            if (!returnContainer.Exists())
             {
                 BlobContainerPermissions permissions = new BlobContainerPermissions
                 {
                     PublicAccess = BlobContainerPublicAccessType.Blob
                 };
 
-                this.BlobContainer.Create();
-                this.BlobContainer.SetPermissions(permissions);
-
+                returnContainer.Create();
+                returnContainer.SetPermissions(permissions);
             }
-        }
 
-        public async Task<String> UploadBlob(String path)
-        {
-            String returnValue = String.Empty;
-
-            CloudBlockBlob cloudBlockBlob = this.BlobContainer.GetBlockBlobReference(System.IO.Path.GetFileName(path));
-            await cloudBlockBlob.UploadFromFileAsync(path);
-
-            return cloudBlockBlob.Uri.AbsoluteUri;
+            return returnContainer;
         }
     }
 }

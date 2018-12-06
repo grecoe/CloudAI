@@ -38,7 +38,7 @@ namespace RssGenerator
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             // Creat the Azure Storage Utility
             /////////////////////////////////////////////////////////////////////////////////////////////////////
-            AzureStorageUtility storageUtility = new AzureStorageUtility(config.StorageConnectionString, config.StorageContainer);
+            AzureStorageUtility storageUtility = new AzureStorageUtility(config.StorageConnectionString);
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             // Create the CosmosDB Client
@@ -48,16 +48,17 @@ namespace RssGenerator
                 /////////////////////////////////////////////////////////////////////////////////////////////////
                 // Looop through each of the RSS feeds, collect the articles, then upload them.
                 /////////////////////////////////////////////////////////////////////////////////////////////////
-                foreach (String feed in config.Feeds)
+                foreach (RssFeedInfo feed in config.Feeds)
                 {
-                    Console.WriteLine("Processing feed : " + feed);
-                    using (RSSFeedReader rssReader = new RSSFeedReader(feed))
+                    Console.WriteLine("Processing feed : " + feed.RSSFeed);
+                    using (RSSFeedReader rssReader = new RSSFeedReader(feed.RSSFeed))
                     {
                         /////////////////////////////////////////////////////////////////////////////////////////
                         // The the batch of articles.....
                         /////////////////////////////////////////////////////////////////////////////////////////
+                        int feedItemCount = 0;
                         List<RSSFeedItem> feedItems = rssReader.ReadFeed();
-                        Console.WriteLine("Feed : " + feed + " has " + feedItems.Count + " items");
+                        Console.WriteLine("Feed : " + feed.RSSFeed + " has " + feedItems.Count + " items");
 
                         /////////////////////////////////////////////////////////////////////////////////////////
                         // For each article, upload it's image(s) and content.
@@ -72,7 +73,7 @@ namespace RssGenerator
                             // Set up the images
                             foreach (RSSImageItem image in item.Images)
                             {
-                                String blobUri = storageUtility.UploadBlob(image.Path).Result;
+                                String blobUri = storageUtility.UploadBlob(image.Path, feed.AzureStorageContainer).Result;
                                 if (!String.IsNullOrEmpty(blobUri))
                                 {
                                     Article media = new Article();
@@ -122,7 +123,10 @@ namespace RssGenerator
                             Console.WriteLine("Article Insert: " + articleResult.ToString());
 
                             // Only allow one for each feed for now
-                            break;
+                            if (++feedItemCount > 5)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
