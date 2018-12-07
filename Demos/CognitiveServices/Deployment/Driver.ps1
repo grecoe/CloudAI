@@ -9,7 +9,7 @@
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
 $subscriptionId = "edf507a2-6235-46c5-b560-fd463ba2e771"
-$resourceGroupName="dangautomation"
+$resourceGroupName="dangauto"
 $locationString = "eastus"
 
 
@@ -105,7 +105,7 @@ $cosmosCreateParameters.Add("location",$locationString)
 #######################################################################
 # Service Bus
 #######################################################################
-$serviceBusDeploymentName = "servicebuscreate22"
+$serviceBusDeploymentName = "servicebuscreate"
 $serviceBusNamespace = "cosmossb"
 $translationQueue = "translationqueue"
 $ocrQueue = "ocrqueue"
@@ -215,7 +215,7 @@ $cosmosAccountInfo = @{}
 $cosmosAccountInfo.Add("apiKey", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $cosmosDeploymentName).Outputs.cosmoskey.value)
 $cosmosAccountInfo.Add("endpoint", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $cosmosDeploymentName).Outputs.endpoint.value)
 $cosmosAccountInfo.Add("name", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $cosmosDeploymentName).Outputs.cosmosname.value)
-$cosmosAccountInfo.Add("connectionString", $cosmosAccountInfo["endpoint"] + ";AccountKey=" +  $cosmosAccountInfo["apiKey"] + ";")
+$cosmosAccountInfo.Add("connectionString", "AccountEndpoint=" + $cosmosAccountInfo["endpoint"] + ";AccountKey=" +  $cosmosAccountInfo["apiKey"] + ";")
 
 #######################################################################
 # Create Service Bus and Queues
@@ -260,6 +260,40 @@ $functionAppInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -Resource
 $functionAppInfo.Add("storageName", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageName.value)
 $functionAppInfo.Add("fnappname", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.functionAppName.value)
 $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;AccountName=" + $functionAppInfo["storageName"] + ";AccountKey=" +  $functionAppInfo["storageKey"])
+
+#######################################################################
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Create Configuration file for RssGenerator application
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#######################################################################
+Write-Host("Creating configuration file for RssGenerator Application")
+
+$configurationCollections = @($fnAppCreateParameters["cosmosIngestCollection"],$fnAppCreateParameters["cosmosProcessedCollection"],$fnAppCreateParameters["cosmosInspectionCollection"])
+
+$nasa = @{}
+$nasa.Add("storage_container","nasa")
+$nasa.Add("feed","https://www.nasa.gov/rss/dyn/breaking_news.rss")
+$france = @{}
+$france.Add("storage_container","france24")
+$france.Add("feed","https://www.france24.com/fr/europe/rss")
+$germany = @{}
+$germany.Add("storage_container","zeit")
+$germany.Add("feed","http://newsfeed.zeit.de/index")
+$configurationFeeds = @($nasa, $france, $germany)
+
+$configuration = @{}
+$configuration.Add("cosmos_db_uri",$cosmosAccountInfo["endpoint"])
+$configuration.Add("cosmos_db_key",$cosmosAccountInfo["apiKey"])
+$configuration.Add("cosmos_db_database",$fnAppCreateParameters["cosmosDatabase"])
+$configuration.Add("cosmos_db_ingest_collection",$fnAppCreateParameters["cosmosIngestCollection"])
+$configuration.Add("cosmos_db_collections",$configurationCollections)
+$configuration.Add("azure_storage_connection",$additionalStorageAccountInfo["connectionString"])
+$configuration.Add("rss_feeds",$configurationFeeds)
+
+$configuration | ConvertTo-Json -depth 100 | Out-File "..\RssGenerator\Configuration.json"
+
 
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -313,4 +347,24 @@ Write-Host ( $functionAppInfo["storageKey"])
 Write-Host ( $functionAppInfo["storageName"])
 Write-Host ( $functionAppInfo["fnappname"])
 Write-Host ( $functionAppInfo["stgConnectionString"])
+
+#######################################################################
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Additional Instructions
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#######################################################################
+# Example Location : https://cosmosfnappba4e.file.core.windows.net/cosmosfnappba4e/site/wwwroot/
+Write-Host("")
+Write-Host("Upload the Azure Function Files to Azure File Share Storage")
+Write-Host("Using Azure Storage Explorer or Azure Portal, connect to the storage account:")
+Write-Host("")
+Write-Host($functionAppInfo["storageName"] + " : "  + $functionAppInfo["stgConnectionString"])
+Write-Host("")
+Write-Host("Next, upload the contents of the wwwroot folder (locally) to the following location:")
+Write-Host("")
+Write-Host("https://" + $functionAppInfo["storageName"] + ".file.core.windows.net/" + $functionAppInfo["fnappname"] + "/site/wwwroot/")
+Write-Host("")
+
 

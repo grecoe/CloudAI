@@ -30,6 +30,8 @@ namespace RssGenerator
     {
         static void Main(string[] args)
         {
+            List<String> arguments = new List<string>(args);
+
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             // Load the configuration settings that contain the CosmosDB, Azure Storage, and RSS feed information
             /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,101 +46,17 @@ namespace RssGenerator
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             // Create the CosmosDB Client
             /////////////////////////////////////////////////////////////////////////////////////////////////////
+            String returnResult = "Jobs completed";
             using (CosmosDbClient client = new CosmosDbClient(config.CosmosUri, config.CosmosKey))
             {
-                /////////////////////////////////////////////////////////////////////////////////////////////////
-                // Create the database and collections if needed
-                /////////////////////////////////////////////////////////////////////////////////////////////////
-                Console.WriteLine("Verifying CosmosDB database and collections");
-                foreach (String coll in config.CosmosCollectionList)
+                if(arguments.Contains("seed") )
                 {
-                    client.CreateCollection(config.CosmosDatabase, coll).Wait();
+                    returnResult = Program.SeedDatabase(config, client);
                 }
-
-                /////////////////////////////////////////////////////////////////////////////////////////////////
-                // Looop through each of the RSS feeds, collect the articles, then upload them.
-                /////////////////////////////////////////////////////////////////////////////////////////////////
-                foreach (RssFeedInfo feed in config.Feeds)
+                else
                 {
-                    Console.WriteLine("Processing feed : " + feed.RSSFeed);
-                    using (RSSFeedReader rssReader = new RSSFeedReader(feed.RSSFeed))
-                    {
-                        /////////////////////////////////////////////////////////////////////////////////////////
-                        // The the batch of articles.....
-                        /////////////////////////////////////////////////////////////////////////////////////////
-                        int feedItemCount = 0;
-                        List<RSSFeedItem> feedItems = rssReader.ReadFeed();
-                        Console.WriteLine("Feed : " + feed.RSSFeed + " has " + feedItems.Count + " items");
-
-                        /////////////////////////////////////////////////////////////////////////////////////////
-                        // For each article, upload it's image(s) and content.
-                        /////////////////////////////////////////////////////////////////////////////////////////
-                        foreach (RSSFeedItem item in feedItems)
-                        {
-                            Console.WriteLine("Inserting : " + item.Title);
-
-                            Article mainArticle = new Article();
-                            List<Article> imageContent = new List<Article>();
-
-                            // Set up the images
-                            foreach (RSSImageItem image in item.Images)
-                            {
-                                String blobUri = storageUtility.UploadBlob(image.Path, feed.AzureStorageContainer).Result;
-                                if (!String.IsNullOrEmpty(blobUri))
-                                {
-                                    Article media = new Article();
-                                    media.ArtifactType = "image";
-                                    media.AssetHash = image.Hash;
-                                    media.UniqueIdentifier = image.Id;
-                                    media.SetProperty(ArticleProperties.RetrievalDate, DateTime.Now.ToString("O"));
-                                    media.SetProperty(ArticleProperties.OriginalUri, image.Uri);
-                                    media.SetProperty(ArticleProperties.InternalUri, blobUri);
-                                    imageContent.Add(media);
-                                }
-                            }
-
-                            // Now set up the article iteself
-                            mainArticle.SetProperty(ArticleProperties.OriginalUri, item.Uri);
-                            mainArticle.SetProperty(ArticleProperties.RetrievalDate, DateTime.Now.ToString("O"));
-                            mainArticle.SetProperty(ArticleProperties.PostDate, item.PublishedDate);
-                            mainArticle.SetProperty(ArticleProperties.Title, item.Title);
-                            mainArticle.SetProperty(ArticleProperties.Body, Program.CleanInput(item.Summary));
-
-                            List<Dictionary<string, string>> childFiles = new List<Dictionary<string, string>>();
-                            foreach (Article file in imageContent)
-                            {
-                                Dictionary<String, String> obj = new Dictionary<string, string>();
-                                obj.Add(Article.MEDIA_ID, file.UniqueIdentifier);
-                                obj.Add(Article.MEDIA_ORIG_URI, file.GetProperty(ArticleProperties.OriginalUri).ToString());
-                                obj.Add(Article.MEDIA_INTERNAL_URI, file.GetProperty(ArticleProperties.InternalUri).ToString());
-                                childFiles.Add(obj);
-                            }
-                            mainArticle.SetProperty(ArticleProperties.ChildImages, childFiles);
-
-                            mainArticle.SetProperty(ArticleProperties.ChildVideos, null);
-                            mainArticle.SetProperty(ArticleProperties.Author, null);
-                            mainArticle.SetProperty(ArticleProperties.HeroImage, null);
-
-                            // Insert the media files first
-                            foreach (Article imageArticle in imageContent)
-                            {
-                                bool imageResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, imageArticle).Result;
-                                Console.WriteLine("Image Insert: " + imageResult.ToString());
-                            }
-
-                            // Wait briefly....
-                            System.Threading.Thread.Sleep(500);
-
-                            bool articleResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, mainArticle).Result;
-                            Console.WriteLine("Article Insert: " + articleResult.ToString());
-
-                            // Only allow one for each feed for now
-                            if (++feedItemCount > 5)
-                            {
-                                break;
-                            }
-                        }
-                    }
+                    Program.SeedDatabase(config, client);
+                    returnResult = Program.UploadRssFeeds(config, client, storageUtility);
                 }
             }
 
@@ -150,8 +68,118 @@ namespace RssGenerator
                 HashGenerator.HashAlgorithm.Dispose();
             }
 
-            Console.WriteLine("Finished processing RSS feeds");
+            Console.WriteLine(returnResult);
+            Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
+        }
+
+        private static String SeedDatabase(Configuration config, CosmosDbClient client)
+        {
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            // Create the database and collections if needed
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            Console.WriteLine("Seed CosmosDB database and collections");
+            foreach (String coll in config.CosmosCollectionList)
+            {
+                client.CreateCollection(config.CosmosDatabase, coll).Wait();
+            }
+
+            return "Finsihed seeding database.";
+        }
+
+        private static String UploadRssFeeds(Configuration config, CosmosDbClient client, AzureStorageUtility storageUtility)
+        {
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            // Looop through each of the RSS feeds, collect the articles, then upload them.
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            foreach (RssFeedInfo feed in config.Feeds)
+            {
+                Console.WriteLine("Processing feed : " + feed.RSSFeed);
+                using (RSSFeedReader rssReader = new RSSFeedReader(feed.RSSFeed))
+                {
+                    /////////////////////////////////////////////////////////////////////////////////////////
+                    // The the batch of articles.....
+                    /////////////////////////////////////////////////////////////////////////////////////////
+                    int feedItemCount = 0;
+                    List<RSSFeedItem> feedItems = rssReader.ReadFeed();
+                    Console.WriteLine("Feed : " + feed.RSSFeed + " has " + feedItems.Count + " items");
+
+                    /////////////////////////////////////////////////////////////////////////////////////////
+                    // For each article, upload it's image(s) and content.
+                    /////////////////////////////////////////////////////////////////////////////////////////
+                    foreach (RSSFeedItem item in feedItems)
+                    {
+                        Console.WriteLine("Inserting : " + item.Title);
+
+                        Article mainArticle = new Article();
+                        List<Article> imageContent = new List<Article>();
+
+                        // Set up the images
+                        foreach (RSSImageItem image in item.Images)
+                        {
+                            String blobUri = storageUtility.UploadBlob(image.Path, feed.AzureStorageContainer).Result;
+                            if (!String.IsNullOrEmpty(blobUri))
+                            {
+                                Article media = new Article();
+                                media.ArtifactType = "image";
+                                media.AssetHash = image.Hash;
+                                media.UniqueIdentifier = image.Id;
+                                media.SetProperty(ArticleProperties.RetrievalDate, DateTime.Now.ToString("O"));
+                                media.SetProperty(ArticleProperties.OriginalUri, image.Uri);
+                                media.SetProperty(ArticleProperties.InternalUri, blobUri);
+                                imageContent.Add(media);
+                            }
+                        }
+
+                        // Now set up the article iteself
+                        mainArticle.SetProperty(ArticleProperties.OriginalUri, item.Uri);
+                        mainArticle.SetProperty(ArticleProperties.RetrievalDate, DateTime.Now.ToString("O"));
+                        mainArticle.SetProperty(ArticleProperties.PostDate, item.PublishedDate);
+                        mainArticle.SetProperty(ArticleProperties.Title, item.Title);
+                        mainArticle.SetProperty(ArticleProperties.Body, Program.CleanInput(item.Summary));
+
+                        List<Dictionary<string, string>> childFiles = new List<Dictionary<string, string>>();
+                        foreach (Article file in imageContent)
+                        {
+                            Dictionary<String, String> obj = new Dictionary<string, string>();
+                            obj.Add(Article.MEDIA_ID, file.UniqueIdentifier);
+                            obj.Add(Article.MEDIA_ORIG_URI, file.GetProperty(ArticleProperties.OriginalUri).ToString());
+                            obj.Add(Article.MEDIA_INTERNAL_URI, file.GetProperty(ArticleProperties.InternalUri).ToString());
+                            childFiles.Add(obj);
+                        }
+                        mainArticle.SetProperty(ArticleProperties.ChildImages, childFiles);
+
+                        mainArticle.SetProperty(ArticleProperties.ChildVideos, null);
+                        mainArticle.SetProperty(ArticleProperties.Author, null);
+                        mainArticle.SetProperty(ArticleProperties.HeroImage, null);
+
+                        // Insert the media files first
+                        foreach (Article imageArticle in imageContent)
+                        {
+                            try
+                            {
+                                bool imageResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, imageArticle).Result;
+                                Console.WriteLine("Image Insert: " + imageResult.ToString());
+                            }
+                            catch (Exception ex) { }
+                        }
+
+                        // Wait briefly....
+                        System.Threading.Thread.Sleep(500);
+
+                        bool articleResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, mainArticle).Result;
+                        Console.WriteLine("Article Insert: " + articleResult.ToString());
+
+                        // Only allow one for each feed for now
+                        if (++feedItemCount > 5)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return "Finished uploading current articles.";
         }
 
         private static String CleanInput(String input)

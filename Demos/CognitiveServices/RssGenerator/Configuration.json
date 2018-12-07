@@ -3,13 +3,12 @@
   "cosmos_db_key": "YOUR_COSMOS_KEY",
   "cosmos_db_database": "Articles",
   "cosmos_db_ingest_collection": "Ingest",
+  "azure_storage_connection": "YOUR_STORAGE_ACCOUNT",
   "cosmos_db_collections": [
     "Ingest",
     "Processed",
     "Inspection"
   ],
-  "azure_storage_connection": "YOUR_ADDITIONAL_STORAGE",
-  "azure_storage_container": "scraped",
   "rss_feeds": [
     {
       "storage_container": "nasa",
