@@ -9,7 +9,7 @@
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
 $subscriptionId = "edf507a2-6235-46c5-b560-fd463ba2e771"
-$resourceGroupName="dangauto"
+$resourceGroupName="dangautomation6"
 $locationString = "eastus"
 
 
@@ -94,7 +94,10 @@ $textApiCreateParameters.Add("cognitiveServicesLocation",$locationString)
 $cosmosDeploymentName = "comsoscreate"
 $cosmosApiType = "SQL"
 $cosmosAccountName = "cosmos"
-$textSKU = "S0"
+$cosmosDatabase = "Articles"
+$cosmosInspectionCollection = "Inspection"
+$cosmosProcessedCollection = "Processed"
+$cosmosIngestCollection = "Ingest"
 
 #Set up parameters to create CosmosDB account.
 $cosmosCreateParameters = @{}
@@ -160,14 +163,28 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location $locationString
 
 
 #######################################################################
-# Create the storage account used to hold image/videos
+# Create the storage account used to hold image/videos/azure functions
 #######################################################################
-Write-Host("Creating additional storage account for images/videos.")
+Write-Host("Creating additional storage account for images/videos/functions.")
 New-AzureRmResourceGroupDeployment -Name $storageAccountDeploymentName -ResourceGroupName $resourceGroupName -TemplateFile ".\StorageAccount.json" -TemplateParameterObject $storageCreateParameters
 $additionalStorageAccountInfo = @{}
 $additionalStorageAccountInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $storageAccountDeploymentName).Outputs.storageKey.value)
 $additionalStorageAccountInfo.Add("accountName", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $storageAccountDeploymentName).Outputs.storageName.value)
 $additionalStorageAccountInfo.Add("connectionString", "DefaultEndpointsProtocol=https;AccountName=" + $additionalStorageAccountInfo["accountName"] + ";AccountKey=" +  $additionalStorageAccountInfo["storageKey"])
+
+# Copy the website files to storage
+Write-Host("Uploading function zip.")
+$functionsContainerName = "acurefunctions"
+$websiteFile = "AzureFunctions.zip"
+$websitePackage = ".\Functions\AzureFunctions.zip"
+$websitePackageLocation = "https://" + $additionalStorageAccountInfo["accountName"] + ".blob.core.windows.net/" + $functionsContainerName + "/" + $websiteFile
+
+# create a context for account and key
+$ctx = New-AzureStorageContext $additionalStorageAccountInfo["accountName"] $additionalStorageAccountInfo["storageKey"]
+
+New-AzureStorageContainer -Name $functionsContainerName -Context $ctx -Permission blob
+Set-AzureStorageBlobContent -File $websitePackage -Container $functionsContainerName -Blob $websiteFile -Context $ctx 
+
 
 #######################################################################
 # Create computer vision API service
@@ -218,6 +235,42 @@ $cosmosAccountInfo.Add("name", (Get-AzureRmResourceGroupDeployment -ResourceGrou
 $cosmosAccountInfo.Add("connectionString", "AccountEndpoint=" + $cosmosAccountInfo["endpoint"] + ";AccountKey=" +  $cosmosAccountInfo["apiKey"] + ";")
 
 #######################################################################
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# Create Configuration file for RssGenerator application and seed 
+# CosmosDB with database and collections.
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#######################################################################
+Write-Host("Creating configuration file for RssGenerator Application")
+
+$configurationCollections = @($cosmosIngestCollection,$cosmosProcessedCollection,$cosmosInspectionCollection)
+
+$nasa = @{}
+$nasa.Add("storage_container","nasa")
+$nasa.Add("feed","https://www.nasa.gov/rss/dyn/breaking_news.rss")
+$france = @{}
+$france.Add("storage_container","france24")
+$france.Add("feed","https://www.france24.com/fr/europe/rss")
+$germany = @{}
+$germany.Add("storage_container","zeit")
+$germany.Add("feed","http://newsfeed.zeit.de/index")
+$configurationFeeds = @($nasa, $france, $germany)
+
+$configuration = @{}
+$configuration.Add("cosmos_db_uri",$cosmosAccountInfo["endpoint"])
+$configuration.Add("cosmos_db_key",$cosmosAccountInfo["apiKey"])
+$configuration.Add("cosmos_db_database",$cosmosDatabase)
+$configuration.Add("cosmos_db_ingest_collection",$cosmosIngestCollection)
+$configuration.Add("cosmos_db_collections",$configurationCollections)
+$configuration.Add("azure_storage_connection",$additionalStorageAccountInfo["connectionString"])
+$configuration.Add("rss_feeds",$configurationFeeds)
+
+$configuration | ConvertTo-Json -depth 100 | Out-File ".\RssGenerator\Configuration.json"
+Write-Host("Seeding CosmosDB with Database and Collections")
+.\RssGenerator\RssGenerator seed
+
+#######################################################################
 # Create Service Bus and Queues
 #######################################################################
 Write-Host("Creating Service Bus and Queues")
@@ -238,10 +291,10 @@ $serviceBusInfo.Add("inspectionQueue",$inspectionQueue)
 Write-Host("Creating Function App")
 
 $fnAppCreateParameters.Add("cosmosConnectionString",$cosmosAccountInfo["connectionString"])
-$fnAppCreateParameters.Add("cosmosDatabase","Articles")
-$fnAppCreateParameters.Add("cosmosInspectionCollection","Inspection")
-$fnAppCreateParameters.Add("cosmosProcessedCollection","Processed")
-$fnAppCreateParameters.Add("cosmosIngestCollection","Ingest")
+$fnAppCreateParameters.Add("cosmosDatabase",$cosmosDatabase)
+$fnAppCreateParameters.Add("cosmosInspectionCollection", $cosmosInspectionCollection)
+$fnAppCreateParameters.Add("cosmosProcessedCollection",$cosmosProcessedCollection)
+$fnAppCreateParameters.Add("cosmosIngestCollection",$cosmosIngestCollection)
 $fnAppCreateParameters.Add("sbConnectionString",$serviceBusInfo["connectionstring"])
 $fnAppCreateParameters.Add("faceKey",$faceAccountInfo["apiKey"])
 $fnAppCreateParameters.Add("faceURI",$faceAccountInfo["endpoint"])
@@ -252,6 +305,7 @@ $fnAppCreateParameters.Add("translationURI",$translationAccountInfo["globalEndpo
 $fnAppCreateParameters.Add("translationLang","en")
 $fnAppCreateParameters.Add("visionKey",$computerVisionAccountInfo["apiKey"])
 $fnAppCreateParameters.Add("visionURI",$computerVisionAccountInfo["endpoint"])
+$fnAppCreateParameters.Add("packageUri",$websitePackageLocation)
 
 New-AzureRmResourceGroupDeployment -Name $fnAppDeploymentName -ResourceGroupName $resourceGroupName -TemplateFile ".\FunctionApp.json" -TemplateParameterObject $fnAppCreateParameters
 
@@ -260,39 +314,6 @@ $functionAppInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -Resource
 $functionAppInfo.Add("storageName", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageName.value)
 $functionAppInfo.Add("fnappname", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.functionAppName.value)
 $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;AccountName=" + $functionAppInfo["storageName"] + ";AccountKey=" +  $functionAppInfo["storageKey"])
-
-#######################################################################
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Create Configuration file for RssGenerator application
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#######################################################################
-Write-Host("Creating configuration file for RssGenerator Application")
-
-$configurationCollections = @($fnAppCreateParameters["cosmosIngestCollection"],$fnAppCreateParameters["cosmosProcessedCollection"],$fnAppCreateParameters["cosmosInspectionCollection"])
-
-$nasa = @{}
-$nasa.Add("storage_container","nasa")
-$nasa.Add("feed","https://www.nasa.gov/rss/dyn/breaking_news.rss")
-$france = @{}
-$france.Add("storage_container","france24")
-$france.Add("feed","https://www.france24.com/fr/europe/rss")
-$germany = @{}
-$germany.Add("storage_container","zeit")
-$germany.Add("feed","http://newsfeed.zeit.de/index")
-$configurationFeeds = @($nasa, $france, $germany)
-
-$configuration = @{}
-$configuration.Add("cosmos_db_uri",$cosmosAccountInfo["endpoint"])
-$configuration.Add("cosmos_db_key",$cosmosAccountInfo["apiKey"])
-$configuration.Add("cosmos_db_database",$fnAppCreateParameters["cosmosDatabase"])
-$configuration.Add("cosmos_db_ingest_collection",$fnAppCreateParameters["cosmosIngestCollection"])
-$configuration.Add("cosmos_db_collections",$configurationCollections)
-$configuration.Add("azure_storage_connection",$additionalStorageAccountInfo["connectionString"])
-$configuration.Add("rss_feeds",$configurationFeeds)
-
-$configuration | ConvertTo-Json -depth 100 | Out-File "..\RssGenerator\Configuration.json"
 
 
 #######################################################################

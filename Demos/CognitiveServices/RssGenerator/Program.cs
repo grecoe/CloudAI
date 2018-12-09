@@ -47,10 +47,12 @@ namespace RssGenerator
             // Create the CosmosDB Client
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             String returnResult = "Jobs completed";
+            bool bWaitForUser = true;
             using (CosmosDbClient client = new CosmosDbClient(config.CosmosUri, config.CosmosKey))
             {
                 if(arguments.Contains("seed") )
                 {
+                    bWaitForUser = false;
                     returnResult = Program.SeedDatabase(config, client);
                 }
                 else
@@ -69,8 +71,11 @@ namespace RssGenerator
             }
 
             Console.WriteLine(returnResult);
-            Console.WriteLine("Press any key to exit.");
-            Console.ReadLine();
+            if (bWaitForUser)
+            {
+                Console.WriteLine("Press any key to exit.");
+                Console.ReadLine();
+            }
         }
 
         private static String SeedDatabase(Configuration config, CosmosDbClient client)

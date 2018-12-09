@@ -131,6 +131,13 @@
 			"metadata": {
 				"description": "Vision API Uri."
 			}
+		},
+		"packageUri" : {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Blob URI of function package"
+			}
 		}
 	},
 	"variables": {
@@ -186,6 +193,10 @@
 						{
 							"name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
 							"value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+						},
+						{
+							"name": "WEBSITE_RUN_FROM_PACKAGE",
+							"value": "[parameters('packageUri')]"
 						},
 						{
 							"name": "WEBSITE_CONTENTSHARE",

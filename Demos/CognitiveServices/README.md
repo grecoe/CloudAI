@@ -1,6 +1,8 @@
 # Demos - Cognitive Services
 <sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
+https://docs.microsoft.com/en-us/powershell/azure/install-azurerm-ps?view=azurermps-6.13.0
+
 This demo is a series of Azure Services stitched together to process digital articles that contain media (images and videos) in an automated fashion.
 
 RSSGenerator is used to populate a Cosmos DB Collection with RSS articles in multiple languages and the Azure Function App (wwwroot) contains the functions that:
