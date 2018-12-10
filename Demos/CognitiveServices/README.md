@@ -56,7 +56,7 @@ Azure Service | Purpose
 <img src=".\images\pipeline.png">
 </center>
 
-For record data formats see [\RssGenerator\README.md](../RssGenerator/README.md)
+For record data formats see [\RssGenerator\README.md](../RssGenerator)
 
 This demo is a series of Azure Services stitched together to process digital articles that contain media (images) in an automated fashion.
 
