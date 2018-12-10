@@ -56,6 +56,8 @@ Azure Service | Purpose
 <img src=".\images\pipeline.png">
 </center>
 
+For record data formats see [\RssGenerator\README.md](..\RssGenerator\README.md)
+
 This demo is a series of Azure Services stitched together to process digital articles that contain media (images) in an automated fashion.
 
 The generator in this case is contained in this repository and named RSSGenerator. This generator is used to populate a Cosmos DB Collection with RSS articles in multiple languages which then trigger the following: 
