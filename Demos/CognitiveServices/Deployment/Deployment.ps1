@@ -151,7 +151,7 @@ $fnAppCreateParameters.Add("location",$locationString)
 #######################################################################
 # Log in and Select the right subscription.
 #######################################################################
-#Login-AzureRMAccount
+Login-AzureRMAccount
 Select-AzureRmSubscription -SubscriptionId $subscriptionId
 
 
