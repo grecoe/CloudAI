@@ -7,7 +7,7 @@ This directory contains the source code used to build the generator application 
 ## Data Formats
 
 ### Ingestion format
-his format is contains the original content of the article. Articles are broken down into article (contains text) and image entries in the Ingest collection in teh Cosmos DB. 
+This format is contains the original content of the article. Articles are broken down into article (contains text) and image entries in the Ingest collection in teh Cosmos DB. 
 
 ```
 {

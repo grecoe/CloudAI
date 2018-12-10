@@ -16,7 +16,7 @@ English | https://www.nasa.gov/rss/dyn/breaking_news.rss
 French | https://www.france24.com/fr/europe/rss
 German | http://newsfeed.zeit.de/index
 
-Our "requirements" that were presented are that for each document ingested into the pipeline you must:
+The "requirements" for this project are that for each document ingested into the pipeline it must:
 1. Translate all text found in any article to English. (though the translation languate should, and is, programmable)
 2. Find key phrases in the text and document them.
 3. Find known entities by full name or abbreviation and provide information about those known entities.
