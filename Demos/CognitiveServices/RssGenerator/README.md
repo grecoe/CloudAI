@@ -67,8 +67,16 @@ processed_datetime	|DateTime	|Y	|X	|X	|X
 processed_time*	|Int	|Y	|X	|X	|X
 title**	|object	|N	|X ||		
 body**	|object	|N	|X ||		
+vision***	|object	|N	| |X|X		
+face****	|object	|N	| |X|X		
 tags	|Array(string)	|N	|X	|X	|X
+\* Total processing time (ms)
+
 \** Text Field Analytics objects
+
+\*** Vision Analytics object
+
+\*** Face Analytics object
 
 ##### Text Field Analytics Object
 ```
@@ -90,5 +98,27 @@ tags	|Array(string)	|N	|X	|X	|X
         }
 		....
     ]
+}
+```
+
+##### Vision Analytics Object
+```
+"vision": {
+     "object_categories": ["array of strings of object categories found"],
+     "objects": ["array of strings of objects"],
+     "text": ["array of strings of text found in images"]
+ }
+```
+
+##### Face Analytics Object
+The face object is a list of People with gender and age.
+```
+"face": {
+    "people": [
+		{
+			"gender" : "gender of person found",
+			"age" : "age of person found"
+		}
+	]
 }
 ```

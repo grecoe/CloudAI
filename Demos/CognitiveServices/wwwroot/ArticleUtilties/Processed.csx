@@ -36,9 +36,50 @@ public enum ProcessedProperties
     // Instances of TextFieldAnalytics
     [PropertyDescriptor("title")]
     Title, 
+    // Instances of VisionResults
+    [PropertyDescriptor("vision")]
+    Vision,
+    // Instances of FaceResults
+    [PropertyDescriptor("face")]
+    Face,
     [PropertyDescriptor("tags")]
     Tags
 };
+
+public class Person
+{
+    [JsonProperty(PropertyName = "gender")]
+    public String Gender { get; set; }
+    [JsonProperty(PropertyName = "age")]
+    public String Age { get; set; }
+}
+
+public class FaceResults
+{
+    [JsonProperty(PropertyName = "people")]
+    public List<Person> People { get; set; }
+    public FaceResults()
+    {
+        this.People = new List<Person>();
+    }
+}
+
+public class VisionResults
+{
+    [JsonProperty(PropertyName = "object_categories")]
+    public List<String> ObjectCategories { get; set; }
+    [JsonProperty(PropertyName = "objects")]
+    public List<String> Objects { get; set; }
+    [JsonProperty(PropertyName = "text")]
+    public List<String> Text { get; set; }
+
+    public VisionResults()
+    {
+        this.ObjectCategories = new List<string>();
+        this.Objects = new List<string>();
+        this.Text = new List<string>();
+    }
+}
 
 public class TextFieldAnalytics
 {
@@ -113,6 +154,18 @@ public class Processed
                     if (returnValue != null)
                     {
                         returnValue = JsonConvert.DeserializeObject<TextFieldAnalytics>(JsonConvert.SerializeObject(returnValue));
+                    }
+                    break;
+                case ProcessedProperties.Vision:
+                    if (returnValue != null)
+                    {
+                        returnValue = JsonConvert.DeserializeObject<VisionResults>(JsonConvert.SerializeObject(returnValue));
+                    }
+                    break;
+                case ProcessedProperties.Face:
+                    if (returnValue != null)
+                    {
+                        returnValue = JsonConvert.DeserializeObject<FaceResults>(JsonConvert.SerializeObject(returnValue));
                     }
                     break;
             }

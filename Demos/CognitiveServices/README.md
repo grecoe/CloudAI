@@ -119,14 +119,14 @@ This demo was written to explicitly execute the automation script on a Windows b
 #### Deploying the solution
 1. Open up Windows PowerShell and navigate to the \Deployment folder whereever it is that you cloned this repository to. 
 
-2. Open the file <b>Driver.ps1</b> and at the top of the file enter in your subscription ID, a name for the Azure Resource Group to hold all of the resources, and a geo location that will host the services. Not all regions are supported, so stick to something that you KNOW will work like eastus, westus, and others. 
+2. Open the file <b>Deployment.ps1</b> and at the top of the file enter in your subscription ID, a name for the Azure Resource Group to hold all of the resources, and a geo location that will host the services. Not all regions are supported, so stick to something that you KNOW will work like eastus, westus, and others. 
 
-3. Run the script Driver.ps1 in that folder. You will be asked to log in to your Azure Subscription shortly after the script starts. After that, the process will not need your intervention until the all of the resources have been deployed. 
+3. Run the script Deployment.ps1 in that folder. You will be asked to log in to your Azure Subscription shortly after the script starts. After that, the process will not need your intervention until the all of the resources have been deployed. 
 
 4. Once completed all of the required Azure resources are deployed to your subscription in the designated resource group. Further, the generator application will have been configured in \Deployment\RssGenerator so simply run \Deployment\RssGenerator\RssGenerator.exe to send some documents into the CosmosDB Document Collection.
 
-5. Open the [Azure Portal](https://portal.azure.com), navigate to the resource group you indentified in the Driver.ps1 file, navigate to the <b>Azure Cosmos DB Account</b> and from there navigate to Data Explorer. You will find a single database with 4 Collections. Start in Ingest, move on to Processed and finally Inspection to see how the incoming articles were processed.  
+5. Open the [Azure Portal](https://portal.azure.com), navigate to the resource group you indentified in the Deployment.ps1 file, navigate to the <b>Azure Cosmos DB Account</b> and from there navigate to Data Explorer. You will find a single database with 4 Collections. Start in Ingest, move on to Processed and finally Inspection to see how the incoming articles were processed.  
   
 #### Deleting the solution
-Simply navigate to the [Azure Portal](https://portal.azure.com) and navigate to the resource group you identified in teh Driver.ps1 file. On the resource group blade click Delete and follow the instructions. Once you have deleted the resource group all of the associated resources will be deleted and your subscription will not longer be billed for the solution. 
+Simply navigate to the [Azure Portal](https://portal.azure.com) and navigate to the resource group you identified in teh Deployment.ps1 file. On the resource group blade click Delete and follow the instructions. Once you have deleted the resource group all of the associated resources will be deleted and your subscription will not longer be billed for the solution. 
 

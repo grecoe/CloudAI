@@ -9,7 +9,7 @@
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
 $subscriptionId = "edf507a2-6235-46c5-b560-fd463ba2e771"
-$resourceGroupName="dangautomation6"
+$resourceGroupName="dangautomation7"
 $locationString = "eastus"
 
 
@@ -319,55 +319,56 @@ $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;Acco
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# OUTPUTS
+# OUTPUTS - No need to output in final
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
 
-Write-Host ("Additional Storage Data")
-Write-Host ( $additionalStorageAccountInfo["storageKey"])
-Write-Host ( $additionalStorageAccountInfo["accountName"])
-Write-Host ( $additionalStorageAccountInfo["connectionString"])
+#Write-Host ("Additional Storage Data")
+#Write-Host ( $additionalStorageAccountInfo["storageKey"])
+#Write-Host ( $additionalStorageAccountInfo["accountName"])
+#Write-Host ( $additionalStorageAccountInfo["connectionString"])
 
-Write-Host ("Computer Vision Data")
-Write-Host ( $computerVisionAccountInfo["apiKey"])
-Write-Host ( $computerVisionAccountInfo["endpoint"])
+#Write-Host ("Computer Vision Data")
+#Write-Host ( $computerVisionAccountInfo["apiKey"])
+#Write-Host ( $computerVisionAccountInfo["endpoint"])
 
-Write-Host ("Translation Data")
-Write-Host ( $translationAccountInfo["apiKey"])
-Write-Host ( $translationAccountInfo["endpoint"])
+#Write-Host ("Translation Data")
+#Write-Host ( $translationAccountInfo["apiKey"])
+#Write-Host ( $translationAccountInfo["endpoint"])
+
 #Global is the one to use in the web app
-Write-Host ( $translationAccountInfo["globalEndpoint"])
+#Write-Host ( $translationAccountInfo["globalEndpoint"])
 
-Write-Host ("Face Data")
-Write-Host ( $faceAccountInfo["apiKey"])
-Write-Host ( $faceAccountInfo["endpoint"])
+#Write-Host ("Face Data")
+#Write-Host ( $faceAccountInfo["apiKey"])
+#Write-Host ( $faceAccountInfo["endpoint"])
 
-Write-Host ("Text Data")
-Write-Host ( $textAccountInfo["apiKey"])
-Write-Host ( $textAccountInfo["endpoint"])
+#Write-Host ("Text Data")
+#Write-Host ( $textAccountInfo["apiKey"])
+#Write-Host ( $textAccountInfo["endpoint"])
 
-Write-Host ("Cosmos DB")
-Write-Host ( $cosmosAccountInfo["apiKey"])
-Write-Host ( $cosmosAccountInfo["endpoint"])
-Write-Host ( $cosmosAccountInfo["name"])
-# ArticleIngestTrigger_ConnectionString
-Write-Host ( $cosmosAccountInfo["connectionString"])
+#Write-Host ("Cosmos DB")
+#Write-Host ( $cosmosAccountInfo["apiKey"])
+#Write-Host ( $cosmosAccountInfo["endpoint"])
+#Write-Host ( $cosmosAccountInfo["name"])
+## ArticleIngestTrigger_ConnectionString
+#Write-Host ( $cosmosAccountInfo["connectionString"])
 
-Write-Host ("Service bus")
-Write-Host ( $serviceBusInfo["connectionstring"])
-Write-Host ( $serviceBusInfo["primarykey"])
-Write-Host ( $serviceBusInfo["name"])
-Write-Host ( $serviceBusInfo["translationQueue"])
-Write-Host ( $serviceBusInfo["ocrQueue"])
-Write-Host ( $serviceBusInfo["faceQueue"])
-Write-Host ( $serviceBusInfo["inspectionQueue"])
+#Write-Host ("Service bus")
+#Write-Host ( $serviceBusInfo["connectionstring"])
+#Write-Host ( $serviceBusInfo["primarykey"])
+#Write-Host ( $serviceBusInfo["name"])
+#Write-Host ( $serviceBusInfo["translationQueue"])
+#Write-Host ( $serviceBusInfo["ocrQueue"])
+#Write-Host ( $serviceBusInfo["faceQueue"])
+#Write-Host ( $serviceBusInfo["inspectionQueue"])
 
-Write-Host ("Function App")
-Write-Host ( $functionAppInfo["storageKey"])
-Write-Host ( $functionAppInfo["storageName"])
-Write-Host ( $functionAppInfo["fnappname"])
-Write-Host ( $functionAppInfo["stgConnectionString"])
+#Write-Host ("Function App")
+#Write-Host ( $functionAppInfo["storageKey"])
+#Write-Host ( $functionAppInfo["storageName"])
+#Write-Host ( $functionAppInfo["fnappname"])
+#Write-Host ( $functionAppInfo["stgConnectionString"])
 
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -378,14 +379,7 @@ Write-Host ( $functionAppInfo["stgConnectionString"])
 #######################################################################
 # Example Location : https://cosmosfnappba4e.file.core.windows.net/cosmosfnappba4e/site/wwwroot/
 Write-Host("")
-Write-Host("Upload the Azure Function Files to Azure File Share Storage")
-Write-Host("Using Azure Storage Explorer or Azure Portal, connect to the storage account:")
+Write-Host("Configuration of this solution is completed, next step is to seed the Cosmos DB Collection")
+Write-Host("to fire off the pipeline. Launch the following application from the Deployment directory:")
+Write-Host("Application : /Deploymnet/RssGenerator/RssGenerator.exe")
 Write-Host("")
-Write-Host($functionAppInfo["storageName"] + " : "  + $functionAppInfo["stgConnectionString"])
-Write-Host("")
-Write-Host("Next, upload the contents of the wwwroot folder (locally) to the following location:")
-Write-Host("")
-Write-Host("https://" + $functionAppInfo["storageName"] + ".file.core.windows.net/" + $functionAppInfo["fnappname"] + "/site/wwwroot/")
-Write-Host("")
-
-

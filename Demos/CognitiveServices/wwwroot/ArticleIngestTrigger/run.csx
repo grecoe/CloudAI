@@ -39,7 +39,7 @@ public static async Task Run(IReadOnlyList<Document> input, ILogger log, ICollec
             log.LogInformation("Working doc " + input[i].Id);
 
             docUtility.LoadRecords(input[i].Id, log); 
-            if(docUtility.RawArticle != null)
+            if(docUtility.RawArticle != null) 
             {
                 if(String.Compare(docUtility.RawArticle.ArtifactType, "article") != 0 )
                 {

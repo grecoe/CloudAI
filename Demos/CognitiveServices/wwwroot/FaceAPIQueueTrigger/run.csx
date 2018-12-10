@@ -68,6 +68,7 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
 
                     // Get the original tags so we don't overwrite them....
                     List<String> tags = processedDoc.UnpackTags();
+                    FaceResults faceResults = new FaceResults();
 
                     log.LogInformation("Performing Face Detection");
                     FaceDetectionResult results = service.FaceIdentifyImage(image[Article.MEDIA_INTERNAL_URI]).Result;
@@ -75,7 +76,10 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
                     {
                         foreach(FaceId fid in results.Faces)
                         {
-                            tags.Add(String.Format("{0} - {1}", fid.Gender, fid.Age));
+                            Person newPerson = new Person();
+                            newPerson.Gender = fid.Gender;
+                            newPerson.Age = fid.Age;
+                            faceResults.People.Add(newPerson);
                         }
                     }
                     else
@@ -84,6 +88,7 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
                     }
  
                     // Now write out the full group of tags
+                    processedDoc.SetProperty(ProcessedProperties.Face, faceResults);
                     processedDoc.SetProperty(ProcessedProperties.Tags, tags);
 
                     // Mark the total execution time

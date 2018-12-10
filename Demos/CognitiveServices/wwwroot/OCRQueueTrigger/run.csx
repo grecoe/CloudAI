@@ -44,7 +44,6 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
 
             // Do some work.....
             List<Dictionary<String, String>> imgs = docUtility.RawArticle.UnpackMedia(ArticleProperties.ChildImages);
-            List<Dictionary<String, String>> vids = docUtility.RawArticle.UnpackMedia(ArticleProperties.ChildVideos);
 
             String visionUri = System.Environment.GetEnvironmentVariable("VisionAPIUri", EnvironmentVariableTarget.Process);
             String visionKey = System.Environment.GetEnvironmentVariable("VisionAPIKey", EnvironmentVariableTarget.Process);
@@ -68,13 +67,14 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
 
                     // Get the original tags so we don't overwrite them....
                     List<String> tags = processedDoc.UnpackTags();
+                    VisionResults visionResults = new VisionResults();
 
                     log.LogInformation("Performing Object Detection");
                     ImageAnalyzeResult results = service.AnalyzeImage(image[Article.MEDIA_INTERNAL_URI]).Result;
                     if(results.Status == System.Net.HttpStatusCode.OK)
                     {
-                        tags.AddRange(results.Categories);
-                        tags.AddRange(results.Tags);
+                        visionResults.ObjectCategories.AddRange(results.Categories);
+                        visionResults.Objects.AddRange(results.Tags);
                     }
                     else
                     {
@@ -85,7 +85,7 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
                     OcrResult ocrResults = service.OcrImage(image[Article.MEDIA_INTERNAL_URI]).Result;
                     if(results.Status == System.Net.HttpStatusCode.OK)
                     {
-                        tags.AddRange(ocrResults.Lines);
+                        visionResults.Text.AddRange(ocrResults.Lines);
                     }
                     else
                     {
@@ -95,6 +95,7 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
 
                     // Now write out the full group of tags
                     processedDoc.SetProperty(ProcessedProperties.Tags, tags);
+                    processedDoc.SetProperty(ProcessedProperties.Vision, visionResults);
 
                     // Mark the total execution time
                     if(processedDoc.GetProperty(ProcessedProperties.ProcessTime) == null)

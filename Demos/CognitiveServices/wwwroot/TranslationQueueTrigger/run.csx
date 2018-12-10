@@ -92,7 +92,6 @@ public static void Run(string myQueueItem, ILogger log, out string outputSbQueue
 
             // Tag it with something usefull....
             List<String> tags = new List<String>();
-            tags.Add("TEXT");
             processedDoc.SetProperty(ProcessedProperties.Tags, tags);
 
             // Update the processed record

@@ -36,12 +36,12 @@ public static async Task  Run(string myQueueItem, ILogger log)
         { 
             log.LogInformation("Found the raw article " + docUtility.RawArticle.UniqueIdentifier);
 
+            // Get the images associated with the article
             List<Dictionary<String,String>> images = docUtility.RawArticle.UnpackMedia(ArticleProperties.ChildImages);
-            List<Dictionary<String,String>> videos = docUtility.RawArticle.UnpackMedia(ArticleProperties.ChildVideos);
 
             // Get processed records associated with the article.
             List<Processed> processArticleResults = docUtility.GetProcessedRecords(log);
-
+ 
             // Get processed records associated with the images
             List<Processed> processImageResults = new List<Processed>();
             foreach(Dictionary<String,String> image in images)
@@ -49,29 +49,61 @@ public static async Task  Run(string myQueueItem, ILogger log)
                 processImageResults.AddRange(docUtility.GetProcessedRecords(image[Article.MEDIA_ID], log));
             }
 
-            // Get processed records associated with the videos
-            List<Processed> processVideoResults = new List<Processed>();
-            foreach(Dictionary<String,String> video in videos)
-            {
-                processVideoResults.AddRange(docUtility.GetProcessedRecords(video[Article.MEDIA_ID], log));
-            }
 
             Dictionary<String,String> outputRecord = new Dictionary<String,String>();
+            outputRecord.Add("artifact_type", "article");
             outputRecord.Add("Raw Article", docUtility.RawArticle.UniqueIdentifier);
             outputRecord.Add("Article Processed Steps", processArticleResults.Count.ToString());
             outputRecord.Add("Image Processed Steps", processImageResults.Count.ToString());
-            outputRecord.Add("Video Processed Steps", processVideoResults.Count.ToString());
-            outputRecord.Add("Original Body", docUtility.RawArticle.GetProperty(ArticleProperties.Body).ToString());
 
-            var analyze = processArticleResults[0].GetProperty(ProcessedProperties.Body);
-            if(analyze != null && analyze is TextFieldAnalytics)
+            // Get stats from title and body
+            int keyPhraseCount = 0;
+            int entityCount = 0;
+            var bodyAnalyze = processArticleResults[0].GetProperty(ProcessedProperties.Body);
+            if(bodyAnalyze != null && bodyAnalyze is TextFieldAnalytics)
             {
-                outputRecord.Add("Translated Body", (analyze as TextFieldAnalytics).Value);
+                keyPhraseCount = (bodyAnalyze as TextFieldAnalytics).Phrases.Count;
+                entityCount = (bodyAnalyze as TextFieldAnalytics).Entities.Count;
             }
+
+            var titleAnalyze = processArticleResults[0].GetProperty(ProcessedProperties.Title);
+            if(titleAnalyze != null && titleAnalyze is TextFieldAnalytics)
+            {
+                keyPhraseCount += (titleAnalyze as TextFieldAnalytics).Phrases.Count;
+                entityCount += (titleAnalyze as TextFieldAnalytics).Entities.Count;
+            }
+            outputRecord.Add("Key Phrase Count ", keyPhraseCount.ToString());
+            outputRecord.Add("Entity Count ", entityCount.ToString());
+
+
+            // Get information about images
+            int categoryCount = 0;
+            int objectCount = 0;
+            int textLines = 0;
+            int peopleCount = 0;
+            foreach(Processed procImage in processImageResults)
+            {
+                var visionAnalyze = procImage.GetProperty(ProcessedProperties.Vision);
+                if(visionAnalyze != null && visionAnalyze is VisionResults)
+                {
+                    categoryCount += (visionAnalyze as VisionResults).ObjectCategories.Count;
+                    objectCount += (visionAnalyze as VisionResults).Objects.Count;
+                    textLines += (visionAnalyze as VisionResults).Text.Count;
+                }
+
+                var faceAnalyze = procImage.GetProperty(ProcessedProperties.Face);
+                if(faceAnalyze != null && faceAnalyze is FaceResults)
+                {
+                    categoryCount += (faceAnalyze as FaceResults).People.Count;
+                }
+            }
+            outputRecord.Add("Image Category Count ", categoryCount.ToString());
+            outputRecord.Add("Image Object Count ", objectCount.ToString());
+            outputRecord.Add("Image Text Lines ", textLines.ToString());
+            outputRecord.Add("Image Face Count ", peopleCount.ToString());
 
             // Now add everything to the article list
             processArticleResults.AddRange(processImageResults);
-            processArticleResults.AddRange(processVideoResults);
             
             float totalExecutionTime = 0;
             int tagCount = 0;
