@@ -4,11 +4,11 @@
 
 There are quite a few Azure services that can be used right out of the box to provide Machine Learning and Artificial Intelligence in the [Azure Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/) suite. There are text, computer vision, facial recognition, video indexing, etc. that offer some powerful functionality without you, the user, ever having to write a line of code or understand the machine learning concepts that underpin them. 
 
-However, it would be potentially too confusing to create an example that uses each and every feature in each and every available cognitive service so this demo has hand picked a few services to use in a coherent way.  
+However, it would be potentially too confusing to create an example that uses each and every feature, with the permutations, in each and every available cognitive service so this demo has hand picked a few services to use in a coherent way.  
 
 So, you ask, what is this demo about? In short, this demo shows how to set up a pipeline for mass ingestion and near realtime analysis of electronic documents to provide useful insights as the documents are being stored into durable storage.
 
-To simplify the concept, this demo will read public RSS news feeds from three different organizations in three different languages. This demo could easily be extended to include more or different RSS feeds by simply changing the configuration of the RSS feed application (more on that later). The feeds used in this demo are:
+To simplify the concept, this demo will read public RSS news feeds from three different organizations in three different languages. This demo could easily be extended to include more RSS feeds by simply changing the configuration of the RSS feed application (more on that later). The example feeds used in this demo are:
 
 Language  | RSS Feed
 ---- | ----
@@ -17,13 +17,15 @@ French | https://www.france24.com/fr/europe/rss
 German | http://newsfeed.zeit.de/index
 
 The "requirements" for this project are that for each document ingested into the pipeline it must:
-1. Translate all text found in any article to English. (though the translation languate should, and is, programmable)
+1. Translate all text found in any article to English. (though the translation languate is programmable)
 2. Find key phrases in the text and document them.
 3. Find known entities by full name or abbreviation and provide information about those known entities.
 4. Detect sentiment (positive, negative or neuteral) from both the title and body text.
 5. Detect text in any associated image and document what is found.
 6. Detect objects in any associated image and document what is found. 
 7. Detect people in any associated image and document people count, and for each person document gender and estimated age. 
+
+> <b> NOTE: </b> While it would be quite useful to use the Text Analytics on the text stripped out of images, it has been left out of this example for simplicity.
 
 Without Azure Cognitive Services you'd probably be scratching your head on how to accomplish these tasks. However, the base cognitive services offered in Azure provide these services directly out of the box. Specifically, the services that will be utilized are:
 
@@ -62,14 +64,15 @@ For record data formats see [\RssGenerator\README.md](./RssGenerator)
 
 This demo is a series of Azure Services stitched together to process digital articles that contain media (images) in an automated fashion.
 
-The generator in this case is contained in this repository and named RSSGenerator. This generator is used to populate a Cosmos DB Collection with RSS articles in multiple languages which then trigger the following: 
+The generator in this case is contained in this repository and named RSSGenerator. This generator is used to populate a Cosmos DB Collection with RSS articles in multiple languages which then trigger the following actions: 
 
 * Note that there can be many generators/ingestion processes feeding the CosmosDB and Azure Storage Account.
 
-1. Ingest function is notified on document inserts into the CosmosDB database in the Articles collection.
-    -	Image and video content are stored in an Azure Storage Account as blobs during the ingest process Notifications can be for one or more inserts.
-    -	Inserts can be of type article, image, or video where image and video documents are associated with the originating article.
-    -	Image and video documents are inserted before the article record as the Cosmos Document Id needs to be recorded in the article document. 
+1. Ingest function is notified on document inserts into the CosmosDB database in the Ingest collection.
+    -	Image(s) are stored in an Azure Storage Account as blobs during the ingest process.
+    -  Notifications can be for one or more inserts.
+    - Inserts can be of type article or image where image documents are associated with the originating article.
+    -	Image documents are inserted before the article record as the Cosmos Document Id needs to be recorded in the article document. 
     -	Only documents of type article are passed along to the queue for further processing as images and videos are processed in later steps.
 2.	The Translate function is triggered by a queue event containing the article document id and utilizes the Translate Text Azure Cognitive Service. 
     -	Detect the language of the existing title and body of the article content and determine if
@@ -79,17 +82,17 @@ The generator in this case is contained in this repository and named RSSGenerato
     -	Where present collect the sentiment, key phrases, and entities from both the body and the title.
     -	Write a record to the Processed collection in CosmosDB recording translation and analysis results and how long it took.
     -	Pass the article id on to the next queue. While this is inefficient if the article does not contain images or videos, it ensures this article, if there is anything interesting found, will be passed along at the end of the pipeline. 
-3.	The Detect function is triggered by a queue event containing the article document id and utilizes the Vision Azure Cognitive service. 
+3.	The Detect function is triggered by a queue event containing the article document id and utilizes the Vision Azure Cognitive service. If images are present on the article, the following steps are taken : 
     -	Detect objects and landmarks in the image using the detect API.
     -	Detect written words in the image using the OCR API
     -	Write to, or create, a record in the Processed collection in CosmosDB recording the detection results by putting each detected object or text into the tags property on the processed record.
     -	Pass the article id to the next queue for processing.
-4.	The Face function is triggered by a queue event containing the article document id and utilizes the Face Cognitive service. 
+4.	The Face function is triggered by a queue event containing the article document id and utilizes the Face Cognitive service. If images are preesnt on the article, the following steps are taken :
     -	Detect faces for gender and age in the image using the Face API.
     -	Write to, or create, a record in the Processed collection in CosmosDB recording the detection results by putting each detected face (gender/age) into the tags property on the processed record.
     -	Pass the article id to the next queue for processing.
 5.	The Notify function is triggered by a queue event containing the article document id.
-    -	Load the processed records for the article, images, and videos.
+    -	Load the processed records for the article and images.
     -	Scan the processed documents for “interesting” content.
     -	If an article or ANY of it’s children trigger an “interesting”* flag, send a notification off to the system of choice.**
 
@@ -130,5 +133,9 @@ This demo was written to explicitly execute the automation script on a Windows b
 5. Open the [Azure Portal](https://portal.azure.com), navigate to the resource group you indentified in the Deployment.ps1 file, navigate to the <b>Azure Cosmos DB Account</b> and from there navigate to Data Explorer. You will find a single database with 4 Collections. Start in Ingest, move on to Processed and finally Inspection to see how the incoming articles were processed.  
   
 #### Deleting the solution
+It is recommended that once the solution has been reviewed that it be deleted from your subscription so that the subscription owner is not incurring ongoing costs of having the services deployed.
+
 Simply navigate to the [Azure Portal](https://portal.azure.com) and navigate to the resource group you identified in teh Deployment.ps1 file. On the resource group blade click Delete and follow the instructions. Once you have deleted the resource group all of the associated resources will be deleted and your subscription will not longer be billed for the solution. 
+
+
 
