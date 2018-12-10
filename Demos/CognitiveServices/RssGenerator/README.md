@@ -13,7 +13,7 @@ This format is contains the original content of the article. Articles are broken
 {
 	"id" : "GUID",
 	"asset_hash" : "hash of the item",
-	"artifact_type" : "article|image|video",
+	"artifact_type" : "article|image",
 	"properties" :
 		{
 			Dependent on artifact_type
@@ -22,21 +22,20 @@ This format is contains the original content of the article. Articles are broken
 ```
 
 #### Property Bag Properties
-Property	| Type | Required |	Article |	Image |	Video
-----|-----|-----|-----|-----|----
-original_uri |	String	|Y	|X	|X	|X
-retrieval_datetime |	DateTime | Y	|X	|X	|X
-post_date	|DateTime	|N	|X ||		
-body	|String	|N	|X ||		
-title	|String	|N	|X ||		
-author	|String	|N	|X ||		
-hero_image	|String	|N	|X ||		
-child_images	|Array(object)	|N	|X ||		
-child_videos	|Array(object)	|N	|X ||		
-internal_uri	|String	N		|X	|X ||
+Property	| Type | Required |	Article |	Image 
+----|-----|-----|-----|-----
+original_uri |	String	|Y	|X	|X	
+retrieval_datetime |	DateTime | Y	|X	|X	
+post_date	|DateTime	|N	|X |		
+body	|String	|N	|X |		
+title	|String	|N	|X |		
+author	|String	|N	|X |		
+hero_image	|String	|N	|X |		
+child_images	|Array(object)	|N	|X |		
+internal_uri	|String	N		|X	|X |
 
 ##### Media Object
-The media object is used for both child_images and child_videos. The field media_id is the Document ID of the media document in the Articles table. 
+The media object is used for child_images. The field media_id is the Document ID of the media document in the Articles table. 
 ```
 {
     "mediaId": "9d30724f5b8043e49552f4b8eb02f010",
@@ -51,7 +50,7 @@ This format is contains the results of analyzing a portion of the ingested artic
 ```
 {
 	"id" : "GUID",
-	"artifact_type" : "article|image|video", <- Matches Ingest table type
+	"artifact_type" : "article|image", <- Matches Ingest table type
 	“parent” : “parent id”, <- Paired with the original document in Articles collection
 	"properties" : {
 			.... dependent on artifact type ......
@@ -61,15 +60,15 @@ This format is contains the results of analyzing a portion of the ingested artic
 ```
 
 #### Property Bag Properties
-Property	| Type | Required |	Article |	Image |	Video
-----|-----|-----|-----|-----|----
-processed_datetime	|DateTime	|Y	|X	|X	|X
-processed_time*	|Int	|Y	|X	|X	|X
-title**	|object	|N	|X ||		
-body**	|object	|N	|X ||		
-vision***	|object	|N	| |X|X		
-face****	|object	|N	| |X|X		
-tags	|Array(string)	|N	|X	|X	|X
+Property	| Type | Required |	Article |	Image 
+----|-----|-----|-----|-----
+processed_datetime	|DateTime	|Y	|X	|X	
+processed_time*	|Int	|Y	|X	|X	
+title**	|object	|N	|X |		
+body**	|object	|N	|X |		
+vision***	|object	|N	| |X		
+face****	|object	|N	| |X		
+tags	|Array(string)	|N	|X	|X	
 \* Total processing time (ms)
 
 \** Text Field Analytics objects
