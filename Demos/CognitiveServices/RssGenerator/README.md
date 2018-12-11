@@ -9,7 +9,7 @@ This directory contains the source code used to build the generator application 
 ### Ingestion format
 This format is contains the original content of the article. Articles are broken down into article (contains text) and image entries in the Ingest collection in teh Cosmos DB. 
 
-```
+```json
 {
 	"id" : "GUID",
 	"asset_hash" : "hash of the item",
@@ -36,7 +36,7 @@ internal_uri	|String	N		|X	|X |
 
 ##### Media Object
 The media object is used for child_images. The field media_id is the Document ID of the media document in the Articles table. 
-```
+```json
 {
     "mediaId": "9d30724f5b8043e49552f4b8eb02f010",
     "origUri": "https://dummy/thirdgrade.jpg",
@@ -47,11 +47,11 @@ The media object is used for child_images. The field media_id is the Document ID
 ### Processed Format
 This format is contains the results of analyzing a portion of the ingested article. There will be one for the main article and one for each image. These records are kept in the Processed collection in Cosmos DB.
 
-```
+```json
 {
 	"id" : "GUID",
-	"artifact_type" : "article|image", <- Matches Ingest table type
-	“parent” : “parent id”, <- Paired with the original document in Articles collection
+	"artifact_type" : "article|image", 
+        “parent” : “parent id”,
 	"properties" : {
 			.... dependent on artifact type ......
 	}
@@ -78,7 +78,7 @@ tags	|Array(string)	|N	|X	|X
 \*** Face Analytics object
 
 ##### Text Field Analytics Object
-```
+```json
 "body|title": {
     "type": "Body|Title",
     "orig_lang_code": "language detected",
@@ -101,7 +101,7 @@ tags	|Array(string)	|N	|X	|X
 ```
 
 ##### Vision Analytics Object
-```
+```json
 "vision": {
      "object_categories": ["array of strings of object categories found"],
      "objects": ["array of strings of objects"],
@@ -111,7 +111,7 @@ tags	|Array(string)	|N	|X	|X
 
 ##### Face Analytics Object
 The face object is a list of People with gender and age.
-```
+```json
 "face": {
     "people": [
 		{

@@ -57,7 +57,7 @@ namespace RssGenerator
                 }
                 else
                 {
-                    Program.SeedDatabase(config, client);
+                    //Program.SeedDatabase(config, client);
                     returnResult = Program.UploadRssFeeds(config, client, storageUtility);
                 }
             }
@@ -140,7 +140,7 @@ namespace RssGenerator
                         mainArticle.SetProperty(ArticleProperties.OriginalUri, item.Uri);
                         mainArticle.SetProperty(ArticleProperties.RetrievalDate, DateTime.Now.ToString("O"));
                         mainArticle.SetProperty(ArticleProperties.PostDate, item.PublishedDate);
-                        mainArticle.SetProperty(ArticleProperties.Title, item.Title);
+                        mainArticle.SetProperty(ArticleProperties.Title, Program.CleanInput(item.Title));
                         mainArticle.SetProperty(ArticleProperties.Body, Program.CleanInput(item.Summary));
 
                         List<Dictionary<string, string>> childFiles = new List<Dictionary<string, string>>();
@@ -187,6 +187,10 @@ namespace RssGenerator
             return "Finished uploading current articles.";
         }
 
+        /// <summary>
+        /// Have to clean up the text that may be translated. HTML tags and double quotes 
+        /// cause the Translation API to fail.
+        /// </summary>
         private static String CleanInput(String input)
         {
             String returnValue = input;
@@ -209,7 +213,9 @@ namespace RssGenerator
 
                 returnValue = tempValue;
             }
-            return returnValue;
+
+            // Finally strip out any double quotes...causes an exception in the translation API
+            return returnValue.Replace('\"', '\'');
         }
     }
 }
