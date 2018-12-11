@@ -8,7 +8,7 @@
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
-$subscriptionId = "edf507a2-6235-46c5-b560-fd463ba2e771"
+$subscriptionId = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
 $resourceGroupName="dangautomation7"
 $locationString = "eastus"
 
@@ -151,7 +151,7 @@ $fnAppCreateParameters.Add("location",$locationString)
 #######################################################################
 # Log in and Select the right subscription.
 #######################################################################
-#Login-AzureRMAccount
+Login-AzureRMAccount
 Select-AzureRmSubscription -SubscriptionId $subscriptionId
 
 
@@ -165,7 +165,7 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location $locationString
 #######################################################################
 # Create the storage account used to hold image/videos/azure functions
 #######################################################################
-Write-Host("Creating additional storage account for images/videos/functions.")
+Write-Host("Creating additional storage account for images/functions.")
 New-AzureRmResourceGroupDeployment -Name $storageAccountDeploymentName -ResourceGroupName $resourceGroupName -TemplateFile ".\StorageAccount.json" -TemplateParameterObject $storageCreateParameters
 $additionalStorageAccountInfo = @{}
 $additionalStorageAccountInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $storageAccountDeploymentName).Outputs.storageKey.value)
@@ -381,5 +381,5 @@ $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;Acco
 Write-Host("")
 Write-Host("Configuration of this solution is completed, next step is to seed the Cosmos DB Collection")
 Write-Host("to fire off the pipeline. Launch the following application from the Deployment directory:")
-Write-Host("Application : /Deploymnet/RssGenerator/RssGenerator.exe")
+Write-Host("Application : /Deployment/RssGenerator/RssGenerator.exe")
 Write-Host("")
