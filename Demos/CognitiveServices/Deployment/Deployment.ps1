@@ -8,10 +8,9 @@
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
-$subscriptionId = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-$resourceGroupName="dangautomation7"
+$subscriptionId = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX (YOUR_SUBSCRIPTION_ID)"
+$resourceGroupName="YOUR_RESOURCE_GROUP_NAME"
 $locationString = "eastus"
-
 
 
 #######################################################################
@@ -319,7 +318,9 @@ $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;Acco
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# OUTPUTS - No need to output in final
+# OUTPUTS - The following is a collection of output values from the 
+#			above deployments. If interested, uncomment these lines to 
+#			view those values.
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #######################################################################
@@ -337,7 +338,7 @@ $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;Acco
 #Write-Host ( $translationAccountInfo["apiKey"])
 #Write-Host ( $translationAccountInfo["endpoint"])
 
-#Global is the one to use in the web app
+##Global is the one to use in the web app
 #Write-Host ( $translationAccountInfo["globalEndpoint"])
 
 #Write-Host ("Face Data")
@@ -379,7 +380,10 @@ $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;Acco
 #######################################################################
 # Example Location : https://cosmosfnappba4e.file.core.windows.net/cosmosfnappba4e/site/wwwroot/
 Write-Host("")
-Write-Host("Configuration of this solution is completed, next step is to seed the Cosmos DB Collection")
-Write-Host("to fire off the pipeline. Launch the following application from the Deployment directory:")
+Write-Host("Configuration of this solution is almost completed, the Azure Function Apps need just a ")
+Write-Host("couple of minutes to make the connections to Cosmos DB and Azure Service Bus")
+Write-Host("")
+Write-Host("When that is completed, the next step is to seed the Cosmos DB Collection that will fire")
+Write-Host("off the pipeline. Launch the following application from the Deployment directory:")
 Write-Host("Application : /Deployment/RssGenerator/RssGenerator.exe")
 Write-Host("")

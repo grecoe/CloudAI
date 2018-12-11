@@ -1,6 +1,8 @@
 # A Developers Perspective: Building and deploying machine learning models using Microsoft Azure Machine Learning Workbench with containers on a Kubernetes cluster
 <sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
+> <b>NOTE</b> Azure Machine Learning Workbench was deprecated in September 2018. Information about that can be found [here](https://docs.microsoft.com/en-us/azure/machine-learning/service/overview-what-happened-to-workbench). However, concepts around machine learning and consumption of those models may still be useful to the reader.
+
 
 This repository introduces data science and machine learning at a very high level. Using that knowledge, a problem was is identified at a manufacturing facility in which machine learning would be useful. 
 
