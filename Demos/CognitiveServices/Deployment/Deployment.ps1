@@ -129,6 +129,8 @@ $serviceBusCreateParameters.Add("location",$locationString)
 $fnAppDeploymentName = "functionappcreate"
 $fnAppName = "cosmosfn"
 $fnStgType = "Standard_LRS"
+$fnAppVersion = "2015-08-01"
+$fnAppType = "Microsoft.Web/sites"
 
 
 #Set up parameters to create CosmosDB account.
@@ -313,6 +315,9 @@ $functionAppInfo.Add("storageKey", (Get-AzureRmResourceGroupDeployment -Resource
 $functionAppInfo.Add("storageName", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.storageName.value)
 $functionAppInfo.Add("fnappname", (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $fnAppDeploymentName).Outputs.functionAppName.value)
 $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;AccountName=" + $functionAppInfo["storageName"] + ";AccountKey=" +  $functionAppInfo["storageKey"])
+
+Write-Host("Force function app to refresh for Cosmos DB connection")
+Invoke-AzureRmResourceAction -ResourceGroupName $resourceGroupName -ResourceType $fnAppType -ResourceName $functionAppInfo["fnappname"] -Action syncfunctiontriggers -ApiVersion $fnAppVersion -Force
 
 
 #######################################################################
