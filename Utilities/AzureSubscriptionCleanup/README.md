@@ -47,3 +47,20 @@ This script will output a text file in the script directory containing the names
 ### Script Output
 This script will write to the console window the results of which resource groups are present in the Azure Subscription or not. 
 
+## Finding potentially unused resource groups
+Just because a resource group doesn't have a lock on it, dosen't mean it is not active. One way, but not definitively, to determine a potentally stale resource group is to check the activity logs. If nothing has been put in the logs for some time the resource group may be abandonded. 
+
+|File|Description|
+|--------------------|------------------------|              
+| FindActiveResourceGroups.ps1|	The file that contains the script to scan a subscriptions resource groups looking at the activity logs of the resource group. 
+
+
+### Script Parameters
+|Parameter |Usage|
+|--------------------|-----------------------|
+|-subId "id"|	The subscripiton ID to use for finding resource groups to delete.| 
+|-hours "n"|	The number of hours in the past to search. Default is 2 maximum is 15 days (though not verified, the limit on the Get-AzureRmLog command is 15 days)| 
+|-help|	A flag indicating to show the usage of the script. Nothing will be performed.|
+
+### Script Output
+This script creates a file named [subscription_id]activitylogs.json in the execution directory of the script. In it contains the list of active and inactive resource groups for the subscription that the script was run against. 

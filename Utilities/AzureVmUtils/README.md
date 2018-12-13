@@ -1,9 +1,10 @@
 # Azure VM Start-Stop Script
 <sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
-The script in this folder can be used to batch start/stop Azure Virtual Machines in any number of subscriptions/resource groups.
+## Start Stop Virtual Machines
+This script is used for batch start/stop Azure Virtual Machines in any number of subscriptions/resource groups.
 
-## Files
+### Files
 
 |File|Description|
 |--------------------|------------------------|              
@@ -11,7 +12,7 @@ The script in this folder can be used to batch start/stop Azure Virtual Machines
 | VMConfiguation.json|	This JSON file describes the location of the Virtual Machines to either start or stop. An entry is made for each subscription/resourcegroup/virtual machine that is to be affected by the script.|
 
 
-## Script Parameters
+### Script Parameters
 The script takes two Boolean parameters
 
 |Parameter |Usage|
@@ -26,7 +27,7 @@ To create static IP's for your virtual machine, read here:
 https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address
 
 
-## Usage
+### Usage
 
 Start a VM: 
 > .\AzureVMStateChange.ps1 -shutdown $false
@@ -35,3 +36,25 @@ Stop a VM
 > .\AzureVMStateChange.ps1 -shutdown $true
 
 > .\AzureVMStateChange.ps1 -shutdown $true -deallocate $true
+
+## Create Configuration.json from a Subscription 
+This script is used for creating the neccesary input file for the AzureVMStateChange.ps1 script, but under a different name. The output file will include ALL virtual machines in ALL resource groups in the subscription.
+
+### Files
+
+|File|Description|
+|--------------------|------------------------|              
+| CreateVmConfiguration.ps1|	The file that contains the script.|
+
+
+### Script Parameters
+The script takes two Boolean parameters
+
+|Parameter |Usage|
+|--------------------|-----------------------|
+|-subId "id"|	The subscripiton ID to use for finding all virtual machines in all resource groups.| 
+|-help|	A flag indicating to show the usage of the script. Nothing will be performed.|
+
+
+### Script Output
+This script creates a file named [subscription_id]logs.json in the execution directory of the script. If renamed to Configuration.json, it can be used with the AzureVMStateChange.ps1 script to act on ALL virtual machines in the subscription. 
