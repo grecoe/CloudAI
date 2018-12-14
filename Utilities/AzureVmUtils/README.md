@@ -58,6 +58,7 @@ The script takes two Boolean parameters
 
 ### Script Output
 This script creates two files:
+
 |File |Content|
 |--------------------|-----------------------|
 |config_[subid].json|	A JSON file that if renamed to VMConfiguration.json can be sent to teh AzureVMStateChange.ps1 script. The contents are only virtual machines in the subscription that are in the running state.| 
