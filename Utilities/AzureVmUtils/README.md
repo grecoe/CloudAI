@@ -38,13 +38,13 @@ Stop a VM
 > .\AzureVMStateChange.ps1 -shutdown $true -deallocate $true
 
 ## Create Configuration.json from a Subscription 
-This script is used for creating the neccesary input file for the AzureVMStateChange.ps1 script, but under a different name. The output file will include ALL virtual machines in ALL resource groups in the subscription.
+This script is used for creating the neccesary input file for the AzureVMStateChange.ps1 script by collecting a list of running VM's in a subscripiton. Further output includes a file containing all VM's by region and the running state. 
 
 ### Files
 
 |File|Description|
 |--------------------|------------------------|              
-| CreateVmConfiguration.ps1|	The file that contains the script.|
+| GetVmInfoAndConfig.ps1|	The file that contains the script.|
 
 
 ### Script Parameters
@@ -57,4 +57,8 @@ The script takes two Boolean parameters
 
 
 ### Script Output
-This script creates a file named [subscription_id]logs.json in the execution directory of the script. If renamed to Configuration.json, it can be used with the AzureVMStateChange.ps1 script to act on ALL virtual machines in the subscription. 
+This script creates two files:
+|File |Content|
+|--------------------|-----------------------|
+|config_[subid].json|	A JSON file that if renamed to VMConfiguration.json can be sent to teh AzureVMStateChange.ps1 script. The contents are only virtual machines in the subscription that are in the running state.| 
+|status_[subid].json|	A JSON file containing all of the VM's in the subscription broken down by region and running state|
