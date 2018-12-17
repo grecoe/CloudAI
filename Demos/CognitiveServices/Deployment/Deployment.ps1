@@ -317,8 +317,17 @@ $functionAppInfo.Add("fnappname", (Get-AzureRmResourceGroupDeployment -ResourceG
 $functionAppInfo.Add("stgConnectionString", "DefaultEndpointsProtocol=https;AccountName=" + $functionAppInfo["storageName"] + ";AccountKey=" +  $functionAppInfo["storageKey"])
 
 Write-Host("Force function app to refresh for Cosmos DB connection")
-Invoke-AzureRmResourceAction -ResourceGroupName $resourceGroupName -ResourceType $fnAppType -ResourceName $functionAppInfo["fnappname"] -Action syncfunctiontriggers -ApiVersion $fnAppVersion -Force
 
+# Forcing the funciton app *should* cause the trigger function to be refreshed, but it doesn't due to an issue.
+# Invoke-AzureRmResourceAction -ResourceGroupName $resourceGroupName -ResourceType $fnAppType -ResourceName $functionAppInfo["fnappname"] -Action syncfunctiontriggers -ApiVersion $fnAppVersion -Force
+
+# You must ping the endpoint to get the function app to make the connections needed
+$fnAppTrigger= "https://" + $functionAppInfo["fnappname"] + ".azurewebsites.net"
+$triggerRequest = [System.Net.WebRequest]::Create($fnAppTrigger)
+$triggerResponse = $triggerRequest.GetResponse()
+Write-Host($triggerResponse)
+$triggerStatus = [int]$triggerResponse.StatusCode
+Write-Host($triggerStatus)
 
 #######################################################################
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
