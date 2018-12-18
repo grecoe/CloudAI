@@ -9,15 +9,34 @@
 param(
 	[bool]$shutdown=$true,
 	[bool]$deallocate=$false
+	[switch]$help=$false
 )
 
 Set-StrictMode -Version 1
 
-$configfile = ".\\VMConfiguration.json"
+
+#####################################################
+# If the help switch was used, just show the help for the 
+# script and get out.
+#####################################################
+if($help -eq $true)
+{
+	Write-Host ""
+	Write-Host "This script will batch change the running state of Azure Virtual Machines based on the configuration"
+	Write-Host "in the Configuration.json file."
+	Write-Host ""
+	Write-Host "The Configuration.json file can be filled in by hand or auto generated using the GetVmInfoAndConfig.ps1 script."
+	Write-Host ""
+	Write-Host "Parameters:"
+	Write-Host "	-shutdown : Required on all calls EXCEPT help. Identifies whether the Virtual Machines will be started or stopped."
+	Write-Host "	-deallocate : If shutdown is $true, the deallocate flag determines if the Virtual Machines will be shutdown or deallocated."
+	break
+}
 
 ####################################################################
 # Load the configuration file
 ####################################################################
+$configfile = ".\\VMConfiguration.json"
 $configuration = $null
 try
 {
@@ -71,6 +90,11 @@ foreach($sub in $configuration.Subscriptions)
 							break
 						}
 						elseif($status.code -eq "PowerState/stopped")
+						{
+							$stopped=$true
+							break
+						}
+						elseif($status.code -eq "PowerState/deallocated")
 						{
 							$stopped=$true
 							break

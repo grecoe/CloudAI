@@ -1,18 +1,18 @@
 # Azure Subscription Cleanup Scripts
 <sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
-The scripts in this folder can be used to either batch clean up unused resource groups in your Azure Subscription. List all types of resources in your Azure Subscription or list all resources of a certain type in your Azure Subscription.
+Azure resources have a way of multiplying in a subscription that is not strictly controlled by its administrators. It happens to all of us.
 
-Resources and resource groups have a way of multiplying in an Azure Subscription over time. Some of them become obsolete but it can be unclear who created it and for what purpose. However, these resources continue to cost you on a weekly or monthly basis. 
+On the other hand, locking down a non-production subscription that blocks your team from creating the resources they need to get their work or research done slows down the development and learning cycles. 
 
-Periodically cleaning up or at least understanding what is in your subscription is vitally important.
+Managing resources, and the costs associated with them, can be a challenge. 
 
-Use the scripts to clean up resources or resource groups.
+The scripts in this repository are meant to help you, the subscription administrator, to manage resources by:
 
-## Resource Group Level 
-The scripts in this folder can be used to identify resource groups in your subscription. Identify resource groups that have little activity associated with them. Delete unlocked resource groups in your subscripiton
+1.	[Detecting unlocked resources groups, and deleting them.](.\ResourceGroupLevel)
+2.	[Identifying all resources by region and selectively deleting those resources.](.\ResourceLevel)
+3.	[Shutting down Virtual Machines](.\VirtualMachines)
 
+Actively managing resources can keep you in budget while still offering a wide arrange of services to your development team.
 
-## Resource Level 
-The scripts in this folder can be used to list all resources by type and region. Create a collection of all resources across your subscription by a specific resource type. Delete individual resources.
-
+I hope the scripts in this repository will be useful to other Azure Subscription Administrators.

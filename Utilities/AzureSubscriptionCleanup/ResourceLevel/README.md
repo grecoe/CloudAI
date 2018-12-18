@@ -1,36 +1,41 @@
 # Azure Subscription Cleanup Scripts - Resource Level
 <sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
-The scripts in this folder can be used to batch clean identify and clean up resources in your Azure Subscription.
+It can be very useful to an administrator to understand all of the resources that are contained within a subscription. 
 
-Resources have a way of multiplying in an Azure Subscription over time. Some of them become obsolete but it can be unclear who created it and for what purpose. 
+This high level view gives a broad understanding of what is contained in the subscription and could be used to determine where the bigger costs are being accrued. 
 
-Use the scripts to identify and clean up resources.
+The scripts in this repository can be used to clean identify resources, but not delete them.
 
-## Locked or ReadOnly Resources
-A resource cannot be deleted if it or it's parent resource group have either a ReadOnly or Delete lock applied to it. Even a single resource contained in the resource group having any lock prevents the deletion of resources in the resource group. 
+While the scripts below do not directly delete resources, they can be modified quite easily to call [Remove-AzureRMResource](https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/remove-azurermresource?view=azurermps-6.13.0), which will delete individual resources from the subscription.
 
-Before you attempt to clean up resources, ensure that locks will not prevent the clean up. 
+## Identify all resources
+Having a list of all resources in a subscription can be useful in that it gives a broad picture of consumption in a subscription. 
 
-## Identify all resources in an Azure Subscription
+This script is used to generate a list of all resources, broken out by Azure Region, contained in a subscription.
+
+## Identify all resources script
 
 |File|Description|
 |--------------------|------------------------|              
 | ListResources.ps1|	This scirpt is used to collect a list of all resources in the subscription organized by region. The results simply provide a count of each type of resource found. The results are printed out to a file.|
 
 
-
 ### Script Parameters
-|Parameter |Usage|
-|--------------------|-----------------------|
-|-subId "id"|	The subscripiton ID to use for finding resource groups to delete.| 
-|-help|	A flag indicating to show the usage of the script. Nothing will be performed.|
+|Parameter |Required|Usage|
+|--------------------|---------|-----------------------|
+|-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
+|-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
 
 ### Script Output
 This script will output a text file in the script directory named [subid]_resources.json.
 
-## Identify all resources of a given resource type
+## Identify resources by type
+Instead of a list of all resources, it is sometimes useful to find all resources of a certain type such as storage accounts. 
 
+This script is used to generate a list of all resources of a specific type, broken out by Azure Region, contained in a subscription.
+
+## Identify resources by type script
 |File|Description|
 |--------------------|------------------------|              
 | ExpandResourceType.ps1|	The script is used to collect a list of all resources of a given type in the subscription organized by region. The results simply provide a list of names and resource id of the resources found. The results are printed to a file.|
@@ -38,11 +43,11 @@ This script will output a text file in the script directory named [subid]_resour
 
 
 ### Script Parameters
-|Parameter |Usage|
-|--------------------|-----------------------|
-|-subId "id"|	The subscripiton ID to use for finding resource groups to delete.| 
-|-resourceType "type"| The type of resource type to find. Example: Microsoft.BatchAI/jobs|
-|-help|	A flag indicating to show the usage of the script. Nothing will be performed.|
+|Parameter |Required|Usage|
+|--------------------|---------|-----------------------|
+|-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
+|-resourceType "type"| Yes| The type of resource type to find. Example: Microsoft.BatchAI/jobs|
+|-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
 
 ### Script Output
 This script will output a text file in the script directory named [subid]_details.json.
