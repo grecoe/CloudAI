@@ -40,10 +40,9 @@ if(-not $subId)
 # Log in and set to the sub you want to see
 #####################################################
 Write-Host "Log into Azure...."
-#UNCOMMENT THIS TO BE LOGGED IN THROUGH THE SCRIPT: Login-AzureRmAccount
+Login-AzureRmAccount
 Write-Host "Setting subscription ID : $subId"
 Set-AzureRmContext -SubscriptionID $subId
-#edf507a2-6235-46c5-b560-fd463ba2e771
 
 $removedRG = New-Object System.Collections.ArrayList
 $presentRG = New-Object System.Collections.ArrayList

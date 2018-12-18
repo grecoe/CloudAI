@@ -57,7 +57,7 @@ if(-not $resourceType)
 # Log in and set to the sub you want to see
 #####################################################
 Write-Host "Log into Azure...."
-#Login-AzureRmAccount
+Login-AzureRmAccount
 Write-Host ("Setting subscription ID : " + $subId )
 Set-AzureRmContext -SubscriptionID $subId
 
