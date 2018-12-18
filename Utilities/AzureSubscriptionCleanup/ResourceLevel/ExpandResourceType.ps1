@@ -8,6 +8,8 @@
 param(
 	[string]$subId,
 	[string]$resourceType,
+	[string]$resourceGroup,
+	[switch]$deleteResources=$false,
 	[switch]$help=$false
 )
 
@@ -27,9 +29,11 @@ if($help -eq $true)
 	Write-Host "You will be prompted to log in but MUST provide a subscription ID."
 	Write-Host ""
 	Write-Host "Parameters:"
-	Write-Host "	-subId : Required on all calls EXCEPT help. Identifies the subscription to scrub."
-	Write-Host "	-resourceType : Required string of resource type. Example: Microsoft.CognitiveServices/accounts" 
-	Write-Host "	-help : Shows this help message"
+	Write-Host "	-subId [subid]: Required on all calls EXCEPT help. Identifies the subscription to scrub."
+	Write-Host "	-resourceType [restype]: Required string of resource type. Example: Microsoft.CognitiveServices/accounts" 
+	Write-Host "	-resourceGroup [groupname]: Optional string identifying a specific resource group." 
+	Write-Host "	-deleteResources : Optional, presence means to delete resources found. " 
+	Write-Host "	-help : Optional, presence means to show this help message"
 	break
 }
 
@@ -54,39 +58,110 @@ if(-not $resourceType)
 #####################################################
 Write-Host "Log into Azure...."
 #Login-AzureRmAccount
-Write-Host ("Setting subscription ID : " + $subId + " to search for resources of type " + $resourceType)
+Write-Host ("Setting subscription ID : " + $subId )
 Set-AzureRmContext -SubscriptionID $subId
+
+Write-Host ("")
+if(-not $resourceGroup)
+{
+	Write-Host ("Searching all resource groups for resources of type : " + $resourceType)
+}
+else
+{
+	Write-Host ("Searching resource group " + $resourceGroup + " for resources of type : "  + $resourceType)
+}
 
 
 #####################################################
 # Collect all of the resource groups
 #####################################################
-Write-Host "Scanning subscription for resource groups, this could take a while....."
 
-$resourceGroups = Get-AzureRmResourceGroup 
 
 $resourceList = @{}
 $groupcount = 0
-foreach($group in $resourceGroups)
+if(-not $resourceGroup)
 {
-	Write-Host($group.ResourceGroupName)
-	
-	$resources = Get-AzureRmResource -ResourceGroupName $group.ResourceGroupName -ResourceType $resourceType
+	#####################################################
+	# A resource group was not provided so scan over all
+	# of the resource groups in the subscription.
+	#####################################################
+	Write-Host("Scanning subscription for all resource groups, this could take a while.....")
 
-	Write-Host($resources | ConvertTo-Json)
+	$resourceGroups = Get-AzureRmResourceGroup 
+
+	foreach($group in $resourceGroups)
+	{
+		Write-Host("Scanning resource group: " + $group.ResourceGroupName)
+	
+		$resources = Get-AzureRmResource -ResourceGroupName $group.ResourceGroupName -ResourceType $resourceType
+
+		foreach($res in $resources)
+		{
+			Write-Host("Found resource: " + $res.Name)
+
+			if($resourceList.ContainsKey($res.Location) -eq $false)
+			{
+				$resourceList.Add($res.Location, @{})
+			}
+		
+			$resourceList[$res.Location].Add($res.Name, $res.ResourceId)
+		}
+	}
+}
+else
+{
+	#####################################################
+	# A resource group was provided so scan only the 
+	# provided resource group.
+	#####################################################
+	Write-Host("Scanning resource group : " + $resourceGroup)
+	
+	$resources = Get-AzureRmResource -ResourceGroupName $resourceGroup -ResourceType $resourceType
 
 	foreach($res in $resources)
 	{
-		Write-Host($res | ConvertTo-Json)
+		Write-Host("Found resource: " + $res.Name)
 		
 		if($resourceList.ContainsKey($res.Location) -eq $false)
 		{
 			$resourceList.Add($res.Location, @{})
 		}
-		
+	
 		$resourceList[$res.Location].Add($res.Name, $res.ResourceId)
 	}
 }
+Write-Host ""
+
+
+#####################################################
+# Check for the deleteResources flag. If it's set give
+# the user one last chance to back out of the deletion.
+#####################################################
+if($deleteResources -eq $true)
+{
+	Write-Host "The deleteResources flag was set. Running in this mode will delete all resources found."
+	$response = Read-Host 'Are you sure you want to delete all resources found? (y/n) '
+	if($response -ne "y")
+	{
+		Write-Host "Cancelling the delete operations on found resources."
+		break
+	}
+	else
+	{
+		Write-Host "Deleting found resources."
+
+		foreach($regionKey in $resourceList.Keys)
+		{
+			Write-Host("Found in region : " + $regionKey)
+			foreach($resourceKey in $resourceList[$regionKey].Keys)
+			{
+				Write-Host("Deleting " + $resourceType + " named " + $resourceKey + " in region " + $regionKey)
+				Remove-AzureRmResource -Force -ResourceId $resourceList[$regionKey].Item($resourceKey)
+			}
+		}
+	}
+}
+
 
 # Output the data to a file.....
 $overview = New-Object PSObject -Property @{ 
@@ -95,6 +170,7 @@ $overview = New-Object PSObject -Property @{
 		Instances = $resourceList; 
 	}
 
+	
 $outputOverview = $overview | ConvertTo-Json -depth 100
 $fileName = $subId + "_detail.json"
 Out-File -FilePath .\$fileName -InputObject $outputOverview
