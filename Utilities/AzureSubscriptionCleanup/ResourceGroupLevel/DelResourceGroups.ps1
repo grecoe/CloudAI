@@ -41,7 +41,7 @@ if(-not $subId)
 # Log in and set to the sub you want to see
 #####################################################
 Write-Host "Log into Azure...."
-Login-AzureRmAccount
+#Login-AzureRmAccount
 Write-Host "Setting subscription ID : $subId"
 Set-AzureRmContext -SubscriptionID $subId
 
@@ -77,6 +77,7 @@ $totalResourceGroups = 0
 $lockedRG = New-Object System.Collections.ArrayList
 $readOnlyRG = New-Object System.Collections.ArrayList
 $unlockedRG = New-Object System.Collections.ArrayList
+$specialRG = New-Object System.Collections.ArrayList
 
 $resourceGroups = Get-AzureRmResourceGroup #| Where-Object {$_.ResourceGroupName -eq "dangtestdel"}
 
@@ -93,7 +94,17 @@ foreach($group in $resourceGroups)
 	$locks = Get-AzureRmResourceLock -ResourceGroupName $name
 	if($locks.length -eq 0)
 	{
-		$unlockedRG.add($name) > $null
+		if($name.Contains("cleanup") -or
+			$name.Contains("Default-Storage-") -or
+			$name.Contains("DefaultResourceGroup-") -or
+			$name.Contains("cloud-shell-storage-") )
+		{
+			$specialRG.Add($name) > $null
+		}
+		else
+		{
+			$unlockedRG.add($name) > $null
+		}
 	}
 	else
 	{
@@ -151,6 +162,12 @@ Out-File -FilePath .\deletegroups.txt -InputObject $unlockedRG
 Write-Output "Total Resource Groups : $totalResourceGroups, delete locked $($lockedRG.Count), readonly locked $($readOnlyRG.Count), unlocked : $($unlockedRG.Count)"
 if($whatif -eq $true)
 {
+	Write-Output "------------- SPECIAL GROUPS - IGNORED ----------------"
+	foreach($grp in $specialRG)
+	{
+		Write-Output "Special: $grp"
+	}
+
 	Write-Output "------------- LOCKED GROUPS - READ ONLY LOCK ----------------"
 	foreach($grp in $readOnlyRG)
 	{
