@@ -5,6 +5,7 @@
 #####################################################
 param(
 	[string]$subId,
+	[switch]$login=$false,
 	[switch]$help=$false
 )
 
@@ -20,6 +21,7 @@ if($help -eq $true)
 	Write-Host "Must be supplied."
 	Write-Host "Parameters:"
 	Write-Host "	-help : Shows this help message"
+	Write-Host "	-login : Tells script to log into azure subscription, otherwise assumes logged in already"
 	Write-Host "	-subId : Required on all calls EXCEPT help. Identifies the subscription to scrub."
 	break
 }
@@ -39,8 +41,16 @@ if(-not $subId)
 #####################################################
 # Log in and set to the sub you want to see
 #####################################################
-Write-Host "Log into Azure...."
-Login-AzureRmAccount
+if($login -eq $true)
+{
+	Write-Host "Log into Azure...."
+	Login-AzureRmAccount
+}
+else
+{
+	Write-Host "Bypassing Azure Login...."
+}
+
 Write-Host "Setting subscription ID : $subId"
 Set-AzureRmContext -SubscriptionID $subId
 

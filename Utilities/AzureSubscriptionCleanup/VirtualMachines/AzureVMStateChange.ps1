@@ -9,6 +9,7 @@
 param(
 	[bool]$shutdown=$true,
 	[bool]$deallocate=$false
+	[switch]$login=$false,
 	[switch]$help=$false
 )
 
@@ -30,6 +31,7 @@ if($help -eq $true)
 	Write-Host "Parameters:"
 	Write-Host "	-shutdown : Required on all calls EXCEPT help. Identifies whether the Virtual Machines will be started or stopped."
 	Write-Host "	-deallocate : If shutdown is $true, the deallocate flag determines if the Virtual Machines will be shutdown or deallocated."
+	Write-Host "	-login : Tells script to log into azure subscription, otherwise assumes logged in already"
 	break
 }
 
@@ -51,7 +53,15 @@ catch
 ####################################################################
 # Login to Azure and set the correct subscription
 ####################################################################
-Login-AzureRmAccount
+if($login -eq $true)
+{
+	Write-Host "Log into Azure...."
+	Login-AzureRmAccount
+}
+else
+{
+	Write-Host "Bypassing Azure Login...."
+}
 
 
 ####################################################################

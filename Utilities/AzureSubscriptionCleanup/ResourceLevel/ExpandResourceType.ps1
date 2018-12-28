@@ -9,6 +9,7 @@ param(
 	[string]$subId,
 	[string]$resourceType,
 	[string]$resourceGroup,
+	[switch]$login=$false,
 	[switch]$deleteResources=$false,
 	[switch]$help=$false
 )
@@ -33,6 +34,7 @@ if($help -eq $true)
 	Write-Host "	-resourceType [restype]: Required string of resource type. Example: Microsoft.CognitiveServices/accounts" 
 	Write-Host "	-resourceGroup [groupname]: Optional string identifying a specific resource group." 
 	Write-Host "	-deleteResources : Optional, presence means to delete resources found. " 
+	Write-Host "	-login : Tells script to log into azure subscription, otherwise assumes logged in already"
 	Write-Host "	-help : Optional, presence means to show this help message"
 	break
 }
@@ -56,8 +58,16 @@ if(-not $resourceType)
 #####################################################
 # Log in and set to the sub you want to see
 #####################################################
-Write-Host "Log into Azure...."
-Login-AzureRmAccount
+if($login -eq $true)
+{
+	Write-Host "Log into Azure...."
+	Login-AzureRmAccount
+}
+else
+{
+	Write-Host "Bypassing Azure Login...."
+}
+
 Write-Host ("Setting subscription ID : " + $subId )
 Set-AzureRmContext -SubscriptionID $subId
 
