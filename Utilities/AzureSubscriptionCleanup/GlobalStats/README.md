@@ -25,7 +25,7 @@ Login-AzureRMAccount
 
 ### Output Files
 |Parameter |Content|
-|--------------------|---------|-----------------------|
+|--------------------|-----------------------|
 |resource_group_status.json| For each subscription there is an object that contains subscription name, id, count of resource groups and count of unlocked resource groups.| 
 |virtual_machine_status.json| For each subscription there is an object that contains subscription name, id, count of virtural machines, count of running virtual machines and count of stopped virtual machines (i.e. not deallocated).|
 |subscription_global_stats.json| Lists the count of subscriptions, count of resource groups, count of unlocked resource groups, count ofvirtual machines, count of running virtual machines, and finally a list of subscription data where there is at least one resource group.|
