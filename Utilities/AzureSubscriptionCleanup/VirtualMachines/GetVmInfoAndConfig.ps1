@@ -169,12 +169,12 @@ $outputSubCollection = $subCollection | ConvertTo-Json -depth 100
 #Create a directory
 md -Name $subId
 #Write the configuration file
-$configurationFilename = "config_" + $subId + ".json"
+$configurationFilename = "vm_config.json"
 Out-File -FilePath .\$subId\$configurationFilename -InputObject $outputSubCollection
 Write-Host("Completed")	
 	
 #Write the status file
 $fileContent = $vmCollection | ConvertTo-Json -depth 100
-$filename = "status_" + $subId + ".json"
+$filename = "vm_status.json"
 Out-File -FilePath .\$subId\$filename -InputObject $fileContent
 Write-Host("Completed")

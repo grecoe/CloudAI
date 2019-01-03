@@ -63,8 +63,8 @@ Set-AzureRmContext -SubscriptionID $subId
 if($whatif -eq $true)
 {
 	Write-Host "This run will display what would happen, but nothing will be removed from the subscription."
-	Write-Host "Press any key to continue"
-	Read-Host
+	#Write-Host "Press any key to continue"
+	#Read-Host
 }
 else
 {
@@ -107,7 +107,8 @@ foreach($group in $resourceGroups)
 		if($name.Contains("cleanup") -or
 			$name.Contains("Default-Storage-") -or
 			$name.Contains("DefaultResourceGroup-") -or
-			$name.Contains("cloud-shell-storage-") )
+			$name.Contains("cloud-shell-storage-") -or
+			$name.Contains("StreamAnalytics-Default-"))
 		{
 			$specialRG.Add($name) > $null
 		}
@@ -160,10 +161,20 @@ foreach($group in $resourceGroups)
 	}
 }
 
-# Force it all out to a file
+#Create a directory
+md -Name $subId
 
+# Force it all out to a file
 Write-Host "Writing out unlocked groups to file"
-Out-File -FilePath .\deletegroups.txt -InputObject $unlockedRG
+Out-File -FilePath .\$subId\deletegroups.txt -InputObject $unlockedRG
+
+$resourceGroupStats = New-Object PSObject -Property @{ 
+	Total = $totalResourceGroups; 
+	DeleteLocked = $lockedRG.Count; 
+	ReadOnlyLocked = $lockedRG.Count; 
+	Unlocked = $unlockedRG.Count;
+	Special = $specialRG.Count }
+Out-File -FilePath .\$subId\rg_status.json -InputObject ($resourceGroupStats | ConvertTo-Json -depth 100)
 
 #####################################################
 # Output what we found if whatif is set, otherwise
