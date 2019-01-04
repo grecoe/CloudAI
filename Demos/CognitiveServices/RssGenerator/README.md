@@ -7,7 +7,7 @@ This directory contains the source code used to build the generator application 
 ## Data Formats
 
 ### Ingestion format
-This format is contains the original content of the article. Articles are broken down into article (contains text) and image entries in the Ingest collection in teh Cosmos DB. 
+This format contains the original content of the article. Articles are broken down into `article` (contains text) and `image` entries in the Ingest collection in the Cosmos DB. 
 
 ```json
 {
@@ -32,7 +32,7 @@ title	|String	|N	|X |
 author	|String	|N	|X |		
 hero_image	|String	|N	|X |		
 child_images	|Array(object)	|N	|X |		
-internal_uri	|String	N		|X	|X |
+internal_uri	|String	|N	|X	|X
 
 ##### Media Object
 The media object is used for child_images. The field media_id is the Document ID of the media document in the Articles table. 
@@ -45,13 +45,13 @@ The media object is used for child_images. The field media_id is the Document ID
 ```
 
 ### Processed Format
-This format is contains the results of analyzing a portion of the ingested article. There will be one for the main article and one for each image. These records are kept in the Processed collection in Cosmos DB.
+This format contains the results of analyzing a portion of the ingested article. There will be one entry for the main article and one for each image. These records are kept in the Processed collection in Cosmos DB.
 
 ```json
 {
 	"id" : "GUID",
 	"artifact_type" : "article|image", 
-        “parent” : “parent id”,
+        "parent": "parent id",
 	"properties" : {
 			.... dependent on artifact type ......
 	}
@@ -68,14 +68,15 @@ title**	|object	|N	|X |
 body**	|object	|N	|X |		
 vision***	|object	|N	| |X		
 face****	|object	|N	| |X		
-tags	|Array(string)	|N	|X	|X	
+tags	|Array(string)	|N	|X	|X
+
 \* Total processing time (ms)
 
 \** Text Field Analytics objects
 
 \*** Vision Analytics object
 
-\*** Face Analytics object
+\**** Face Analytics object
 
 ##### Text Field Analytics Object
 ```json
