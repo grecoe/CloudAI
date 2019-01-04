@@ -9,6 +9,7 @@ param(
 	[string]$subId,
 	[switch]$help=$false,
 	[switch]$login=$false,
+	[switch]$delspecials=$false,
 	[switch]$whatif=$false
 )
 
@@ -24,6 +25,7 @@ if($help -eq $true)
 	Write-Host "	-help : Shows this help message"
 	Write-Host "	-whatif : Lists out resource groups that are locked and unlocked, unlocked resource groups will be deleted."
 	Write-Host "	-subId : Required on all calls EXCEPT help. Identifies the subscription to scrub."
+	Write-Host "	-delspecials : Will delete even special resource groups EXCEPT cleanupservice."
 	Write-Host "	-login : Tells script to log into azure subscription, otherwise assumes logged in already"
 	break
 }
@@ -105,14 +107,17 @@ foreach($group in $resourceGroups)
 	if($locks.length -eq 0)
 	{
 		if($name.Contains("cleanup") -or
-			$name.Contains("Default-Storage-") -or
-			$name.Contains("DefaultResourceGroup-") -or
-			$name.Contains("cloud-shell-storage-") -or
-			$name.Contains("Default-ServiceBus-") -or
-			$name.Contains("Default-Web-") -or
-			$name.Contains("OI-Default-") -or
-			$name.Contains("Default-SQL") -or
-			$name.Contains("StreamAnalytics-Default-"))
+			( ($delspecials -eq $false) -and
+			  ($name.Contains("Default-Storage-") -or
+				$name.Contains("DefaultResourceGroup-") -or
+				$name.Contains("cloud-shell-storage-") -or
+				$name.Contains("Default-ServiceBus-") -or
+				$name.Contains("Default-Web-") -or
+				$name.Contains("OI-Default-") -or
+				$name.Contains("Default-SQL") -or
+				$name.Contains("StreamAnalytics-Default-"))
+			)
+		  )
 		{
 			$specialRG.Add($name) > $null
 		}
