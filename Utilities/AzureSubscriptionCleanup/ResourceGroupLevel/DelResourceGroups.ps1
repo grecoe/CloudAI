@@ -108,6 +108,10 @@ foreach($group in $resourceGroups)
 			$name.Contains("Default-Storage-") -or
 			$name.Contains("DefaultResourceGroup-") -or
 			$name.Contains("cloud-shell-storage-") -or
+			$name.Contains("Default-ServiceBus-") -or
+			$name.Contains("Default-Web-") -or
+			$name.Contains("OI-Default-") -or
+			$name.Contains("Default-SQL") -or
 			$name.Contains("StreamAnalytics-Default-"))
 		{
 			$specialRG.Add($name) > $null
