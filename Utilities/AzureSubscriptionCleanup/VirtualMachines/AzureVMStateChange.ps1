@@ -8,7 +8,7 @@
 
 param(
 	[bool]$shutdown=$true,
-	[bool]$deallocate=$false
+	[bool]$deallocate=$false,
 	[switch]$login=$false,
 	[switch]$help=$false
 )
