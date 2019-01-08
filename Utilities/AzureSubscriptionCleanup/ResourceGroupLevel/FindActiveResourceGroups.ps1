@@ -118,8 +118,13 @@ $overview = New-Object PSObject -Property @{
 		Inactive = $allGroupWithoutActivities 
 	}
 
+#Create a directory
+md -ErrorAction Ignore -Name $subId
 
 $outputOverview = $overview | ConvertTo-Json -depth 100
-$fileName = $subId + "activitylogs.json"
-Out-File -FilePath .\$fileName -InputObject $outputOverview
+$fileName = "resourcegroupactivitylogs.json"
+Out-File -FilePath .\$subId\$fileName -InputObject $outputOverview
 Write-Host("Completed")
+
+
+

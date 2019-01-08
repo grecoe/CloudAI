@@ -110,6 +110,7 @@ foreach($group in $resourceGroups)
 			( ($delspecials -eq $false) -and
 			  ($name.Contains("Default-Storage-") -or
 				$name.Contains("DefaultResourceGroup-") -or
+				$name.Contains("Default-MachineLearning-") -or
 				$name.Contains("cloud-shell-storage-") -or
 				$name.Contains("Default-ServiceBus-") -or
 				$name.Contains("Default-Web-") -or
@@ -171,7 +172,7 @@ foreach($group in $resourceGroups)
 }
 
 #Create a directory
-md -Name $subId
+md -ErrorAction Ignore -Name $subId
 
 # Force it all out to a file
 Write-Host "Writing out unlocked groups to file"

@@ -46,7 +46,7 @@ try
 }
 catch
 {
-	Write-Output "Configuration file $configfile could not be found"
+	Write-Output "Configuration file " + $configfile + " could not be found"
 	break
 }
 

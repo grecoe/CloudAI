@@ -180,9 +180,11 @@ $overview = New-Object PSObject -Property @{
 		Instances = $resourceList; 
 	}
 
+#Create a directory
+md -ErrorAction Ignore -Name $subId
 	
 $outputOverview = $overview | ConvertTo-Json -depth 100
-$fileName = $subId + "_detail.json"
-Out-File -FilePath .\$fileName -InputObject $outputOverview
+$fileName = "resource_detail.json"
+Out-File -FilePath .\$subId\$fileName -InputObject $outputOverview
 
-Write-Host("Results can be found here: " + $fileName)
+Write-Host("Completed")

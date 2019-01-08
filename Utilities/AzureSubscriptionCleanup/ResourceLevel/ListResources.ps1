@@ -87,12 +87,14 @@ foreach($res in $resources)
 }
 	
 
+#Create a directory
+md -ErrorAction Ignore -Name $subId
 
 $outputOverview = $resourceList | ConvertTo-Json -depth 100
-$fileName = $subId + "_resources.json"
-Out-File -FilePath .\$fileName -InputObject $outputOverview
+$fileName = "list_resources.json"
+Out-File -FilePath .\$subId\$fileName -InputObject $outputOverview
 
-Write-Host("Results can be found here: " + $fileName)
+Write-Host("Completed")
 
 
 

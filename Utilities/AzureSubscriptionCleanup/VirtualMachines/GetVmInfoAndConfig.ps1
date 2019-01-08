@@ -167,7 +167,7 @@ $subCollection = New-Object PSObject -Property @{ Subscriptions = $subList }
 $outputSubCollection = $subCollection | ConvertTo-Json -depth 100
 
 #Create a directory
-md -Name $subId
+md -ErrorAction Ignore -Name $subId
 #Write the configuration file
 $configurationFilename = "vm_config.json"
 Out-File -FilePath .\$subId\$configurationFilename -InputObject $outputSubCollection
