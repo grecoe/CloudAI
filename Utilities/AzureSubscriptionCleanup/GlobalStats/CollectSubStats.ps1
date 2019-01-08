@@ -12,6 +12,7 @@ $resconstitutedSubs = Get-Content -Raw -Path .\subscriptionlist.json | ConvertFr
 #####################################################
 $vmList = New-Object System.Collections.ArrayList
 $rgList = New-Object System.Collections.ArrayList
+$resourceList = @{}
 
 #####################################################
 # Variables to hold global stats from all of the 
@@ -36,20 +37,25 @@ foreach($rsub in $resconstitutedSubs)
 	
 	$vmfile = (Split-Path $MyInvocation.MyCommand.Path) + "\" + $rsub.Id + "\vm_status.json"
 	$rgfile = (Split-Path $MyInvocation.MyCommand.Path) + "\" + $rsub.Id + "\rg_status.json"
+	$rsfile = (Split-Path $MyInvocation.MyCommand.Path) + "\" + $rsub.Id + "\list_resources.json"
 		
 	#####################################################
 	# Proceed only if files for this subscription were 
 	# actually created.
 	#####################################################
 	if([System.IO.File]::Exists($vmfile) -and 
-		[System.IO.File]::Exists($rgfile))
+		[System.IO.File]::Exists($rgfile) -and
+		[System.IO.File]::Exists($rsfile))
 	{
 
 		# Convert file content to an object
 		$vmInfo = Get-Content -Raw -Path $vmfile | ConvertFrom-Json
 		$rgInfo = Get-Content -Raw -Path $rgfile | ConvertFrom-Json
-	
+		$rsInfo = Get-Content -Raw -Path $rsfile | ConvertFrom-Json
+
+		#####################################################
 		# Collect the resource group stats
+		#####################################################
 		$rgStats = New-Object PSObject -Property @{ 
 			Sub = $rsub.Name;
 			Id = $rsub.Id;
@@ -60,7 +66,9 @@ foreach($rsub in $resconstitutedSubs)
 		$totalRgCount += $rgInfo.Total
 		$totalUnlockedRgCount += $rgInfo.Unlocked
 		
+		#####################################################
 		# Collect the virtual machine stats
+		#####################################################
 		$vmStats = New-Object PSObject -Property @{ 
 			Sub = $rsub.Name;
 			Id = $rsub.Id;
@@ -72,6 +80,28 @@ foreach($rsub in $resconstitutedSubs)
 		$totalVmCount += $vmInfo.TotalVMCount
 		$totalRunningVmCount += $vmInfo.RunningVms
 
+		#####################################################
+		# Collect the resource usage
+		#####################################################
+		foreach($regions in $rsInfo.PsObject.Properties)
+		{
+			foreach($region_details in $regions.PsObject.Properties)
+			{	
+				if($region_details.Name -eq "Value")
+				{
+					foreach($resourceType in $region_details.Value.PsObject.Properties)
+					{
+						if($resourceList.ContainsKey($resourceType.Name) -eq $false)
+						{
+							$resourceList.Add($resourceType.Name,0)
+						}
+						$resourceList[$resourceType.Name] += $resourceType.Value
+					}
+				}
+			}
+		}
+
+		
 		# If there is more than 0 resource groups associated with the subscription
 		# collect it's the stats specifically for this subscription
 		if($rgInfo.Total -gt 0)
@@ -93,10 +123,11 @@ foreach($rsub in $resconstitutedSubs)
 
 
 #####################################################
-# Dump out the resource group and vm information
+# Dump out the resource group,vm, and global resource usage information
 #####################################################
 Out-File -FilePath .\resource_group_status.json -InputObject ($rgList | ConvertTo-Json -depth 100)
 Out-File -FilePath .\virtual_machine_status.json -InputObject ($vmList | ConvertTo-Json -depth 100)
+Out-File -FilePath .\global_resource_usage.json -InputObject ($resourceList | ConvertTo-Json -depth 100)
 
 
 #####################################################

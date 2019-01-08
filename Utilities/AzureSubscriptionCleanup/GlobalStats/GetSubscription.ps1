@@ -26,6 +26,7 @@ foreach($rsub in $resconstitutedSubs)
 	Write-Host($rsub.Name)
 	.\GetVMInfoAndConfig.ps1 -subId $rsub.Id
 	.\DelresourceGroups.ps1 -whatif -subId $rsub.Id
+	.\ListResources.ps1 -subId $rsub.Id
 }
 
 #####################################################

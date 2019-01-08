@@ -7,6 +7,7 @@ Copy the two files in this repo to this directory (after cloning of course):
 
 \ResourceGroupLevel\DelResourceGroups.ps1
 \VirtualMachines\GetVmInfoAndConfig.ps1
+\ResourceLevel\ListResources.ps1
 
 Open PowerShell and navigate to the local directory of this file and run the command 
 ```
@@ -29,4 +30,5 @@ Login-AzureRMAccount
 |resource_group_status.json| For each subscription there is an object that contains subscription name, id, count of resource groups and count of unlocked resource groups.| 
 |virtual_machine_status.json| For each subscription there is an object that contains subscription name, id, count of virtural machines, count of running virtual machines and count of stopped virtual machines (i.e. not deallocated).|
 |subscription_global_stats.json| Lists the count of subscriptions, count of resource groups, count of unlocked resource groups, count ofvirtual machines, count of running virtual machines, and finally a list of subscription data where there is at least one resource group.|
+|global_resource_usage.json| Lists a count of all Azure resource types and the number of instances of each resource type that was found accross all subscriptions.|
 
