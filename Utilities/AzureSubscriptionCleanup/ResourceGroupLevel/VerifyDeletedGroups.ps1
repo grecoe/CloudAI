@@ -57,7 +57,7 @@ Set-AzureRmContext -SubscriptionID $subId
 $removedRG = New-Object System.Collections.ArrayList
 $presentRG = New-Object System.Collections.ArrayList
 
-foreach($resourceGroup in Get-Content .\deletegroups.txt) 
+foreach($resourceGroup in Get-Content .\$subId\deletegroups.txt) 
 {
 	$resourceGroup = $resourceGroup.Trim()
 	$azureResource = Get-AzureRmResourceGroup -Name $resourceGroup -ErrorAction SilentlyContinue
