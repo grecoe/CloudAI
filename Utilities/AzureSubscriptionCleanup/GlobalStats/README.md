@@ -3,10 +3,12 @@
 
 Sometimes it's helpful to get an overview of all the subscription resources across all your resources. The scripts in this directory, along with others in this repo, can be used to find out about resource groups and virtual machine usage.
 
-Copy the two files in this repo to this directory (after cloning of course):
+Copy the three files in this repo to this directory (after cloning of course):
 
 \ResourceGroupLevel\DelResourceGroups.ps1
+
 \VirtualMachines\GetVmInfoAndConfig.ps1
+
 \ResourceLevel\ListResources.ps1
 
 Open PowerShell and navigate to the local directory of this file and run the command 
