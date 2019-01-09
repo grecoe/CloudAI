@@ -106,10 +106,12 @@ foreach($group in $resourceGroups)
 	$locks = Get-AzureRmResourceLock -ResourceGroupName $name
 	if($locks.length -eq 0)
 	{
+		# In all cases do not delete the default storage. 1 it's cheap and 
+		# 2 it may contain VHD images that are leased blocking the deletion.
 		if($name.Contains("cleanup") -or
-			( ($delspecials -eq $false) -and
-			  ($name.Contains("Default-Storage-") -or
-				$name.Contains("DefaultResourceGroup-") -or
+		   $name.Contains("Default-Storage-") -or
+		   ( ($delspecials -eq $false) -and
+			  ($name.Contains("DefaultResourceGroup-") -or
 				$name.Contains("Default-MachineLearning-") -or
 				$name.Contains("cloud-shell-storage-") -or
 				$name.Contains("Default-ServiceBus-") -or
@@ -190,7 +192,7 @@ Out-File -FilePath .\$subId\rg_status.json -InputObject ($resourceGroupStats | C
 # Output what we found if whatif is set, otherwise
 # start the cleaning process.
 #####################################################
-Write-Output "Total Resource Groups : $totalResourceGroups, delete locked $($lockedRG.Count), readonly locked $($readOnlyRG.Count), unlocked : $($unlockedRG.Count)"
+Write-Output "Total Resource Groups : $totalResourceGroups, delete locked $($lockedRG.Count), readonly locked $($readOnlyRG.Count), unlocked : $($unlockedRG.Count), specials ignored $($specialRG.Count)"
 if($whatif -eq $true)
 {
 	Write-Output "------------- SPECIAL GROUPS - IGNORED ----------------"
