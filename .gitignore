@@ -11,8 +11,6 @@
 /Demos/CognitiveServices/RssGenerator/packages/*
 /Demos/CognitiveServices/wwwroot/bin/*
 
-
-
 # Image Classification
 /Utilities/ImageClassification/.vs/*
 /Utilities/ImageClassification/bin/*
@@ -28,4 +26,7 @@
 /Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputApp/obj/*
 /Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputInterfaces/bin/*
 /Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputInterfaces/obj/*
+
+# Subscription Maintenace
+/Utilities/AzureSubscriptionCleanup/SubSpecific/*
 
