@@ -111,7 +111,8 @@ foreach($rsub in $resconstitutedSubs)
 				ResourceGroups = $rgInfo.Total;
 				UnlockedResourceGroups = $rgInfo.Unlocked;
 				VirtualMachines = $vmInfo.TotalVMCount; 
-				RunningVirtualMachines = $vmInfo.RunningVms}
+				RunningVirtualMachines = $vmInfo.RunningVms;
+				StoppedVirtualMachines = $vmInfo.StoppedVms}
 			$resourceGroupList.Add($individualSubStatsRollup) > $null
 		}
 	}
