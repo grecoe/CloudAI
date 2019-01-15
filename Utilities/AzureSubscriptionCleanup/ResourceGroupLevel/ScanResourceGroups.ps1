@@ -176,10 +176,11 @@ foreach($group in $resourceGroups)
 #Create a directory
 md -ErrorAction Ignore -Name $subId
 
-# Force it all out to a file
+# Write out all unlocked resource groups for a verification later.
 Write-Host "Writing out unlocked groups to file"
 Out-File -FilePath .\$subId\deletegroups.txt -InputObject $unlockedRG
 
+# Write out the status of the resource groups.
 $resourceGroupStats = New-Object PSObject -Property @{ 
 	Total = $totalResourceGroups; 
 	DeleteLocked = $lockedRG.Count; 
@@ -187,6 +188,24 @@ $resourceGroupStats = New-Object PSObject -Property @{
 	Unlocked = $unlockedRG.Count;
 	Special = $specialRG.Count }
 Out-File -FilePath .\$subId\rg_status.json -InputObject ($resourceGroupStats | ConvertTo-Json -depth 100)
+
+# Write out the unlock configuration
+$lockConfiguration = New-Object System.Collections.ArrayList
+$lockedResourceGroups = New-Object System.Collections.ArrayList
+foreach($grp in $readOnlyRG)
+{
+	$lockedResourceGroups.Add($grp) > $null
+}
+foreach($grp in $lockedRG)
+{
+	$lockedResourceGroups.Add($grp) > $null
+}
+$subscriptionLockConfiguration = New-Object PSObject -Property @{ 
+	subscriptionId = $subId
+	resourceGroups = $lockedResourceGroups
+	}
+$lockConfiguration.Add($subscriptionLockConfiguration) > $null
+Out-File -FilePath .\$subId\unlockconfiguration.json -InputObject ($lockConfiguration | ConvertTo-Json -depth 100)
 
 #####################################################
 # Output what we found if whatif is set, otherwise

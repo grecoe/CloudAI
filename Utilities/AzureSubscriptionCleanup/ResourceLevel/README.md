@@ -25,6 +25,7 @@ This script is used to generate a list of all resources, broken out by Azure Reg
 |Parameter |Required|Usage|
 |--------------------|---------|-----------------------|
 |-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
+|-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
 |-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
 
 ### Script Output
@@ -48,6 +49,7 @@ This script is used to generate a list of all resources of a specific type, brok
 |Parameter |Required|Usage|
 |--------------------|---------|-----------------------|
 |-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
+|-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
 |-resourceType "type"| Yes| The type of resource type to find. Example: Microsoft.BatchAI/jobs|
 |-resourceGroup "groupname"| No| If provided it, the search will only look for resources of type resourceType in the specified resourceGroup|
 |-deleteResources | No| A flag indicating whether found resources should be deleted. The default value is that no resources will be deleted. User will be prompted if deletion is requested.|

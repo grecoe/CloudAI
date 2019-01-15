@@ -41,6 +41,7 @@ The script takes two Boolean parameters
 |--------------------|---------|-----------------------|
 |-shutdown [$true or $false]| Yes|	A flag indicating whether the machines should be started or stopped.<br>If the machine is running and shutdown is false, the machine is skipped.<br>If the machine is stopped and shutdown is true, the machine is skipped.<br>The default value is $true (stop the machines)| 
 |-deallocate [$true or $false]|	No| A flag that is used ONLY when -shutdown $true is passed in. Determines whether to deallocate the resources or just shut down the VM (which would still incur costs).<br>The default value is $false (does not deallocate the machine when shutdown)|
+|-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
 |-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
 
 >NOTE Remember to configure your IP addresses to static if deallocating the machines. ss
@@ -78,6 +79,7 @@ The script takes two Boolean parameters
 |Parameter |Required|Usage|
 |--------------------|---------|-----------------------|
 |-subId "id"| Yes|	The subscripiton ID to use for finding all virtual machines in all resource groups.| 
+|-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
 |-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
 
 
