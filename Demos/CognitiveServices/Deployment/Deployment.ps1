@@ -250,13 +250,13 @@ $configurationCollections = @($cosmosIngestCollection,$cosmosProcessedCollection
 $nasa = @{}
 $nasa.Add("storage_container","nasa")
 $nasa.Add("feed","https://www.nasa.gov/rss/dyn/breaking_news.rss")
-$france = @{}
-$france.Add("storage_container","france24")
-$france.Add("feed","https://www.france24.com/fr/europe/rss")
+$quebec = @{}
+$quebec.Add("storage_container","opc")
+$quebec.Add("feed","https://www.opc.gouv.qc.ca/actualite/rss.xml")
 $germany = @{}
-$germany.Add("storage_container","zeit")
-$germany.Add("feed","http://newsfeed.zeit.de/index")
-$configurationFeeds = @($nasa, $france, $germany)
+$germany.Add("storage_container","bamf")
+$germany.Add("feed","http://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meldungen")
+$configurationFeeds = @($nasa, $quebec, $germany)
 
 $configuration = @{}
 $configuration.Add("cosmos_db_uri",$cosmosAccountInfo["endpoint"])
@@ -394,8 +394,11 @@ Write-Host($triggerStatus)
 #######################################################################
 # Example Location : https://cosmosfnappba4e.file.core.windows.net/cosmosfnappba4e/site/wwwroot/
 Write-Host("")
-Write-Host("Configuration of this solution is almost completed, the Azure Function Apps need just a ")
-Write-Host("couple of minutes to make the connections to Cosmos DB and Azure Service Bus")
+Write-Host("Configuration of this solution is almost completed, the Azure Function Apps need to be launched ")
+Write-Host("to make the connection to Cosmos DB.")
+Write-Host("1. Navigate to the azure portal https://portal.azure.com and find the resource group " + $resourceGroupName)
+Write-Host("2. Launch the app service " + $functionAppInfo["fnappname"] + " that hosts the function app within that resource group")
+Write-Host("3. Click on the function ArticleIngestTrigger to make the connection to Cosmos DB.")
 Write-Host("")
 Write-Host("When that is completed, the next step is to seed the Cosmos DB Collection that will fire")
 Write-Host("off the pipeline. Launch the following application from the Deployment directory:")
