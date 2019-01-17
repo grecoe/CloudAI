@@ -81,17 +81,18 @@ namespace RssGenerator.RSS
         {
             List<RSSFeedItem> returnList = new List<RSSFeedItem>();
 
-            XmlReader reader = XmlReader.Create(this.FeedUri);
+            XmlReader reader = XmlReader.Create(this.FeedUri); ;
             SyndicationFeed feed = SyndicationFeed.Load(reader);
             reader.Close();
+
             foreach (SyndicationItem item in feed.Items)
             {
                 RSSFeedItem newItem = new RSSFeedItem();
                 newItem.Title = item.Title.Text;
                 newItem.Summary = item.Summary.Text;
                 newItem.PublishedDate = item.PublishDate.ToString("O");
-                newItem.Id = HashGenerator.GetHash(item.Id);
-
+                newItem.Id = HashGenerator.GetHash(item.Id + DateTime.Now.ToLongTimeString());
+                
                 foreach (SyndicationLink var in item.Links)
                 {
                     if (!String.IsNullOrEmpty(var.MediaType) && var.MediaType.Contains("image"))
