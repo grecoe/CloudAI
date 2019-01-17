@@ -251,8 +251,8 @@ $nasa = @{}
 $nasa.Add("storage_container","nasa")
 $nasa.Add("feed","https://www.nasa.gov/rss/dyn/breaking_news.rss")
 $quebec = @{}
-$quebec.Add("storage_container","opc")
-$quebec.Add("feed","https://www.opc.gouv.qc.ca/actualite/rss.xml")
+$quebec.Add("storage_container","europa")
+$quebec.Add("feed","https://euipo.europa.eu/ohimportal/en/web/observatory/home/-/journal/rss/1504608?_15_groupId=11370")
 $germany = @{}
 $germany.Add("storage_container","bamf")
 $germany.Add("feed","http://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meldungen")

@@ -13,8 +13,8 @@ To simplify the concept, this demo will read public RSS news feeds from three di
 Language  | RSS Feed
 ---- | ----
 English | https://www.nasa.gov/rss/dyn/breaking_news.rss
-French | https://www.france24.com/fr/europe/rss
-German | http://newsfeed.zeit.de/index
+French | https://euipo.europa.eu/ohimportal/fr/web/observatory/home/-/journal/rss/1504608?_15_groupId=11370 
+German | http://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meldungen
 
 The "requirements" for this project are that, for each document ingested into the pipeline, it must:
 1. Translate all text found in any article to English (though the target language should be, and is, programmable).
