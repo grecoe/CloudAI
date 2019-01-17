@@ -13,7 +13,7 @@ To simplify the concept, this demo will read public RSS news feeds from three di
 Language  | RSS Feed
 ---- | ----
 English | https://www.nasa.gov/rss/dyn/breaking_news.rss
-French | https://euipo.europa.eu/ohimportal/fr/web/observatory/home/-/journal/rss/1504608?_15_groupId=11370 
+Russian | http://government.ru/all/rss/ 
 German | http://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meldungen
 
 The "requirements" for this project are that, for each document ingested into the pipeline, it must:
