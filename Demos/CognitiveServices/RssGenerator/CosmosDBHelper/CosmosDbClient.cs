@@ -26,6 +26,7 @@ using System.Net;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using RssGenerator.RecordFormats;
+using Microsoft.Azure.Documents.Linq;
 
 namespace RssGenerator.CosmosDBHelper
 {
@@ -45,6 +46,13 @@ namespace RssGenerator.CosmosDBHelper
             this.KEY = key;
         }
 
+        /// <summary>
+        /// Creates a document in a collection.
+        /// </summary>
+        /// <param name="database">Database containing the collection</param>
+        /// <param name="collection">Collection</param>
+        /// <param name="document">Document to insert</param>
+        /// <returns>True if succesful</returns>
         public async Task<bool> CreateDocument(String database, String collection, object document)
         {
             this.CreateCollection(database, collection).Wait();
@@ -56,6 +64,9 @@ namespace RssGenerator.CosmosDBHelper
             return (doc != null && doc.StatusCode == HttpStatusCode.Created);
         }
 
+        /// <summary>
+        /// Create the acutal DocumentClient to use on transactions.
+        /// </summary>
         public void Connect()
         {
             if(String.IsNullOrEmpty(this.KEY))
@@ -73,6 +84,12 @@ namespace RssGenerator.CosmosDBHelper
             }
         }
 
+        /// <summary>
+        /// Create a database and a collection within the database assuming they 
+        /// don't already exist.
+        /// </summary>
+        /// <param name="database">Database name</param>
+        /// <param name="collection">Collection name</param>
         public async Task CreateCollection(String database, String collection)
         {
             if (String.IsNullOrEmpty(database))
@@ -154,6 +171,60 @@ namespace RssGenerator.CosmosDBHelper
             return count;
         }
 
+        /// <summary>
+        /// Collect a series of records from a single collection.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="database"></param>
+        /// <param name="collection"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public async Task<List<Newtonsoft.Json.Linq.JObject>> RetrieveRecords(DocumentClient client, String database, String collection, int max = 100)
+        {
+            List<Newtonsoft.Json.Linq.JObject> returnObjects = new List<Newtonsoft.Json.Linq.JObject>();
+
+            using (IDocumentQuery<object> queryable = client.CreateDocumentQuery<object>(
+                        UriFactory.CreateDocumentCollectionUri(database, collection),
+                        new FeedOptions { EnableCrossPartitionQuery = true }).AsDocumentQuery())
+            {
+                while (queryable.HasMoreResults)
+                {
+                    foreach (object b in await queryable.ExecuteNextAsync<object>())
+                    {
+                        returnObjects.Add(Newtonsoft.Json.JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(b.ToString()));
+                        if(returnObjects.Count >= max)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+             return returnObjects;
+        }
+
+        public async Task<List<Newtonsoft.Json.Linq.JObject>> PerformQuery(DocumentClient client, String database, String collection, string sqlQuery)
+        {
+            List<Newtonsoft.Json.Linq.JObject> returnObjects = new List<Newtonsoft.Json.Linq.JObject>();
+
+            using (IDocumentQuery<object> queryable = client.CreateDocumentQuery<object>(
+                        UriFactory.CreateDocumentCollectionUri(database, collection),
+                        sqlQuery).AsDocumentQuery())
+            {
+                while (queryable.HasMoreResults)
+                {
+                    foreach (object b in await queryable.ExecuteNextAsync<object>())
+                    {
+                        returnObjects.Add(Newtonsoft.Json.JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(b.ToString()));
+                    }
+                }
+            }
+
+            return returnObjects;
+        }
+
+
+        /*
         public Article RetrieveArticle(DocumentClient client, String database, String collection, String id)
         {
             Article returnArticle = null;
@@ -187,6 +258,7 @@ namespace RssGenerator.CosmosDBHelper
                 UriFactory.CreateDocumentCollectionUri(database, collection),
                 article);
         }
+        */
 
         #region IDisposable
         public void Dispose()
