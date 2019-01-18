@@ -24,6 +24,10 @@ using Newtonsoft.Json;
 
 namespace RssGenerator
 {
+    /// <summary>
+    /// Sub item in the Configuration.json that identifies the 
+    /// RSS feeds and storage container.
+    /// </summary>
     class RssFeedInfo
     {
         [JsonProperty(PropertyName = "storage_container")]
@@ -32,6 +36,10 @@ namespace RssGenerator
         public String RSSFeed { get; set; }
     }
 
+    /// <summary>
+    /// Class that wraps the Configuration.json file that is used to drive
+    /// the functionality. 
+    /// </summary>
     class Configuration
     {
         [JsonIgnore]

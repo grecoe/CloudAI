@@ -27,6 +27,14 @@ namespace RssGenerator
 {
     partial class Program
     {
+        /// <summary>
+        /// Entry point to the application.
+        /// </summary>
+        /// <param name="args">
+        ///     None - Uploads the articles to Cosmos
+        ///     seed - Creates the database and collections (not needed)
+        ///     query - Performs a query on processed images 
+        /// </param>
         static void Main(string[] args)
         {
             List<String> arguments = new List<string>(args);

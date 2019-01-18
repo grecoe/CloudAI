@@ -24,7 +24,9 @@ using Newtonsoft.Json;
 
 namespace RssGenerator.RecordFormats
 {
-
+    /// <summary>
+    /// Enumeration used to get/set properties on an article.
+    /// </summary>
     public enum ArticleProperties
     {
         [PropertyDescriptor("original_uri")]
@@ -49,6 +51,9 @@ namespace RssGenerator.RecordFormats
         ChildVideos
     };
 
+    /// <summary>
+    /// Definition of an article that will be inserted into Cosmos.
+    /// </summary>
     public class Article
     {
         [JsonIgnore]

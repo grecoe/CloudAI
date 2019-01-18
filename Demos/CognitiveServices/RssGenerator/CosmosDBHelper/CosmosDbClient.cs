@@ -20,25 +20,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using RssGenerator.RecordFormats;
 using Microsoft.Azure.Documents.Linq;
 
 namespace RssGenerator.CosmosDBHelper
 {
     class CosmosDbClient : IDisposable
     {
+        #region Private Members
         private bool Disposed { get; set; }
-        public String URI { get; private set; }
-        public String KEY { get; private set; }
         private Database CurrentDatabase { get; set; }
         private DocumentCollection CurrentCollection { get; set; }
+        #endregion
 
+        #region Public Members
+        public String URI { get; private set; }
+        public String KEY { get; private set; }
         public DocumentClient DocClient { get; set; }
+        #endregion
 
         public CosmosDbClient(String uri, String key)
         {
@@ -150,6 +152,7 @@ namespace RssGenerator.CosmosDBHelper
             }
         }
 
+        /*
         public async Task<int> DeleteDocuments(DocumentClient client, String database, String collection)
         {
             int count = 0;
@@ -170,6 +173,7 @@ namespace RssGenerator.CosmosDBHelper
             }
             return count;
         }
+        */
 
         /// <summary>
         /// Collect a series of records from a single collection.
@@ -203,6 +207,14 @@ namespace RssGenerator.CosmosDBHelper
              return returnObjects;
         }
 
+        /// <summary>
+        /// Perform a query against a collection in Cosmos 
+        /// </summary>
+        /// <param name="client">Client to communicate with CosmosDB</param>
+        /// <param name="database">Database name</param>
+        /// <param name="collection">Collection name</param>
+        /// <param name="sqlQuery">SQL Query</param>
+        /// <returns></returns>
         public async Task<List<Newtonsoft.Json.Linq.JObject>> PerformQuery(DocumentClient client, String database, String collection, string sqlQuery)
         {
             List<Newtonsoft.Json.Linq.JObject> returnObjects = new List<Newtonsoft.Json.Linq.JObject>();
@@ -222,43 +234,6 @@ namespace RssGenerator.CosmosDBHelper
 
             return returnObjects;
         }
-
-
-        /*
-        public Article RetrieveArticle(DocumentClient client, String database, String collection, String id)
-        {
-            Article returnArticle = null;
-
-            //        FeedOptions queryOptions = new FeedOptions {MaxItemCount = 1};
-            //        queryOptions.EnableCrossPartitionQuery = true;
-            FeedOptions queryOptions = new FeedOptions { EnableCrossPartitionQuery = true };
-           // queryOptions.PartitionKey = new PartitionKey("artifact_type");
-
-            IQueryable<Article> articleQuery = client.CreateDocumentQuery<Article>(
-                UriFactory.CreateDocumentCollectionUri(database, collection),
-                queryOptions)
-                .Where(f => f.UniqueIdentifier == id);
-
-            List<Article> artList = new List<Article>();
-            if (articleQuery != null && articleQuery.Count() == 1)
-            {
-                foreach (Article art in articleQuery)
-                {
-                    artList.Add(art);
-                    returnArticle = art;
-                }
-            }
-
-            return returnArticle;
-        }
-
-        public async Task UpsertArticle(DocumentClient client, String database, String collection, Article article)
-        {
-            var document = await client.UpsertDocumentAsync(
-                UriFactory.CreateDocumentCollectionUri(database, collection),
-                article);
-        }
-        */
 
         #region IDisposable
         public void Dispose()

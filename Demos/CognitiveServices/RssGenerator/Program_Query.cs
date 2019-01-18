@@ -33,6 +33,9 @@ namespace RssGenerator
         /// <summary>
         /// Look into the Processed collection and find all images. Get the original image ID
         /// and then query the Ingest table to determine which original article it belonged to.
+        /// 
+        /// This function is an example on how to retrieve records by collection or by using
+        /// a query string.
         /// </summary>
         /// <param name="config">Configuration with CosmosDB information</param>
         /// <param name="client">CLient to do work</param>

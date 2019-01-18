@@ -23,9 +23,7 @@ using RssGenerator.RSS;
 using RssGenerator.StorageHelper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace RssGenerator
 {
@@ -82,13 +80,14 @@ namespace RssGenerator
                             }
                         }
 
-                        // Now set up the article iteself
+                        // Set up the article
                         mainArticle.SetProperty(ArticleProperties.OriginalUri, item.Uri);
                         mainArticle.SetProperty(ArticleProperties.RetrievalDate, DateTime.Now.ToString("O"));
                         mainArticle.SetProperty(ArticleProperties.PostDate, item.PublishedDate);
                         mainArticle.SetProperty(ArticleProperties.Title, Program.CleanInput(item.Title));
                         mainArticle.SetProperty(ArticleProperties.Body, Program.CleanInput(item.Summary));
 
+                        // Create the child entries and attach to teh article.
                         List<Dictionary<string, string>> childFiles = new List<Dictionary<string, string>>();
                         foreach (Article file in imageContent)
                         {
@@ -99,12 +98,11 @@ namespace RssGenerator
                             childFiles.Add(obj);
                         }
                         mainArticle.SetProperty(ArticleProperties.ChildImages, childFiles);
-
                         mainArticle.SetProperty(ArticleProperties.ChildVideos, null);
                         mainArticle.SetProperty(ArticleProperties.Author, null);
                         mainArticle.SetProperty(ArticleProperties.HeroImage, null);
 
-                        // Insert the media files first
+                        // Insert the media file documents to cosmos first
                         foreach (Article imageArticle in imageContent)
                         {
                             try
@@ -118,13 +116,14 @@ namespace RssGenerator
                         // Wait briefly....
                         System.Threading.Thread.Sleep(500);
 
+                        // Insert the article document to cosmos second
                         bool articleResult = client.CreateDocument(config.CosmosDatabase, config.CosmosIngestCollection, mainArticle).Result;
                         Console.WriteLine("Article Insert: " + articleResult.ToString());
 
-                        // Only allow one for each feed for now
+                        // Ease of use to restrict the flow of records, uncomment the break statement. 
                         if (++feedItemCount > 5)
                         {
-                            break;
+                            //break;
                         }
                     }
                 }
@@ -135,7 +134,7 @@ namespace RssGenerator
 
         /// <summary>
         /// Have to clean up the text that may be translated. HTML tags and double quotes 
-        /// cause the Translation API to fail.
+        /// cause the Translation API to fail.This applies to title and body.
         /// </summary>
         private static String CleanInput(String input)
         {

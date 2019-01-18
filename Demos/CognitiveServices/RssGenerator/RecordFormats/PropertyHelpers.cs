@@ -34,6 +34,10 @@ namespace RssGenerator.RecordFormats
         }
     }
 
+    /// <summary>
+    /// Helper class used to retrieve JSON name associated with an enum used for storing 
+    /// and retrieving properties in the Article class.
+    /// </summary>
     public static class AttributesHelperExtension
     {
         public static string JsonName(this Enum value)

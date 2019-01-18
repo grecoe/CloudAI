@@ -22,6 +22,11 @@ using System;
 
 namespace RssGenerator.RSS
 {
+    /// <summary>
+    /// A simple hash generation class used to make mock hashes on articles and images. 
+    /// 
+    /// Suggestion: Create a better solution for your enterprise grade solution.
+    /// </summary>
     class HashGenerator
     {
         public static System.Security.Cryptography.SHA256Managed HashAlgorithm { get; private set; }

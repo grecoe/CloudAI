@@ -25,13 +25,19 @@ using System.Threading.Tasks;
 
 namespace RssGenerator.StorageHelper
 {
-    // https://dangtestrepo.blob.core.windows.net/scraped/ac.JPG
+    /// <summary>
+    /// Class that wraps teh Azure Storage functionality.
+    /// </summary>
     class AzureStorageUtility
     {
+        #region Private Members
         private CloudStorageAccount StorageAccount { get; set; }
         private CloudBlobClient BlobClient { get; set; }
+        #endregion
 
+        #region Public Members
         public String ConnectionString { get; private set;}
+        #endregion
 
         public AzureStorageUtility(String connection)
         {
@@ -41,6 +47,12 @@ namespace RssGenerator.StorageHelper
             this.BlobClient = this.StorageAccount.CreateCloudBlobClient();
         }
 
+        /// <summary>
+        /// Uploads a local file to blob storage into the specified container.
+        /// </summary>
+        /// <param name="path">Local file path</param>
+        /// <param name="container">Azure Storage container name.</param>
+        /// <returns>URI of the uploaded blob</returns>
         public async Task<String> UploadBlob(String path, String container)
         {
             String returnValue = String.Empty;
@@ -52,6 +64,12 @@ namespace RssGenerator.StorageHelper
             return cloudBlockBlob.Uri.AbsoluteUri;
         }
 
+        /// <summary>
+        /// Gets an instance of CloubBlobContainer. If the container doesn't exist
+        /// it is created.
+        /// </summary>
+        /// <param name="container">Container name</param>
+        /// <returns>Instance of CloudBlobContainer</returns>
         private CloudBlobContainer GetContainer(String container)
         {
             CloudBlobContainer returnContainer  = this.BlobClient.GetContainerReference(container);

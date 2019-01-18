@@ -27,6 +27,9 @@ using System.Xml;
 
 namespace RssGenerator.RSS
 {
+    /// <summary>
+    /// Information about an image found in an RSS feed.
+    /// </summary>
     class RSSImageItem
     {
         public String Id { get; set; }
@@ -36,6 +39,9 @@ namespace RssGenerator.RSS
         public String Hash { get; set; }
     }
 
+    /// <summary>
+    /// Implementation of an RSS article
+    /// </summary>
     class RSSFeedItem
     {
         public String Id { get; set; }
@@ -51,6 +57,9 @@ namespace RssGenerator.RSS
         }
     }
 
+    /// <summary>
+    /// A reader that wraps reading RSS feeds.
+    /// </summary>
     class RSSFeedReader : IDisposable
     {
         #region Private Members
@@ -70,13 +79,19 @@ namespace RssGenerator.RSS
         }
         #endregion
 
+        #region Public Members
         public String FeedUri { get; private set; }
+        #endregion
 
         public RSSFeedReader(String rssFeed)
         {
             this.FeedUri = rssFeed;
         }
 
+        /// <summary>
+        /// Reads the feed specified in the constructor.
+        /// </summary>
+        /// <returns>A list of items found in the feed.</returns>
         public List<RSSFeedItem> ReadFeed()
         {
             List<RSSFeedItem> returnList = new List<RSSFeedItem>();
@@ -113,6 +128,9 @@ namespace RssGenerator.RSS
 
 
         #region Private Helpers
+        /// <summary>
+        /// Delete any temporary files.
+        /// </summary>
         private void ClearTempFiles()
         {
             foreach(String file in System.IO.Directory.EnumerateFiles(this.BasePath))
@@ -127,6 +145,11 @@ namespace RssGenerator.RSS
             catch (Exception ex) { }
         }
 
+        /// <summary>
+        /// Create an HTTP client to read an image.
+        /// </summary>
+        /// <param name="uri">URI of an image</param>
+        /// <returns>HTTP client to be used to read the image file.</returns>
         private System.Net.Http.HttpClient CreateImageClient(String uri)
         {
             System.Net.Http.HttpClient  imageClient = new System.Net.Http.HttpClient();
@@ -134,6 +157,12 @@ namespace RssGenerator.RSS
             return imageClient;
         }
 
+        /// <summary>
+        /// Downloads an image identified in an article so it can be uploaded
+        /// to Cosmos later.
+        /// </summary>
+        /// <param name="uri">URI of an image file.</param>
+        /// <returns>Instance of an RSSImageItem</returns>
         private async Task<RSSImageItem> DownloadImage(String uri)
         {
             RSSImageItem item = new RSSImageItem();
@@ -165,6 +194,13 @@ namespace RssGenerator.RSS
             return item;
         }
 
+        /// <summary>
+        /// Generic GET request wrapper that manages multiple attempts and used
+        /// for downloading image files.
+        /// </summary>
+        /// <param name="client">Configured HTTP client.</param>
+        /// <param name="maxAttempts">Maximun number of attempts to perform the get in case of failure.</param>
+        /// <returns>AN HTTPresponseMessage if succesful, null otherwise.</returns>
         public static HttpResponseMessage MakeRequest(HttpClient client, int maxAttempts)
         {
             int attempts = 0;
