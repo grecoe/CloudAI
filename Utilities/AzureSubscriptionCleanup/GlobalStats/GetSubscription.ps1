@@ -24,9 +24,10 @@ $resconstitutedSubs = Get-Content -Raw -Path .\subscriptionlist.json | ConvertFr
 foreach($rsub in $resconstitutedSubs)
 {
 	Write-Host($rsub.Name)
-	.\GetVMInfoAndConfig.ps1 -subId $rsub.Id
-	.\DelresourceGroups.ps1 -whatif -subId $rsub.Id
-	.\ListResources.ps1 -subId $rsub.Id
+	..\VirtualMachines\GetVMInfoAndConfig.ps1 -subId $rsub.Id
+	..\ResourceGroupLevel\ScanResourceGroups.ps1 -whatif -subId $rsub.Id
+	..\ResourceGroupLevel\ListOldResourceGroups.ps1 -subId $($sub.Value)
+	..\ResourceLevel\ListResources.ps1 -subId $rsub.Id
 }
 
 #####################################################

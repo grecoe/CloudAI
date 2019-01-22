@@ -62,16 +62,12 @@ Set-AzureRmContext -SubscriptionID $subId
 #####################################################
 # Collect all of the resource groups
 #####################################################
-Write-Host "Scanning subscription for resource groups, this could take a while....."
+Write-Host "Scanning subscription for resources, this could take a while....."
 
-$resourceGroups = Get-AzureRmResourceGroup #| Where-Object {$_.ResourceGroupName -eq "dangtestdel"}
 
 $resourceList = @{}
-Write-Host($group.ResourceGroupName)
-	
-$resources = Get-AzureRmResource
 
-	
+$resources = Get-AzureRmResource
 foreach($res in $resources)
 {
 	if($resourceList.ContainsKey($res.Location) -eq $false)
