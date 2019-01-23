@@ -29,4 +29,7 @@
 
 # Subscription Maintenace
 /Utilities/AzureSubscriptionCleanup/SubSpecific/*
-
+/Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/.vs/*
+/Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/bin/*
+/Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/obj/*
+/Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/packages/*
