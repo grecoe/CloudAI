@@ -1,23 +1,13 @@
 #####################################################
 # Parameters for the script
 # subId - Required - need a subscription ID to work on
-# path - Required - path to input file
 # help - Optional - Switch to show usage
 # login - Optional - Switch if present requires login
 #
-# Input File Format:
-# JSON Array of objects identifying subscriptions and resource group names 
-# to unlock.
-#	[
-#		{
-#			"subscriptionId" : "your sub id",
-#			"resourceGroups" : [ "list of group names"]
-#		}
-#	]
+# Removes locks from every resource group.
 #####################################################
 param(
 	[string]$subId,
-	[string]$path,
 	[switch]$help=$false,
 	[switch]$login=$false
 )
@@ -33,7 +23,6 @@ if($help -eq $true)
 	Write-Host "Parameters:"
 	Write-Host "	-help : Shows this help message"
 	Write-Host "	-subId : Required on all calls EXCEPT help. Identifies the subscription to scrub."
-	Write-Host "	-path : Full disk path of file containing subscription and resouce group name information."
 	Write-Host "	-login : Tells script to log into azure subscription, otherwise assumes logged in already"
 	break
 }
@@ -46,15 +35,6 @@ Set-StrictMode -Version 1
 if(-not $subId)
 {
 	Write-Host "-subId is a required parameter. Run the script with -help to get more information."
-	break
-}
-
-#####################################################
-# Verify that a file is actually provided
-#####################################################
-if(-not $path)
-{
-	Write-Host "-path is a required parameter. Run the script with -help to get more information."
 	break
 }
 
@@ -72,37 +52,30 @@ else
 }
 
 
-#####################################################
-# Collect all of the resource groups
-#####################################################
-Write-Host("Loading information from file : " + $path)
-$unlockData = Get-Content -Raw -Path $path | ConvertFrom-Json
-
 
 #####################################################
 # Go through each one looking at locks. Add them to
 # the appropriate list - locked unlocked.
 #####################################################
-foreach($sub in $unlockData)
-{
-	Write-Host "Setting subscription ID : " + $sub.subscriptionId
-	Set-AzureRmContext -SubscriptionID $sub.subscriptionId
+Write-Host "Setting subscription ID : " + $subId
+Set-AzureRmContext -SubscriptionID $subId
 
-	foreach($rg in $sub.resourceGroups)
+$resourceGroups = Get-AzureRmResourceGroup 
+
+foreach($rg in $resourceGroups)
+{
+	$locks = Get-AzureRmResourceLock -ResourceGroupName $rg.ResourceGroupName
+
+	if($locks.length -ne 0)
 	{
-		$locks = Get-AzureRmResourceLock -ResourceGroupName $rg
-	
-		if($locks.length -ne 0)
+		# It has a lock either ReadOnly or CanNotDelete so it has to 
+		# be marked as locked.
+		foreach($lock in $locks)
 		{
-			# It has a lock either ReadOnly or CanNotDelete so it has to 
-			# be marked as locked.
-			foreach($lock in $locks)
-			{
-				Write-Host("Removing lock : " + $lock.LockId)
-				Write-Host("--------------------------------------------------------")
+			Write-Host("Removing lock : " + $lock.LockId + " from " + $rg.ResourceGroupName)
+			Write-Host("--------------------------------------------------------")
 			
-				Remove-AzureRmResourceLock -Force -LockId $lock.LockId
-			}
+			Remove-AzureRmResourceLock -Force -LockId $lock.LockId
 		}
 	}
 }
