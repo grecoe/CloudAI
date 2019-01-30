@@ -104,33 +104,21 @@ foreach($group in $resourceGroups)
 	$name=$group.ResourceGroupName
 
 	$locks = Get-AzureRmResourceLock -ResourceGroupName $name
-	if($locks.length -eq 0)
+	if($locks)
 	{
-		# In all cases do not delete the default storage. 1 it's cheap and 
-		# 2 it may contain VHD images that are leased blocking the deletion.
-		if($name.Contains("cleanup") -or
-		   $name.Contains("Default-Storage-") -or
-		   ( ($delspecials -eq $false) -and
-			  ($name.Contains("DefaultResourceGroup-") -or
-				$name.Contains("Default-MachineLearning-") -or
-				$name.Contains("cloud-shell-storage-") -or
-				$name.Contains("Default-ServiceBus-") -or
-				$name.Contains("Default-Web-") -or
-				$name.Contains("OI-Default-") -or
-				$name.Contains("Default-SQL") -or
-				$name.Contains("StreamAnalytics-Default-"))
-			)
-		  )
+		$foundlocks = New-Object System.Collections.ArrayList
+		if($locks.Length -gt 0)
 		{
-			$specialRG.Add($name) > $null
+			foreach($lock in $locks)
+			{	
+				$foundlocks.Add($lock) > $null
+			}
 		}
 		else
 		{
-			$unlockedRG.add($name) > $null
+			$foundlocks.Add($locks) > $null
 		}
-	}
-	else
-	{
+	
 		# It has a lock either ReadOnly or CanNotDelete so it has to 
 		# be marked as locked.
 		foreach($lock in $locks)
@@ -159,6 +147,31 @@ foreach($group in $resourceGroups)
 					$readOnlyRG.add($name) > $null
 				}
 			}
+		}
+	}
+	else
+	{
+		# In all cases do not delete the default storage. 1 it's cheap and 
+		# 2 it may contain VHD images that are leased blocking the deletion.
+		if($name.Contains("cleanup") -or
+		   $name.Contains("Default-Storage-") -or
+		   ( ($delspecials -eq $false) -and
+			  ($name.Contains("DefaultResourceGroup-") -or
+				$name.Contains("Default-MachineLearning-") -or
+				$name.Contains("cloud-shell-storage-") -or
+				$name.Contains("Default-ServiceBus-") -or
+				$name.Contains("Default-Web-") -or
+				$name.Contains("OI-Default-") -or
+				$name.Contains("Default-SQL") -or
+				$name.Contains("StreamAnalytics-Default-"))
+			)
+		  )
+		{
+			$specialRG.Add($name) > $null
+		}
+		else
+		{
+			$unlockedRG.add($name) > $null
 		}
 	}
 
