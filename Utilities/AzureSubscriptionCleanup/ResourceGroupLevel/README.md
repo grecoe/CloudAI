@@ -85,16 +85,21 @@ This script removes all resource group and child resource locks on the specified
 |-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
 |-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
 
+### Script Output
+This script will write to the console window the results of determining if the targeted resource groups are still present in the subscription. 
+
 ## Verifying Compliance Of Resource Groups
 This script verifies that all __locked__ resource groups have the following tags applied to it:
  * alias
  * project
- * lifespan
+ * expires
+
+ If these exist, then a further check is done on the "expires" tag to determine if the group is still valid. The data in the expires tag is expected to be YYYY-MM-DD format.
  
  
 |File|Description|
 |--------------------|------------------------|              
-| UnlockResourceGroups.ps1|	The file that contains the script to remove locks on a resource group and all of it's child resources.| 
+| FindNonCompliantGroups.ps1|	The file that contains the script to verify tag compliance on locked resource groups.| 
 
 
 ### Script Parameters
@@ -103,4 +108,17 @@ This script verifies that all __locked__ resource groups have the following tags
 |-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
 |-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
 |-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
+
+### Script Output
+This script will write a file called resource_group_compliance.json in a directory named after the subscription id in the executing directory of the script. 
+
+The data contained in this JSON file are:
+|Object |Value|
+|--------------------|-----------------------|
+|Total| The total number of resource groups looked at.| 
+|Unlocked| The number of resource groups not locked. These are explicitly non-compliant.|
+|Compliant|	The number of compliant resource groups (tags and expiration).|
+|NonCompliant|	Key values that are Key = resource group name, Value = missing tag list|
+|InvalidDate|	Key values that are Key = resource group name, Value = bad date input on tag|
+|Expired|	Key values that are Key = resource group name, Value = original expiration date|
 
