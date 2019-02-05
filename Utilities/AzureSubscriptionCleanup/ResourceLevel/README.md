@@ -14,7 +14,7 @@ Having a list of all resources in a subscription can be useful in that it gives 
 
 This script is used to generate a list of all resources, broken out by Azure Region, contained in a subscription.
 
-## Identify all resources script
+### Identify all resources script
 
 |File|Description|
 |--------------------|------------------------|              
@@ -31,6 +31,40 @@ This script is used to generate a list of all resources, broken out by Azure Reg
 ### Script Output
 This script will output a text file in the script directory named [subid]_resources.json.
 
+
+## Find multiple resources of a certain type
+At times, it's useful to figure out where certain resources are deployed in your subscription. This can be useful in cases where a certain resource type is being taken out of production, or you simply want to know where all instances of a particular resource are located, for instance SQL Servers.
+
+### Find multiple resources script 
+|File|Description|
+|--------------------|------------------------|              
+| FindResourceDeployments.ps1|	The script is used to collect a list of found particular resources in the subscription organized by resource group. The results file.|
+
+### Script Parameters
+|Parameter |Required|Usage|
+|--------------------|---------|-----------------------|
+|-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
+|-resourceFile "path"| Yes| The path to the file containing the resource types to find.|
+|-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
+|-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
+
+### Input File Format
+The file pointed to by the parameter -resourceFile MUST be in the format:
+
+```
+{
+	"resources" : [
+	    "resource_type (i.e. Microsoft.MachineLearningModelManagement/accounts etc....)",
+		"resource_type"
+        ...
+	]
+}
+```
+
+### Script Output
+This script will output a text file in the script directory named subid\resourcedeployment.json.
+
+
 ## Identify resources by type and optionally delete them
 Instead of a list of all resources, it is sometimes useful to find all resources of a certain type such as storage accounts. 
 
@@ -38,7 +72,7 @@ This script is used to generate a list of all resources of a specific type, brok
 
 >NOTE If deletion is chosen the resource group and/or the resource can have no locks associated with it. This follows the same rules as trying to delete a resource group. 
 
-## Identify resources by type script
+### Identify resources by type script
 |File|Description|
 |--------------------|------------------------|              
 | ExpandResourceType.ps1|	The script is used to collect a list of all resources of a given type in the subscription organized by region. The results simply provide a list of names and resource id of the resources found. The results are printed to a file.|

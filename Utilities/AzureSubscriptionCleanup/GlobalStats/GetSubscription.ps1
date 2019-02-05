@@ -23,10 +23,22 @@ $resconstitutedSubs = Get-Content -Raw -Path .\subscriptionlist.json | ConvertFr
 # Collect VM and resource group information
 foreach($rsub in $resconstitutedSubs)
 {
-	Write-Host($rsub.Name)
+	Write-Host("Working on sub" + $rsub.Name)
+	Write-Host("*********************************************")
+	Write-Host("Collect VM : " + $rsub.Name)
+	Write-Host("*********************************************")
 	..\VirtualMachines\GetVMInfoAndConfig.ps1 -subId $rsub.Id
+	Write-Host("*********************************************")
+	Write-Host("Scan all RGs : " + $rsub.Name)
+	Write-Host("*********************************************")
 	..\ResourceGroupLevel\ScanResourceGroups.ps1 -whatif -subId $rsub.Id
-	..\ResourceGroupLevel\ListOldResourceGroups.ps1 -subId $($sub.Value)
+	#Write-Host("*********************************************")
+	#Write-Host("Scan for old RGs : " + $rsub.Name)
+	#Write-Host("*********************************************")
+	#..\ResourceGroupLevel\ListOldResourceGroups.ps1 -subId $rsub.Id
+	Write-Host("*********************************************")
+	Write-Host("List Resources : " + $rsub.Name)
+	Write-Host("*********************************************")
 	..\ResourceLevel\ListResources.ps1 -subId $rsub.Id
 }
 

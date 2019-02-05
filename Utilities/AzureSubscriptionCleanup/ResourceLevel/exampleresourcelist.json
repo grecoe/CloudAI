@@ -1,0 +1,9 @@
+{
+	"resources" : [
+	    "Microsoft.MachineLearningModelManagement/accounts",
+		"Microsoft.MachineLearningExperimentation/accounts",
+		"Microsoft.MachineLearningExperimentation/accounts/workspaces/projects",
+		"Microsoft.MachineLearningExperimentation/accounts/workspaces",
+		"Microsoft.MachineLearningCompute/operationalizationClusters"
+	]
+}

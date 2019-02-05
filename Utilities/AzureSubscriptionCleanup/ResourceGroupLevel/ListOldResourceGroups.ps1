@@ -74,7 +74,9 @@ foreach($group in $resourceGroups)
 
 	$rgTotalList.Add($group.ResourceGroupName) > $null
 	
-	$resources = Find-AzureRmResource -ResourceGroupNameEquals $group.ResourceGroupName
+	# Find-AzureRmResource deprecated in breaking change....
+	#$resources = Find-AzureRmResource -ResourceGroupNameEquals $group.ResourceGroupName
+	$resources = Get-AzureRmResource -ResourceGroupName $group.ResourceGroupName
 	
 	$pointInTime = [DateTime]::Now.AddDays(-60)
 	$horizon = $pointInTime.AddDays(-29)
