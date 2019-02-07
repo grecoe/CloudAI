@@ -112,7 +112,8 @@ foreach($group in $resourceGroups)
 	}
 	
 	# Determine if it's older than 60 days
-	$groupResources = Find-AzureRmResource -ResourceGroupNameEquals $name
+	# $groupResources = Find-AzureRmResource -ResourceGroupNameEquals $name
+	$groupResources = Get-AzureRmResource -ResourceGroupName $name
 	
 	$pointInTime = [DateTime]::Now.AddDays(-60)
 	$horizon = $pointInTime.AddDays(-29)
