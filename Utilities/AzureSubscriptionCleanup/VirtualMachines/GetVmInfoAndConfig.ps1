@@ -73,11 +73,14 @@ $runningVms=0
 $stoppedVms=0
 $deallocatedVms=0
 $vmStopCollections = New-Object System.Collections.ArrayList
+$vmStoppedCollections = New-Object System.Collections.ArrayList
+
 foreach($group in $resourceGroups)
 {
 	$vms = Get-AzureRmVM -ResourceGroupName $group.ResourceGroupName
 	
 	$runningVmCollection = New-Object System.Collections.ArrayList
+	$stoppedVmCollection = New-Object System.Collections.ArrayList
 
 	Write-Host("Collect VMS in resource group " + $group.ResourceGroupName)
 	foreach($vminst in $vms)
@@ -130,6 +133,7 @@ foreach($group in $resourceGroups)
 			}
 			else
 			{
+				$stoppedVmCollection.Add($vminst.Name) > $null
 				$stoppedVms++
 			}
 			
@@ -149,6 +153,11 @@ foreach($group in $resourceGroups)
 		$vmgroup = New-Object PSObject -Property @{ Name = $group.ResourceGroupName; VirtualMachines = $runningVmCollection }
 		$vmStopCollections.Add($vmgroup) > $null
 	}
+	if($stoppedVmCollection.Count -gt 0)
+	{
+		$vmstoppedgroup = New-Object PSObject -Property @{ Name = $group.ResourceGroupName; VirtualMachines = $stoppedVmCollection }
+		$vmStoppedCollections.Add($vmstoppedgroup) > $null
+	}
 }
 
 #Create the status object
@@ -166,6 +175,12 @@ $subList.Add($rgConfigCollection) > $null
 $subCollection = New-Object PSObject -Property @{ Subscriptions = $subList }
 $outputSubCollection = $subCollection | ConvertTo-Json -depth 100
 
+$rgStoppedConfigCollection = New-Object PSObject -Property @{ SubscriptionId = $subId; ResourceGroups = $vmStoppedCollections }
+$stoppedSubList = New-Object System.Collections.ArrayList
+$stoppedSubList.Add($rgStoppedConfigCollection) > $null
+$stoppedSubCollection = New-Object PSObject -Property @{ Subscriptions = $stoppedSubList }
+$stoppedOutputSubCollection = $stoppedSubCollection | ConvertTo-Json -depth 100
+
 #Create a directory
 md -ErrorAction Ignore -Name $subId
 #Write the configuration file
@@ -178,3 +193,9 @@ $fileContent = $vmCollection | ConvertTo-Json -depth 100
 $filename = "vm_status.json"
 Out-File -FilePath .\$subId\$filename -InputObject $fileContent
 Write-Host("Completed")
+
+#Write the stopped machines file
+$stoppedfilename = "vm_stopped.json"
+Out-File -FilePath .\$subId\$stoppedfilename -InputObject $stoppedOutputSubCollection
+Write-Host("Completed")
+
