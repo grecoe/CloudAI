@@ -1,0 +1,8 @@
+﻿{
+  "Destination": "destination_storage_account_connection_string",
+  "Sources": [
+    "source_storage_account_connection_string_1",
+    "source_storage_account_connection_string_2",
+    "etc..."
+  ]
+}

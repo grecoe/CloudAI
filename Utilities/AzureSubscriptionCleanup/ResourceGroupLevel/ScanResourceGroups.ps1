@@ -189,6 +189,10 @@ foreach($group in $resourceGroups)
 #Create a directory
 md -ErrorAction Ignore -Name $subId
 
+#DELETE THIS LINE
+md -ErrorAction Ignore -Name "unlockedstatus"
+#DELETE THIS LINE
+
 # Write out all unlocked resource groups for a verification later.
 Write-Host "Writing out unlocked groups to file"
 Out-File -FilePath .\$subId\deletegroups.txt -InputObject $unlockedRG
@@ -219,6 +223,15 @@ $subscriptionLockConfiguration = New-Object PSObject -Property @{
 	}
 $lockConfiguration.Add($subscriptionLockConfiguration) > $null
 Out-File -FilePath .\$subId\unlockconfiguration.json -InputObject ($lockConfiguration | ConvertTo-Json -depth 100)
+
+#DELETE THIS SECTION
+$sharedConfiguration = New-Object PSObject -Property @{ 
+	SubscriptionId = $subId
+	UnlockedResourceGroups = $unlockedRG
+	}
+$unlockedFileName = ".\unlockedstatus\" + $subId + ".json"
+Out-File -FilePath $unlockedFileName -InputObject ($sharedConfiguration | ConvertTo-Json -depth 100)
+#DELETE THIS SECTION
 
 #####################################################
 # Output what we found if whatif is set, otherwise

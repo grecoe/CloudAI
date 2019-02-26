@@ -27,9 +27,15 @@
 /Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputInterfaces/bin/*
 /Utilities/DistributedEndpointTesting/DistributedThroughput/ThroughputInterfaces/obj/*
 
-# Subscription Maintenace
+# Subscription Maintenance
 /Utilities/AzureSubscriptionCleanup/SubSpecific/*
 /Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/.vs/*
 /Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/bin/*
 /Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/obj/*
 /Utilities/AzureSubscriptionCleanup/GlobalStats/SubDataUpload/packages/*
+
+# Storage Consolidation
+/Utilities/StorageConsolidation/.vs/*
+/Utilities/StorageConsolidation/bin/*
+/Utilities/StorageConsolidation/obj/*
+/Utilities/StorageConsolidation/packages/*
