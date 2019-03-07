@@ -69,6 +69,7 @@ $unlockedGroups=0
 $compliantGroups=0
 $nonCompliantGroups = @{}
 $invalidDateGroups = @{}
+$missingTagValueGroups = @{}
 $expiredGroups = @{}
 
 #####################################################
@@ -112,6 +113,24 @@ foreach($group in $resourceGroups)
 			}
 			else
 			{
+				# Check to make sure alias and project have values
+				$emptyTags = New-Object System.Collections.ArrayList
+				if([string]::IsNullOrEmpty($group.Tags["alias"]))
+				{
+					$emptyTags.Add("alias") > $null
+				}
+				if([string]::IsNullOrEmpty($group.Tags["project"]))
+				{
+					$emptyTags.Add("project") > $null
+				}
+				
+				if($emptyTags.Count -ne 0)
+				{
+					$emptyTagPayload = $emptyTags -join ","
+					$missingTagValueGroups.Add($group.ResourceGroupName,$emptyTagPayload)
+				}
+				
+				
 				# Have to validate the date
 				$storedExpiredTag = $group.Tags["expires"]
 				$parts = $storedExpiredTag -split '-'
@@ -186,7 +205,8 @@ $outofcompliance = New-Object PSObject -Property @{
 	Compliant = $compliantGroups;
 	NonCompliant = $nonCompliantGroups;
 	InvalidDate = $invalidDateGroups;
-	Expired = $expiredGroups}
+	Expired = $expiredGroups;
+	EmptyTags = $missingTagValueGroups}
 	
 Out-File -FilePath .\$subId\resource_group_compliance.json -InputObject ($outofcompliance | ConvertTo-Json -depth 100)
 

@@ -163,7 +163,8 @@ foreach($group in $resourceGroups)
 				$name.Contains("Default-Web-") -or
 				$name.Contains("OI-Default-") -or
 				$name.Contains("Default-SQL") -or
-				$name.Contains("StreamAnalytics-Default-"))
+				$name.Contains("StreamAnalytics-Default-") -or
+				$name.Contains("databricks-"))
 			)
 		  )
 		{
