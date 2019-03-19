@@ -117,3 +117,33 @@ In the following examples the search will be for storage accounts.
 ```
 .\ExpandResourceType.ps1 -subid $subscription -resourceGroup $resourceGroup -resourceType $resourceType -deleteResources
 ```
+## Identify Virtual Disks and optionally delete them
+This script is used to find:
+- Managed Disks
+- Unmanaged Disks*
+- Leased VHD files
+- Unleased VHD files*
+
+*These can be optionally deleted when running the script.
+
+Disks will ONLY be identified if they belong to an unlockec resource grou.
+
+### Identify resources by type script
+|File|Description|
+|--------------------|------------------------|              
+| ManagedDisks.ps1|	The script is used to collect managed/unmanaged disks and leased/unleased VHD files in unlocked resource groups, and optionally delete umnanaged disks and unleased VHD files.|
+
+
+
+### Script Parameters
+|Parameter |Required|Usage|
+|--------------------|---------|-----------------------|
+|-subId "id"| Yes|	The subscripiton ID to use for finding resource groups to delete.| 
+|-login| No| A flag, when present means user should be logged in, otherwise assumes user is logged in.|
+|-deleteVHD| No| A flag used to indicate if unleased VHD files should be deleted.|
+|-deleteUnmanagedDisk| No| A flag used to indicate if unmanaged disks should be deleted.|
+|-whatif| No| A flag that internally forced the delete flags to false. |
+|-help|	No| A flag indicating to show the usage of the script. Nothing will be performed.|
+
+### Script Output
+This script will output a text file in the script directory named azuredisks.json.
