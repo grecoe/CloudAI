@@ -89,6 +89,10 @@ namespace ImageClassifier
         {
             this.InputBindings.Clear();
 
+            /*
+             * Used to have number pad to select categories, however, when the limit gets to 10
+             * an exception is thrown. If you KNOW you'll have 9 or less categories, this can still
+             * work
             int keyIdx = 0;
             System.Windows.Input.Key[] keys = new Key[]
             {
@@ -113,6 +117,7 @@ namespace ImageClassifier
                 cmd.ClassificationsChanged += this.ForceClassificationUpdate;
                 this.PrepareInputBindings(cmd, keys[keyIdx++]);
             }
+            */
 
             if (this.ApplicationContext.SelectedDataSource != null && this.ApplicationContext.SelectedDataSource.ImageControl != null)
             {
