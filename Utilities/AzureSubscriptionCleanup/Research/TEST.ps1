@@ -4,7 +4,8 @@
 . './ResourceUtils.ps1'
 . './MlCompute.ps1'
 
-$subId = '8dd18bd7-b9dc-4213-b367-cd6a7745bc88'
+#$subId = '8dd18bd7-b9dc-4213-b367-cd6a7745bc88' #fang
+$subId = 'edf507a2-6235-46c5-b560-fd463ba2e771' #team
 
 $expectedTags = ("alias", "project", "expires")
 #$groups = Get-ResourceGroupInfo -sub '0ca618d2-22a8-413a-96d0-0f1b531129c3'
@@ -15,8 +16,17 @@ $totalVmInfo.Add("Total", 0)
 $totalVmInfo.Add("Running", 0)
 $totalVmInfo.Add("Deallocated",0)
 
-$wspaces = FindMlComputeClusters -sub $subId
-$dout = $wspaces | ConvertTo-Json -depth 100
+$vminstances = GetVirtualMachines -sub $subId -resourceGroup $null
+$mlCompute = FindMlComputeClusters -sub $subId
+$mlsummary = SummarizeComputeClusters -mlComputeInformation $mlCompute
+
+$mergedResults = MergeComputeResources -mlClusterOverview $mlsummary -vmOverview $vminstances
+
+$computeCalc = New-Object PSObject -Property @{ 
+	VirtualMachines=$vminstances;
+	MlCompute=$mlsummary;
+	Merged=$mergedResults}
+$dout = $computeCalc | ConvertTo-Json -depth 100
 Write-Host($dout)
 break
 

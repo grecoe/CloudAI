@@ -72,6 +72,67 @@ function FindDeployments {
 }
 
 ###############################################################
+# MergeComputeResources
+#
+#	Determines total VM usage in a subscription by merging the VmSize
+#	information with the ml compute cluster information.
+#
+#	#Supply your sub ID
+#	$subId = 'YOUR_SUB_ID' 
+#	
+#	#Get Virtual Machines
+#	$vminstances = GetVirtualMachines -sub $subId -resourceGroup $null
+#	
+#	#Get ML Compute Clusters
+#	$mlCompute = FindMlComputeClusters -sub $subId
+#	
+#	#Summarize Compute Clusters
+#	$mlsummary = SummarizeComputeClusters -mlComputeInformation $mlCompute
+#	
+#	#Merge the VM and the Compute Clusters to get a full picture
+#	$mergedResults = MergeComputeResources -mlClusterOverview $mlsummary -vmOverview $vminstances
+#	
+#	Params:
+#		mlClusterOverview : Output of SummarizeComputeClusters
+#		vmOverview : Output of GetVirtualMachines
+#
+#	Returns: -vmOverview object param updated with content from the 
+#			 -mlClusterOverview object.
+###############################################################
+function MergeComputeResources {
+	Param($mlClusterOverview, $vmOverview)
+	
+	$returnValue = $null
+	
+	if($mlClusterOverview -and $vmOverview)
+	{
+		$returnValue = $vmOverview.PSObject.Copy()
+		$returnValue.SKU = $vmOverview.SKU.Clone()
+		
+		foreach($clusterInfo in $mlClusterOverview)
+		{
+			$returnValue.Total += $clusterInfo.TotalMachines
+			$returnValue.Running += $clusterInfo.ActiveMachines
+			$returnValue.Deallocated += ($clusterInfo.TotalMachines - $clusterInfo.ActiveMachines)
+
+			foreach($sku in $clusterInfo.SKU.Keys)
+			{	
+				if($returnValue.SKU.ContainsKey($sku))
+				{
+					$returnValue.SKU[$sku] += $clusterInfo.SKU[$sku]
+				}
+				else
+				{
+					$returnValue.SKU.Add($sku, $clusterInfo.SKU[$sku])
+				}
+			}
+		}
+	}
+
+	$returnValue
+}
+
+###############################################################
 # GetVirtualMachines
 #
 #	Retrieves a collection of Virtual Machine stats for a specific
@@ -79,15 +140,15 @@ function FindDeployments {
 #
 #	Params:
 #		sub : Subscription to work within
-#		resourceGroup : Resource Grup to search.
+#		resourceGroup : Resource Group to search, if null then search entire subscription
 #
 #	Returns:
 #		PSObject:			
-#		Total  - int 
-#		Running - int
-#		Stopped - int
-#		Deallocated - int 
-#		SKU - Hash Table , KEY = SKU[String], Value = Count[int]
+#			Total  - int 
+#			Running - int
+#			Stopped - int
+#			Deallocated - int 
+#			SKU - Hash Table , KEY = SKU[String], Value = Count[int]
 ###############################################################
 function GetVirtualMachines {
 	Param([string]$resourceGroup,[string]$sub)
@@ -100,11 +161,22 @@ function GetVirtualMachines {
 	$stoppedVirtualMachines=0
 	$virtualMachineSkus=@{}
 	
-	$vms = Get-AzureRmVM -ResourceGroupName $resourceGroup
+	$vms = $null
+	if($resourceGroup)
+	{
+		Write-Host("Get VM Instances in RG : " + $resourceGroup)
+		$vms = Get-AzureRmVM -ResourceGroupName $resourceGroup
+	}
+	else
+	{
+		Write-Host("Get VM Instances in Subscription : " + $sub)
+		$vms = Get-AzureRmVM
+	}
+
 	foreach($vminst in $vms)
 	{
 		$totalVirtualMachines++
-		$vmStatus = Get-AzureRmVM -ErrorAction Stop -Status -ResourceGroupName $resourceGroup -Name $vminst.Name
+		$vmStatus = Get-AzureRmVM -ErrorAction Stop -Status -ResourceGroupName $vminst.ResourceGroupName -Name $vminst.Name
 		if($vmStatus)
 		{
 			# Get the state of the VM
