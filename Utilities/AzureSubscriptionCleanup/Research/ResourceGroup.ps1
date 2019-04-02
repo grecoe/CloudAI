@@ -1,3 +1,33 @@
+###############################################################
+# ResourceGroup.ps1
+#
+#	Contains scripts to collect or modify Azure Subscriptions. 
+#
+#
+#	FUNCTIONS AVAILABLE
+#			# Get a list of resource groups in a subscription 
+#			GetResourceGroupInfo [-subId]
+#			# Summarize the list of resource groups
+#			GetResourceGroupSummary [-subId] [-history]
+#			# Determine if a group is older than 60 days
+#			ResourceGroupOlderThan60Days -groupName
+#			# Parse the tags from a resource group
+#			ParseTags -tags
+#			# Parses the locks from a resource group
+#			ParseLocks -locks
+#			# Check existence of tags 
+#			FindMissingTags -tags -expected
+#			# Modify group tags
+#			ModifyGroupTags [-subId] -groupName -tags
+#			# Remove resource locks on group
+#			UnlockGroup [-subId] -groupName
+#			# Is name a default Azure RG
+#			IsSpecialGroup  -groupName
+#			# Get groups in buckets
+#			GetResourceGroupBuckets [-subId]
+#		
+###############################################################
+
 
 
 ###############################################################
@@ -6,6 +36,7 @@
 #	Collects a summary of resource groups in the subscription.
 #
 #	Params:
+#		[subId] : Subscription to work on. If present context switched.
 #		groups : Output of GetResourceGroupInfo
 #		history : Flag, if present looks for >60 days, careful
 #				  it's slow. Default is NOT to look.
@@ -20,11 +51,12 @@
 #			Regions - Hashtable, key=region, value=# in region.
 ###############################################################
 function GetResourceGroupSummary{
-	Param ($groups, [switch]$history)
+	Param ([string]$subId, $groups, [switch]$history)
 
-	#$context = Set-AzureRmContext -SubscriptionID $subId
-
-	#$groups = GetResourceGroupInfo -sub $subId
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 	
 	$totalResourceGroups = 0
 	$lockedRG = 0
@@ -52,19 +84,8 @@ function GetResourceGroupSummary{
 		}
 		
 		# Determine if it's specialRG
-		if($g.Value.Name.Contains("cleanup") -or
-		   $g.Value.Name.Contains("Default-Storage-") -or
-		   ( $g.Value.Name.Contains("DefaultResourceGroup-") -or
-			 $g.Value.Name.Contains("Default-MachineLearning-") -or
-			 $g.Value.Name.Contains("cloud-shell-storage-") -or
-			 $g.Value.Name.Contains("Default-ServiceBus-") -or
-			 $g.Value.Name.Contains("Default-Web-") -or
-			 $g.Value.Name.Contains("OI-Default-") -or
-			 $g.Value.Name.Contains("Default-SQL") -or
-			 $g.Value.Name.Contains("StreamAnalytics-Default-") -or
-			 $g.Value.Name.Contains("databricks-")
-			)
-		  )
+		$special = IsSpecialGroup -groupName $g.Value.Name
+		if($special -eq $true)
 		{
 			$specialRG += 1
 		}
@@ -109,13 +130,19 @@ function GetResourceGroupSummary{
 #	the context has been set to the right subscription.
 #
 #	Params:
+#		[subId] : Subscription to work on. If present context switched.
 #		groupName : Resource Group Name
 #
 #	Returns:
 #		Boolean flag, $true is >60 days
 ###############################################################
 function ResourceGroupOlderThan60Days {
-	Param ([string]$groupName)
+	Param ([string]$subId, [string]$groupName)
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 	
 	Write-Host("Checking age of " + $groupName)
 	
@@ -146,7 +173,7 @@ function ResourceGroupOlderThan60Days {
 #	lock and tag information. 
 #
 #	Params:
-#		sub : Subscription ID
+#		[subId] : Subscription to work on. If present context switched.
 #
 #	Returns:
 #		Hashtable<[string]subname, [object]info>
@@ -156,11 +183,14 @@ function ResourceGroupOlderThan60Days {
 #			Tags - PSObject
 ###############################################################
 function GetResourceGroupInfo {
-	Param ([string]$sub)
+	Param ([string]$subId)
 
 	$returnTable = @{}
 	
-	$context = Set-AzureRmContext -SubscriptionID $sub
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 
 	$resourceGroups = Get-AzureRmResourceGroup
 
@@ -182,6 +212,102 @@ function GetResourceGroupInfo {
 	}
 
 	$returnTable
+}
+
+###############################################################
+# GetResourceGroupBuckets
+#
+#	Get Resource groups in 4 buckets
+#		DeleteLocked, ReadOnlyLocked, Unlocked, Special
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#
+#	Returns:
+#		Hashtable<[string]bucketName, [list]groupNames>
+###############################################################
+function GetResourceGroupBuckets{
+	Param ([string]$subId)
+
+	$deleteKey = "DeleteLocked"
+	$readOnlyKey = "ReadOnlyLocked"
+	$unlockedKey = "Unlocked"
+	$specialKey = "Special"
+	
+	$returnTable = @{}
+	$returnTable.Add($deleteKey,(New-Object System.Collections.ArrayList))
+	$returnTable.Add($readOnlyKey,(New-Object System.Collections.ArrayList))
+	$returnTable.Add($unlockedKey,(New-Object System.Collections.ArrayList))
+	$returnTable.Add($specialKey, (New-Object System.Collections.ArrayList))
+	
+	$groups = GetResourceGroupInfo -subId $subId
+	foreach($group in $groups.GetEnumerator())
+	{
+		# Check Special First
+		$special = IsSpecialGroup -groupName $group.Value.Name
+		if($special -eq $true)
+		{
+			$returnTable[$specialKey].Add($group.Value.Name) > $null
+			continue
+		}
+		
+		$lockCounts=0
+		$locks = ParseLocks -locks $group.Value.Locks
+		foreach($lockName in $locks.Keys)
+		{	
+			$lockCounts += 1
+			if($locks[$lockName] -like "CanNotDelete")
+			{
+				$returnTable[$deleteKey].Add($group.Value.Name) > $null
+			}
+			elseif($locks[$lockName] -like "ReadOnly")
+			{
+				$returnTable[$readOnlyKey].Add($group.Value.Name) > $null
+			}
+		}
+		
+		if($lockCounts -eq 0)
+		{
+			$returnTable[$unlockedKey].Add($group.Value.Name) > $null
+		}
+	}
+	
+	$returnTable
+}
+
+###############################################################
+# IsSpecialGroup
+#
+#	Determine if the name is an Azure Default
+#
+#	Params:
+#		groupName : Name of a group
+#
+#	Returns:
+#		$true if special, $false otherwise
+###############################################################
+function IsSpecialGroup{
+	Param ([string]$groupName)
+	
+	$special = $false
+	if($groupName.Contains("cleanup") -or
+		   $groupName.Contains("Default-Storage-") -or
+		   ( $groupName.Contains("DefaultResourceGroup-") -or
+			 $groupName.Contains("Default-MachineLearning-") -or
+			 $groupName.Contains("cloud-shell-storage-") -or
+			 $groupName.Contains("Default-ServiceBus-") -or
+			 $groupName.Contains("Default-Web-") -or
+			 $groupName.Contains("OI-Default-") -or
+			 $groupName.Contains("Default-SQL") -or
+			 $groupName.Contains("StreamAnalytics-Default-") -or
+			 $groupName.Contains("databricks-")
+			)
+		  )
+	{
+		$special = $true
+	}
+	
+	$special
 }
 
 ###############################################################
@@ -261,11 +387,13 @@ function ParseLocks {
 ###############################################################
 # FindMissingTags
 #
-#	
+#	Searches existing group tags for expected tags. Returns list
+#	of expected tags that are not present.
 #
 #	Params:
 #		tags : Tags hash table associated with a resource group
-#		expected : Tag names expected to be found
+#			   obtained by calling ParseTags
+#		expected : List of tag names expected to be found
 #
 #	Returns:
 #		List<missing expected tag names>
@@ -290,4 +418,104 @@ function FindMissingTags {
 	}
 	
 	$returnTable
+}
+
+###############################################################
+# ModifyGroupTags
+#
+#	Modify the tags on a resource group.
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		groupName: Resource group to modify. 
+#		tags : Hash table of tagname, tagvalue. If null
+#						clears all tags.
+#	Returns:
+#		Output of az group update --tags
+###############################################################
+function ModifyGroupTags{
+	Param($subId, $groupName, $tags)
+	
+	Write-Host("Setting subscription")
+	if($subId)
+	{
+		$context = az account set -s $subId
+	}
+
+	$groupObject = (az group show -g $groupName) | ConvertFrom-Json
+	$tagsList = New-Object System.Collections.ArrayList
+		
+	if($groupObject.Tags)
+	{
+		Write-Host("Obtaining existing tags ...")
+		$groupObject.Tags.PSObject.Properties | Foreach { $tagsList.Add($_.Name +"=" + "'" + $_.Value +"'") > $null }
+	}
+	
+	Write-Host("Format command input")
+	$tagInput = $null
+	if($tags)
+	{
+		foreach($key in $tags.Keys)
+		{
+			$tagsList.Add($key + "='" + $tags[$key] + "'") > $null
+		}
+
+		Write-Host("Adding tags....")
+		foreach($tag in $tagsList)
+		{	
+			$tagInput += " " + $tag
+		}
+	}
+	else
+	{
+		Write-Host("Adding tags....")
+		$tagInput += "''"
+	}
+
+	# Create the command string and execute it.
+	Write-Host("Updating " + $groupName + " with new tag list " + $tagInput)
+	$commandString = "az group update -n " + $groupName + " --tags " + $tagInput
+	Invoke-Expression $commandString
+}
+
+###############################################################
+# UnlockGroup
+#
+#	Remove resource locks on a resource group.
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		groupName: Resource group to modify. 
+#						clears all tags.
+#	Returns:
+#		Count of locks removed
+###############################################################
+function UnlockGroup {
+	Param($subId, $groupName)
+
+	$removalCount=0
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
+
+	$locks = Get-AzureRmResourceLock -ResourceGroupName $groupName
+	if($locks)
+	{
+		# It has a lock either ReadOnly or CanNotDelete so it has to 
+		# be marked as locked.
+		foreach($lock in $locks)
+		{
+			$removalCount += 1
+			Write-Host("Removing lock : " + $lock.LockId + " from " + $rg.ResourceGroupName)
+			$result = Remove-AzureRmResourceLock -Force -LockId $lock.LockId
+		}
+	}
+	else
+	{
+		Write-Host("No locks to delete")
+	}
+	
+	$removalCount
 }

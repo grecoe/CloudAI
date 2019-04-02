@@ -9,9 +9,22 @@
 #
 #	The AML Compute relies on an extension for az ml in Powershell
 # 	https://docs.microsoft.com/en-us/azure/machine-learning/service/reference-azure-machine-learning-cli
+#
+#	FUNCTIONS AVAILABLE
+#			# Summary of all VM's in subscription
+#			GetVirtualMachineComputeSummary [-subId]
+#			# Merge VM list and AML Cluster list of machines
+#			MergeComputeResources -mlClusterOverview -vmOverview
+#			# Get VM info for rg or whole sub
+#			GetVirtualMachines [-subId] [-resourceGroup]
+#			# Summarize AML Compute Cluster Information
+#			SummarizeComputeClusters -mlComputeInformation
+#			# Find all AML Compute Clusters in subscription
+#			FindMlComputeClusters [-subId]
+#		
 ###############################################################
 
-. './ResourceUtils.ps1'
+. './Resources.ps1'
 
 ###############################################################
 # GetVirtualMachineComputeSummary
@@ -23,7 +36,7 @@
 #	associated with an AML cluster.
 #
 #	Params:
-#		subId : Subscription to scan for compute summary
+#		[subId] : Subscription to work on. If present context switched.
 #
 #	Returns:
 #		PSObject:			
@@ -37,9 +50,9 @@ function GetVirtualMachineComputeSummary {
 	Param($subId)
 
 	# Inner functions here will set context
-	$vminstances = GetVirtualMachines -sub $subId -resourceGroup $null
-	$mlCompute = FindMlComputeClusters -sub $subId
+	$mlCompute = FindMlComputeClusters -subId $subId
 	$mlsummary = SummarizeComputeClusters -mlComputeInformation $mlCompute
+	$vminstances = GetVirtualMachines -resourceGroup $null
 
 	$mergedResults = MergeComputeResources -mlClusterOverview $mlsummary -vmOverview $vminstances
 	
@@ -58,7 +71,7 @@ function GetVirtualMachineComputeSummary {
 #	$subId = 'YOUR_SUB_ID' 
 #	
 #	#Get Virtual Machines
-#	$vminstances = GetVirtualMachines -sub $subId -resourceGroup $null
+#	$vminstances = GetVirtualMachines -subId $subId -resourceGroup $null
 #	
 #	#Get ML Compute Clusters
 #	$mlCompute = FindMlComputeClusters -sub $subId
@@ -116,7 +129,7 @@ function MergeComputeResources {
 #	resource group in a subscription. 
 #
 #	Params:
-#		sub : Subscription to work within
+#		[subId] : Subscription to work on. If present context switched.
 #		resourceGroup : Resource Group to search, if null then search entire subscription
 #
 #	Returns:
@@ -128,9 +141,12 @@ function MergeComputeResources {
 #			SKU - Hash Table , KEY = SKU[String], Value = Count[int]
 ###############################################################
 function GetVirtualMachines {
-	Param([string]$resourceGroup,[string]$sub)
+	Param([string]$resourceGroup,[string]$subId)
 	
-	$context = Set-AzureRmContext -SubscriptionID $sub
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 	
 	$totalVirtualMachines = 0
 	$runningVirtualMachines=0
@@ -141,12 +157,12 @@ function GetVirtualMachines {
 	$vms = $null
 	if($resourceGroup)
 	{
-		Write-Host("Get VM Instances in RG : " + $resourceGroup)
+		Write-Host("Get VM Instances in resource group: " + $resourceGroup)
 		$vms = Get-AzureRmVM -ResourceGroupName $resourceGroup
 	}
 	else
 	{
-		Write-Host("Get VM Instances in Subscription : " + $sub)
+		Write-Host("Get VM Instances in Subscription ")
 		$vms = Get-AzureRmVM
 	}
 
@@ -265,7 +281,7 @@ function SummarizeComputeClusters {
 #	compute resources contained therein. 
 #
 #	Params:
-#		sub : Subscription ID
+#		[subId] : Subscription to work on. If present context switched.
 #
 #	Returns:
 #		List<Object>:
@@ -283,22 +299,32 @@ function SummarizeComputeClusters {
 #				MinNodes - int
 ###############################################################
 function FindMlComputeClusters {
-	Param ([string]$sub)
+	Param ([string]$subId)
 
 	$resourceListDictionary = New-Object System.Collections.ArrayList
 
 	Write-Host("Finding ML Compute Clusters")
-	$context = Set-AzureRmContext -SubscriptionID $sub
+	if($subId)
+	{
+		Write-Host("Switch context")
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 
 	$resourceType = 'Microsoft.MachineLearningServices/workspaces'
-	$deployments = FindDeployments -sub $subId -resourceType $resourceType
+	$deployments = FindDeployments -subId $subId -resourceType $resourceType
 		
-	$context = az account set -s $sub
-
+	if($subId)
+	{
+		$context = az account set -s $subId
+	}
+	
+	Write-Host("Parse Deployments")
 	foreach($rgroup in $deployments.Keys)
 	{
+		Write-Host("Group: " + $rgroup)
 		foreach($wspace in $deployments[$rgroup].Keys)
 		{
+			Write-Host("    Workspace: " + $rgroup)
 			# Now find out what we want 
 			$computeListText = az ml computetarget list -g $rgroup -w $wspace
 			$computeList = $computeListText | ConvertFrom-Json

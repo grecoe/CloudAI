@@ -1,3 +1,16 @@
+###############################################################
+# Resources.ps1
+#
+#	Contains scripts to work on individual resources
+#
+#
+#	FUNCTIONS AVAILABLE
+#			# List all resources in a subscription
+#			GetResources -subId
+#			# Find deployments of specific resource types
+#			FindDeployments -subId -resourceType
+###############################################################
+
 
 ###############################################################
 # GetResources
@@ -6,7 +19,7 @@
 #	type in a subscription. 
 #
 #	Params:
-#		sub : Subscription to work within
+#		[subId] : Subscription to work on. If present context switched.
 #
 #	Returns:
 #		HashTable<[string]resourceType, [int]resourceCount>
@@ -14,7 +27,10 @@
 function GetResources {
 	Param ([string]$subId)
 
-	$context = Set-AzureRmContext -SubscriptionID $subId
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 
 	$returnTable = @{}
 	
@@ -41,7 +57,7 @@ function GetResources {
 #	subscription.
 #
 #	Params:
-#		sub : Subscription to work within
+#		[subId] : Subscription to work on. If present context switched.
 #		resourceType : String resource type to find, i.e. 
 #				-resourceType 'Microsoft.MachineLearningServices/workspaces'
 #
@@ -50,9 +66,12 @@ function GetResources {
 #			HashTable2<[string]resourceName, [string]resourceType
 ###############################################################
 function FindDeployments {
-	Param ([string]$sub,[string]$resourceType)
+	Param ([string]$subId,[string]$resourceType)
 
-	$context = Set-AzureRmContext -SubscriptionID $sub
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
 
 	# <rgname, hastable> , <hastable> = < name, type>
 	$resourceListDictionary = @{}
