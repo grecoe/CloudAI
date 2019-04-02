@@ -1,34 +1,26 @@
 
 
-. './RgUtils.ps1'
+. './ResourceGroup.ps1'
 . './ResourceUtils.ps1'
-. './MlCompute.ps1'
+. './Compute.ps1'
 
-#$subId = '8dd18bd7-b9dc-4213-b367-cd6a7745bc88' #fang
-$subId = 'edf507a2-6235-46c5-b560-fd463ba2e771' #team
+$subId = '0ca618d2-22a8-413a-96d0-0f1b531129c3' #fang
+#$subId = '03909a66-bef8-4d52-8e9a-a346604e0902' #team
 
-$expectedTags = ("alias", "project", "expires")
-#$groups = Get-ResourceGroupInfo -sub '0ca618d2-22a8-413a-96d0-0f1b531129c3'
-#$groups = Get-ResourceGroupInfo -sub $subId
+$groups = GetResourceGroupInfo -sub $subId
+$groupSummary = GetResourceGroupSummary -groups $groups
+$computeSummary = GetVirtualMachineComputeSummary -sub $subId
+$resources = GetResources -subId $subId
 
-$totalVmInfo=@{}
-$totalVmInfo.Add("Total", 0)
-$totalVmInfo.Add("Running", 0)
-$totalVmInfo.Add("Deallocated",0)
-
-$vminstances = GetVirtualMachines -sub $subId -resourceGroup $null
-$mlCompute = FindMlComputeClusters -sub $subId
-$mlsummary = SummarizeComputeClusters -mlComputeInformation $mlCompute
-
-$mergedResults = MergeComputeResources -mlClusterOverview $mlsummary -vmOverview $vminstances
-
-$computeCalc = New-Object PSObject -Property @{ 
-	VirtualMachines=$vminstances;
-	MlCompute=$mlsummary;
-	Merged=$mergedResults}
-$dout = $computeCalc | ConvertTo-Json -depth 100
+$subSummary = New-Object PSObject -Property @{ 
+	GroupInfo=$groupSummary;
+	Compute=$computeSummary;
+	Resources=$resources}
+$dout = $subSummary | ConvertTo-Json -depth 100
 Write-Host($dout)
 break
+
+$expectedTags = ("alias", "project", "expires")
 
 foreach ($g in $groups.GetEnumerator()) {
 
