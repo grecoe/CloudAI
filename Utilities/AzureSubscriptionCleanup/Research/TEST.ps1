@@ -1,14 +1,23 @@
 
 
-. './ResourceGroup.ps1'
-. './Resources.ps1'
-. './Compute.ps1'
+. './Azure/ResourceGroup.ps1'
+. './Azure/Resources.ps1'
+. './Azure/Compute.ps1'
+. './Azure/Subscription.ps1'
+. './Utiltiies/Compliance.ps1'
 
 #$subId = 'edf507a2-6235-46c5-b560-fd463ba2e771' #Danielle
 $subId = '0ca618d2-22a8-413a-96d0-0f1b531129c3' #fang
 #$subId = '03909a66-bef8-4d52-8e9a-a346604e0902' #Tao
 
-$buckets = GetResourceGroupBuckets -subId $subId
+$comp = GetComplianceInformation -subId $subId
+$d3out = $comp | ConvertTo-Json -depth 100
+Write-Host($d3out)
+break
+
+
+
+$buckets = GetSubscriptionOverview -subId $subId
 $d2out = $buckets | ConvertTo-Json -depth 100
 Write-Host($d2out)
 break
@@ -30,7 +39,7 @@ $expectedTags = ("alias", "project", "expires")
 
 foreach ($g in $groups.GetEnumerator()) {
 
-	$vmInformation = GetVirtualMachines -subId $subId -resourceGroup $g.Value.Name
+	$vmInformation = GetVirtualMachinesSummary -subId $subId -resourceGroup $g.Value.Name
 	
 	$totalVmInfo["Total"] += $vmInformation.Total
 	$totalVmInfo["Running"] += $vmInformation.Running 

@@ -15,8 +15,16 @@
 #			GetVirtualMachineComputeSummary [-subId]
 #			# Merge VM list and AML Cluster list of machines
 #			MergeComputeResources -mlClusterOverview -vmOverview
-#			# Get VM info for rg or whole sub
+#			# Get deeper VM info for rg or whole sub
 #			GetVirtualMachines [-subId] [-resourceGroup]
+#			# Get VM summary for rg or whole sub
+#			GetVirtualMachinesSummary [-subId] [-resourceGroup]
+#			# Get VM status for specific instance
+#			GetVmStatus [-subId] -resourceGroup -instanceName
+#			# Stop a virtual machine, optionally deallocate
+#			StopVirtualMachine [-subId] -resourceGroup -instanceName [flag]-deallocate
+#			# Start a virtual machine
+#			StartVirtualMachine [-subId] -resourceGroup -instanceName
 #			# Summarize AML Compute Cluster Information
 #			SummarizeComputeClusters -mlComputeInformation
 #			# Find all AML Compute Clusters in subscription
@@ -24,7 +32,7 @@
 #		
 ###############################################################
 
-. './Resources.ps1'
+. './Azure/Resources.ps1'
 
 ###############################################################
 # GetVirtualMachineComputeSummary
@@ -52,7 +60,7 @@ function GetVirtualMachineComputeSummary {
 	# Inner functions here will set context
 	$mlCompute = FindMlComputeClusters -subId $subId
 	$mlsummary = SummarizeComputeClusters -mlComputeInformation $mlCompute
-	$vminstances = GetVirtualMachines -resourceGroup $null
+	$vminstances = GetVirtualMachinesSummary -resourceGroup $null
 
 	$mergedResults = MergeComputeResources -mlClusterOverview $mlsummary -vmOverview $vminstances
 	
@@ -71,7 +79,7 @@ function GetVirtualMachineComputeSummary {
 #	$subId = 'YOUR_SUB_ID' 
 #	
 #	#Get Virtual Machines
-#	$vminstances = GetVirtualMachines -subId $subId -resourceGroup $null
+#	$vminstances = GetVirtualMachinesSummary -subId $subId -resourceGroup $null
 #	
 #	#Get ML Compute Clusters
 #	$mlCompute = FindMlComputeClusters -sub $subId
@@ -84,7 +92,7 @@ function GetVirtualMachineComputeSummary {
 #	
 #	Params:
 #		mlClusterOverview : Output of SummarizeComputeClusters
-#		vmOverview : Output of GetVirtualMachines
+#		vmOverview : Output of GetVirtualMachinesSummary
 #
 #	Returns: -vmOverview object param updated with content from the 
 #			 -mlClusterOverview object.
@@ -130,7 +138,59 @@ function MergeComputeResources {
 #
 #	Params:
 #		[subId] : Subscription to work on. If present context switched.
-#		resourceGroup : Resource Group to search, if null then search entire subscription
+#		[resourceGroup] : Resource Group to search, if null then search entire subscription
+#
+#	Returns:
+#		List<PSObject>:			
+#			Name : string
+#			Instance : string
+#			Running : bool
+#			Deallocated : bool 
+#			Stopped : bool 
+###############################################################
+function GetVirtualMachines {
+	Param([string]$resourceGroup,[string]$subId)
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
+	
+	$machineList = New-Object System.Collections.ArrayList
+
+	$vms = $null
+	if($resourceGroup)
+	{
+		Write-Host("Get VM Instances in resource group: " + $resourceGroup)
+		$vms = Get-AzureRmVM -ResourceGroupName $resourceGroup
+	}
+	else
+	{
+		Write-Host("Get VM Instances in Subscription ")
+		$vms = Get-AzureRmVM
+	}
+
+	foreach($vminst in $vms)
+	{
+		$status = GetVmStatus -resourceGroup $vminst.ResourceGroupName -instanceName $vminst.Name
+		if($status)
+		{
+			$machineList.Add($status) > $null
+		}
+	}
+	
+	$machineList
+}
+
+###############################################################
+# GetVirtualMachinesSummary
+#
+#	Retrieves a collection of Virtual Machine stats for a specific
+#	resource group in a subscription. 
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		[resourceGroup] : Resource Group to search, if null then search entire subscription
 #
 #	Returns:
 #		PSObject:			
@@ -140,7 +200,7 @@ function MergeComputeResources {
 #			Deallocated - int 
 #			SKU - Hash Table , KEY = SKU[String], Value = Count[int]
 ###############################################################
-function GetVirtualMachines {
+function GetVirtualMachinesSummary {
 	Param([string]$resourceGroup,[string]$subId)
 	
 	if($subId)
@@ -169,49 +229,31 @@ function GetVirtualMachines {
 	foreach($vminst in $vms)
 	{
 		$totalVirtualMachines++
-		$vmStatus = Get-AzureRmVM -ErrorAction Stop -Status -ResourceGroupName $vminst.ResourceGroupName -Name $vminst.Name
-		if($vmStatus)
+		
+		$status = GetVmStatus -resourceGroup $vminst.ResourceGroupName -instanceName $vminst.Name
+		
+		# Record the state count to the total.
+		if($status.Running)
 		{
-			# Get the state of the VM
-			$running=$false
-			$deallocated=$false
-			foreach($status in $vmStatus.Statuses)
-			{
-				if($status.code -eq "PowerState/running")
-				{
-					$running=$true
-					break
-				}
-				if($status.code -eq "PowerState/deallocated")
-				{
-					$deallocated=$true
-					break
-				}
-			}
-			
-			# Record the state count to the total.
-			if($running)
-			{
-				$runningVirtualMachines++
-			}
-			elseif($deallocated)
-			{
-				$deallocatedVirtualMachines++
-			}
-			else
-			{
-				$stoppedVirtualMachines++
-			}
+			$runningVirtualMachines++
+		}
+		if($status.Deallocated)
+		{
+			$deallocatedVirtualMachines++
+		}
+		if($status.Stopped)
+		{
+			$stoppedVirtualMachines++
+		}
 
-			# Capture the size
-			if($virtualMachineSkus.ContainsKey($vminst.HardwareProfile.VmSize) -eq $false)
-			{
-				$virtualMachineSkus.Add($vminst.HardwareProfile.VmSize,1)
-			}
-			else
-			{
-				$virtualMachineSkus[$vminst.HardwareProfile.VmSize]++
-			}
+		# Capture the size
+		if($virtualMachineSkus.ContainsKey($vminst.HardwareProfile.VmSize) -eq $false)
+		{
+			$virtualMachineSkus.Add($vminst.HardwareProfile.VmSize,1)
+		}
+		else
+		{
+			$virtualMachineSkus[$vminst.HardwareProfile.VmSize]++
 		}
 	}
 	
@@ -223,6 +265,133 @@ function GetVirtualMachines {
 			SKU=$virtualMachineSkus}
 	
 	$vmInformation
+}
+
+###############################################################
+# GetVmStatus
+#
+#	Get the status of a given instance of a VM
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		resourceGroup : RG Name
+#		instanceName : VM Name
+#
+#	Returns:
+#		Object:
+#			Name : string
+#			Instance : string
+#			Running : bool
+#			Deallocated : bool 
+#			Stopped : bool 
+###############################################################
+function GetVmStatus {
+	Param([string]$subId, [string]$resourceGroup,[string]$instanceName)
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
+	
+	$running=$false
+	$stopped=$false
+	$deallocated=$false
+	
+	$vmStatus = Get-AzureRmVM -ErrorAction Stop -Status -ResourceGroupName $resourceGroup -Name $instanceName
+	if($vmStatus)
+	{
+		foreach($status in $vmStatus.Statuses)
+		{
+			if($status.code -eq "PowerState/running")
+			{
+				$running=$true
+			}
+
+			if($status.code -eq "PowerState/deallocated")
+			{
+				$deallocated=$true
+			}
+		}
+		
+		$stopped = ( ($running -eq $false) -and ($deallocated -eq $false))
+	}
+
+	$vmInformation = New-Object PSObject -Property @{ 
+			Name =$resourceGroup; 
+			Instance=$instanceName;
+			Stopped=$stopped;
+			Deallocated=$deallocated;
+			Running=$running}
+	
+	$vmInformation
+}
+
+###############################################################
+# StopVirtualMachine
+#
+#	Stops a running virtual machine
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		resourceGroup : RG Name
+#		instanceName : VM Name
+#		deallocate : Switch, deallocates instead of stops
+#
+#	Returns: None
+###############################################################
+function StopVirtualMachine{
+	Params([string]$subId, [string]$resourceGroup,[string]$instanceName,[switch]$deallocate)
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
+	
+	$status = GetVmStatus -resourceGroup $resourceGroup -instanceName $instanceName
+	if($status)
+	{
+		if($status.Running)
+		{
+			if($deallocate)
+			{
+				$result = Stop-AzureRmVM -ResourceGroupName $resourceGroup -Name $instanceName -Force
+			}
+			else
+			{
+				$result = Stop-AzureRmVM -ResourceGroupName $resourceGroup -Name $instanceName -Force -StayProvisioned
+			}
+		}
+	}
+}
+
+###############################################################
+# StartVirtualMachine
+#
+#	Starts a stopped virtual machine
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		resourceGroup : RG Name
+#		instanceName : VM Name
+#
+#	Returns: None
+###############################################################
+function StartVirtualMachine{
+	Params([string]$subId, [string]$resourceGroup,[string]$instanceName)
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
+	
+	$status = GetVmStatus -resourceGroup $resourceGroup -instanceName $instanceName
+	if($status)
+	{
+		if($status.Stopped)
+		{
+			$result = Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $instanceName
+		}
+	}
 }
 
 ###############################################################

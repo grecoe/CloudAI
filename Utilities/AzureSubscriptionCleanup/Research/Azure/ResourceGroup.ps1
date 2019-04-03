@@ -200,7 +200,7 @@ function GetResourceGroupInfo {
 	#####################################################
 	foreach($group in $resourceGroups)
 	{
-		Write-Host("Checking " + $group.ResourceGroupName + " L:" + $group.Location)
+		Write-Host("Loading " + $group.ResourceGroupName + " L:" + $group.Location)
 		$locks = Get-AzureRmResourceLock -ResourceGroupName $group.ResourceGroupName
 		
 		$rgInformation = New-Object PSObject -Property @{ 
@@ -251,6 +251,7 @@ function GetResourceGroupBuckets{
 			continue
 		}
 		
+		#Now get whether it's locked (and type) or unlocked
 		$lockCounts=0
 		$locks = ParseLocks -locks $group.Value.Locks
 		foreach($lockName in $locks.Keys)
