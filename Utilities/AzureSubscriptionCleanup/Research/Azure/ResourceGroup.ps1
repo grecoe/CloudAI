@@ -9,6 +9,8 @@
 #			GetResourceGroupInfo [-subId]
 #			# Summarize the list of resource groups
 #			GetResourceGroupSummary [-subId] [-history]
+#			# Get details on managed by and properties. 
+#			LoadDetailedResourceGroup [-subId] -resourceGroup
 #			# Determine if a group is older than 60 days
 #			ResourceGroupOlderThan60Days -groupName
 #			# Parse the tags from a resource group
@@ -164,6 +166,56 @@ function ResourceGroupOlderThan60Days {
 	}
 
 	$returnValue
+}
+
+ 
+###############################################################
+# LoadDetailedResourceGroup
+#
+#	Gets an RG with more information, like managedBy and retrieves
+#	the ManagedBy Resource Group. 
+#
+#	Params:
+#		[subId] : Subscription to work on. If present context switched.
+#		resourceGroup : Resource Group To Obtain
+#
+#	Returns:
+#		Hashtable<[string]subname, [object]info>
+#			Id - String
+#			Name - String
+#			Location - String  
+#			ManagedBy - String
+#			Properties - PSObject
+#			ManagedByResourceGroup - String
+#			Tags - PSObject
+###############################################################  
+function LoadDetailedResourceGroup {
+	Param ([string]$subId,[string]$resourceGroup)
+	
+	if($subId)
+	{
+		$context = Set-AzureRmContext -SubscriptionID $subId
+	}
+
+	$rgObject = (az group show -g $resourceGroup) | ConvertFrom-Json
+	
+	$managedByGroup=$null
+	if($rgObject.managedBy)
+	{
+		$resourceObject = (az resource show --ids $rgObject.managedBy) | ConvertFrom-Json
+		$managedByGroup = $resourceObject.resourceGroup
+	}
+	
+	$rgInformation = New-Object PSObject -Property @{ 
+		Id = $rgObject.Id;
+		Name = $rgObject.Name;
+		Tags=$rgObject.Tags;
+		Location=$rgObject.Location;
+		ManagedBy=$rgObject.ManagedBy;
+		ManagedByResourceGroup=$managedByGroup;
+		Properties=$rgObject.Properties}
+
+	$rgInformation
 }
 
 ###############################################################
@@ -437,9 +489,9 @@ function FindMissingTags {
 function ModifyGroupTags{
 	Param($subId, $groupName, $tags)
 	
-	Write-Host("Setting subscription")
 	if($subId)
 	{
+		Write-Host("Setting subscription")
 		$context = az account set -s $subId
 	}
 

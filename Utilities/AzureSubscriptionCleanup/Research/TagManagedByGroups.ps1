@@ -13,11 +13,11 @@
 #	visually available to portal users. 
 ################################################################
 
-
 # You may need to update your Azure CLI to do this. 
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest
 
 . './Azure/Subscription.ps1'
+. './Azure/ResourceGroup.ps1'
 
 # Ensure you have issued a Login-AzureRMAccount command first
 
@@ -27,53 +27,42 @@ $subId = 'YOUR_SUBSCRIPTION_ID'
 # Set context so we don't get hung up later
 SetContext -subId $subId
 
-
 # Because we are assuming we know what we want to tie to, create a list of any 
 # resource group that starts with 'databricks-' as these are the databricks
 # cluster resource groups.
 $dataBricksResourceGroups = New-Object System.Collections.ArrayList
-$dataBricksResourceGroups.Add('databricks-rg-us2-jehrling-x24ialn7epsv2') > $null
+$dataBricksResourceGroups.Add('databricks-rg-us2-XXXXXXX') > $null
 
 
 foreach($group in $dataBricksResourceGroups)
 {
 	Write-Host("Working on group " + $group);
-	$infoObj = (az group show -g $group) | ConvertFrom-Json
-	
-	$managedByGroup=$null
-	if($infoObj.managedBy)
-	{
-		$resourceObject = (az resource show --ids $infoObj.managedBy) | ConvertFrom-Json
-		$managedByGroup = $resourceObject.resourceGroup
-		
-		Write-Host("Group " + $group + " is managed by " + $managedByGroup)
-	}
 
-	if($managedByGroup)
+	$rgInfo = LoadDetailedResourceGroup -resourceGroup $group
+	
+	if($rgInfo.ManagedByResourceGroup)
 	{
+		$managedRgInfo = LoadDetailedResourceGroup -resourceGroup $rgInfo.ManagedByResourceGroup
+		$tagsList = @{}
 		
-		$managedByObj = (az group show -g $managedByGroup) | ConvertFrom-Json
-		$tagsList = New-Object System.Collections.ArrayList
-		
-		if($managedByObj.Tags)
+		if($managedRgInfo.Tags)
 		{
 			Write-Host("Obtaining existing tags to preserve them")
-			$managedByObj.Tags.PSObject.Properties | Foreach { $tagsList.Add($_.Name +"=" + "'" + $_.Value +"'") > $null }
+			$managedRgInfo.Tags.PSObject.Properties | Foreach { $tagsList.Add($_.Name, $_.Value)  }
 		}
 	
-		Write-Host("Add in new tags")
-		$tagsList.Add("manages='" + $group + "'") > $null
-
-		$tagInput = $null
-		foreach($tag in $tagsList)
-		{	
-			$tagInput += " " + $tag
+		Write-Host("Add in desired new tags....")
+		if($tagsList.ContainsKey("manages"))
+		{
+			$tagsList["manages"] = $rgInfo.Name
+		}
+		else
+		{
+			$tagsList.Add("manages", $rgInfo.Name) 
 		}
 
-		# Create the command string and execute it.
-		Write-Host("Updating " + $managedByGroup + " with new tag list " + $tagInput)
-		$commandString = "az group update -n " + $managedByGroup + " --tags " + $tagInput
-		Invoke-Expression $commandString
+		Write-Host("Updating Managing Resource Group")
+		ModifyGroupTags -groupName $managedRgInfo.Name -tags $tagsList
 	}
 }
 
