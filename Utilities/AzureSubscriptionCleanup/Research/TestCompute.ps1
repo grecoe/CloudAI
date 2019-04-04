@@ -8,7 +8,7 @@
 # Ensure you have issued a Login-AzureRMAccount command first
 
 # Provide your subscription to verify
-$subId = 'YOUR_SUBSCRIPTION_ID' 
+$subId = 'YOUR_RESOURCE_GROUP' 
 
 # Set context so we don't get hung up later
 SetContext -subId $subId
@@ -41,6 +41,16 @@ Write-Host("#############################################")
 Write-Host("Virtual Machine Information")
 Write-Host("#############################################")
 $output = $vmCompute | ConvertTo-Json
+Write-Host($output)
+
+#################################################################
+# Get the GPU Virtual Machine Information
+#################################################################
+$vmComputeGPU = GetVirtualMachines -skuFilter '*nc*'
+Write-Host("#############################################")
+Write-Host("GPU Only Machine Information")
+Write-Host("#############################################")
+$output = $vmComputeGPU | ConvertTo-Json
 Write-Host($output)
 
 #################################################################

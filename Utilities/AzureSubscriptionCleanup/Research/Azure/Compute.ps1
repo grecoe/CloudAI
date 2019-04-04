@@ -20,7 +20,7 @@
 #			# Get VM summary for rg or whole sub
 #			GetVirtualMachinesSummary [-subId] [-resourceGroup]
 #			# Get VM status for specific instance
-#			GetVmStatus [-subId] -resourceGroup -instanceName
+#			GetVmInformation [-subId] -resourceGroup -instanceName
 #			# Stop a virtual machine, optionally deallocate
 #			StopVirtualMachine [-subId] -resourceGroup -instanceName [flag]-deallocate
 #			# Start a virtual machine
@@ -139,6 +139,8 @@ function MergeComputeResources {
 #	Params:
 #		[subId] : Subscription to work on. If present context switched.
 #		[resourceGroup] : Resource Group to search, if null then search entire subscription
+#		[skuFilter] : Optional filter for getting certain types. For example, 
+#					  to get GPU machines, use '*NC*' as the filter. 
 #
 #	Returns:
 #		List<PSObject>:			
@@ -147,9 +149,10 @@ function MergeComputeResources {
 #			Running : bool
 #			Deallocated : bool 
 #			Stopped : bool 
+#			Sku : VM Sku
 ###############################################################
 function GetVirtualMachines {
-	Param([string]$resourceGroup,[string]$subId)
+	Param([string]$resourceGroup,[string]$subId,[string]$skuFilter)
 	
 	if($subId)
 	{
@@ -159,20 +162,35 @@ function GetVirtualMachines {
 	$machineList = New-Object System.Collections.ArrayList
 
 	$vms = $null
+	$command=$null
+	$filter=$null
+	# If a sku filter provided, prepare for it.
+	if($skuFilter)
+	{
+		Write-Host("Filter VM with : " + $skuFilter)
+		$filter = " | Where-Object {`$_.HardwareProfile.VmSize -like '" + $skuFilter + "'}"
+	}
+		
+	# If a resource group is provided, prepare for that as well.
 	if($resourceGroup)
 	{
 		Write-Host("Get VM Instances in resource group: " + $resourceGroup)
-		$vms = Get-AzureRmVM -ResourceGroupName $resourceGroup
+		$command = 'Get-AzureRmVM -ResourceGroupName ' + $resourceGroup
 	}
 	else
 	{
 		Write-Host("Get VM Instances in Subscription ")
-		$vms = Get-AzureRmVM
+		$command = 'Get-AzureRmVM '
 	}
 
+	# Build up the full command and execute it.
+	$fullCommand = $command + $filter
+	Write-Host("Executing: " + $fullCommand)
+	$vms = Invoke-Expression $fullCommand
+	
 	foreach($vminst in $vms)
 	{
-		$status = GetVmStatus -resourceGroup $vminst.ResourceGroupName -instanceName $vminst.Name
+		$status = GetVmInformation -includeSku -resourceGroup $vminst.ResourceGroupName -instanceName $vminst.Name
 		if($status)
 		{
 			$machineList.Add($status) > $null
@@ -230,7 +248,7 @@ function GetVirtualMachinesSummary {
 	{
 		$totalVirtualMachines++
 		
-		$status = GetVmStatus -resourceGroup $vminst.ResourceGroupName -instanceName $vminst.Name
+		$status = GetVmInformation -resourceGroup $vminst.ResourceGroupName -instanceName $vminst.Name
 		
 		# Record the state count to the total.
 		if($status.Running)
@@ -268,7 +286,7 @@ function GetVirtualMachinesSummary {
 }
 
 ###############################################################
-# GetVmStatus
+# GetVmInformation
 #
 #	Get the status of a given instance of a VM
 #
@@ -284,9 +302,10 @@ function GetVirtualMachinesSummary {
 #			Running : bool
 #			Deallocated : bool 
 #			Stopped : bool 
+#			Sku : String, Only included if includeSku flag present
 ###############################################################
-function GetVmStatus {
-	Param([string]$subId, [string]$resourceGroup,[string]$instanceName)
+function GetVmInformation {
+	Param([string]$subId, [string]$resourceGroup,[string]$instanceName,[switch]$includeSku)
 	
 	if($subId)
 	{
@@ -296,7 +315,9 @@ function GetVmStatus {
 	$running=$false
 	$stopped=$false
 	$deallocated=$false
+	$sku=$null
 	
+	# Using the call below gives you running state but not SKU
 	$vmStatus = Get-AzureRmVM -ErrorAction Stop -Status -ResourceGroupName $resourceGroup -Name $instanceName
 	if($vmStatus)
 	{
@@ -314,6 +335,14 @@ function GetVmStatus {
 		}
 		
 		$stopped = ( ($running -eq $false) -and ($deallocated -eq $false))
+		
+		# Do we need SKU?
+		if($includeSku -eq $true)
+		{
+			# Using the call below doesn't give you running state, but gives you SKU
+			$vmStatusSku = Get-AzureRmVM -ErrorAction Stop -ResourceGroupName $resourceGroup -Name $instanceName
+			$sku=$vmStatusSku.HardwareProfile.VmSize
+		}
 	}
 
 	$vmInformation = New-Object PSObject -Property @{ 
@@ -321,7 +350,8 @@ function GetVmStatus {
 			Instance=$instanceName;
 			Stopped=$stopped;
 			Deallocated=$deallocated;
-			Running=$running}
+			Running=$running;
+			Sku=$sku}
 	
 	$vmInformation
 }
@@ -347,7 +377,7 @@ function StopVirtualMachine{
 		$context = Set-AzureRmContext -SubscriptionID $subId
 	}
 	
-	$status = GetVmStatus -resourceGroup $resourceGroup -instanceName $instanceName
+	$status = GetVmInformation -resourceGroup $resourceGroup -instanceName $instanceName
 	if($status)
 	{
 		if($status.Running)
@@ -384,7 +414,7 @@ function StartVirtualMachine{
 		$context = Set-AzureRmContext -SubscriptionID $subId
 	}
 	
-	$status = GetVmStatus -resourceGroup $resourceGroup -instanceName $instanceName
+	$status = GetVmInformation -resourceGroup $resourceGroup -instanceName $instanceName
 	if($status)
 	{
 		if($status.Stopped)

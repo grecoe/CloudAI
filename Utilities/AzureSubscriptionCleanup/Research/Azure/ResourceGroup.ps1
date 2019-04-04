@@ -185,6 +185,7 @@ function ResourceGroupOlderThan60Days {
 #			Name - String
 #			Location - String  
 #			ManagedBy - String
+#			Locks - PSObject
 #			Properties - PSObject
 #			ManagedByResourceGroup - String
 #			Tags - PSObject
@@ -206,10 +207,13 @@ function LoadDetailedResourceGroup {
 		$managedByGroup = $resourceObject.resourceGroup
 	}
 	
+	$locks = Get-AzureRmResourceLock -ResourceGroupName $resourceGroup
+
 	$rgInformation = New-Object PSObject -Property @{ 
 		Id = $rgObject.Id;
 		Name = $rgObject.Name;
 		Tags=$rgObject.Tags;
+		Locks=$locks;
 		Location=$rgObject.Location;
 		ManagedBy=$rgObject.ManagedBy;
 		ManagedByResourceGroup=$managedByGroup;
