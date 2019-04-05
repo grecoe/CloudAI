@@ -365,6 +365,7 @@ function IsSpecialGroup{
 			 $groupName.Contains("Default-SQL") -or
 			 $groupName.Contains("StreamAnalytics-Default-") -or
 			 $groupName.Contains("databricks-") -or
+			 $groupName.Contains("fileserverrg-") -or
 			 ($groupName -like 'MC*aks*')
 			)
 		  )

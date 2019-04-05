@@ -10,6 +10,9 @@
 # Provide your subscription to verify
 $subId = 'YOUR_SUBSCRIPTION_ID' 
 
+# Set context so we don't get hung up later
+SetContext -subId $subId
+
 # Get the resource group information
 $groups = GetResourceGroupInfo 
 
