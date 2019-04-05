@@ -29,7 +29,10 @@ function GetComplianceInformation {
 	Param([string]$subId)
 	
 	Write-Host("Compliance Information")
-	SetContext -subId $subId
+	if($subId)
+	{
+		SetContext -subId $subId
+	}
 	
 	# What tags are required to meet compliance? Make up your own.
 	$expectedTags = ("alias", "project", "expires")

@@ -209,10 +209,17 @@ function LoadDetailedResourceGroup {
 	
 	$locks = Get-AzureRmResourceLock -ResourceGroupName $resourceGroup
 
+	# With the above call, locks and tags are actual PSCustomObject so convert
+	$tags=@{}
+	if($rgObject.Tags)
+	{
+		$rgObject.Tags.PSObject.Properties | Foreach { $tags[$_.Name] = $_.Value }
+	}
+
 	$rgInformation = New-Object PSObject -Property @{ 
 		Id = $rgObject.Id;
 		Name = $rgObject.Name;
-		Tags=$rgObject.Tags;
+		Tags=$tags;
 		Locks=$locks;
 		Location=$rgObject.Location;
 		ManagedBy=$rgObject.ManagedBy;
@@ -277,7 +284,7 @@ function GetResourceGroupInfo {
 #		DeleteLocked, ReadOnlyLocked, Unlocked, Special
 #
 #	Params:
-#		[subId] : Subscription to work on. If present context switched.
+#		subId : Required, Subscription to work on. 
 #
 #	Returns:
 #		Hashtable<[string]bucketName, [list]groupNames>
@@ -357,7 +364,8 @@ function IsSpecialGroup{
 			 $groupName.Contains("OI-Default-") -or
 			 $groupName.Contains("Default-SQL") -or
 			 $groupName.Contains("StreamAnalytics-Default-") -or
-			 $groupName.Contains("databricks-")
+			 $groupName.Contains("databricks-") -or
+			 ($groupName -like 'MC*aks*')
 			)
 		  )
 	{
