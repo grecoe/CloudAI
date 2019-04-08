@@ -13,21 +13,10 @@
 #			GetStorageContext -acctname -acctkey
 #			# Safely create a container if not there
 #			CreateContainer -ctx -name
-
-#			# Get deeper VM info for rg or whole sub
-#			GetVirtualMachines [-subId] [-resourceGroup]
-#			# Get VM summary for rg or whole sub
-#			GetVirtualMachinesSummary [-subId] [-resourceGroup]
-#			# Get VM status for specific instance
-#			GetVmInformation [-subId] -resourceGroup -instanceName
-#			# Stop a virtual machine, optionally deallocate
-#			StopVirtualMachine [-subId] -resourceGroup -instanceName [flag]-deallocate
-#			# Start a virtual machine
-#			StartVirtualMachine [-subId] -resourceGroup -instanceName
-#			# Summarize AML Compute Cluster Information
-#			SummarizeComputeClusters -mlComputeInformation
-#			# Find all AML Compute Clusters in subscription
-#			FindMlComputeClusters [-subId]
+#			# Upload a local file
+#			UploadLocalFile -ctx -container -localPath -blobName
+#			# Upload a local file
+#			DownloadBlob -ctx -container -localPath -blobName [-getText]
 #		
 ###############################################################
 
@@ -43,10 +32,11 @@ function CreateContainer{
 	$container=$null
 	try
    	{
-		$container = Get-AzureStorageContainer -Context $ctx -Name $name
+		$container = Get-AzureStorageContainer -Context $ctx -Name $name -ErrorAction SilentlyContinue
 		$created=$true
    	}
    	catch {
+		Write-Host("Exception getting container")
 		$_.Exception.Message
    	}	
 

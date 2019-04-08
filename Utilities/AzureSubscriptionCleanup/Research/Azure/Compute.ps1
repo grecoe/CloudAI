@@ -523,7 +523,7 @@ function FindMlComputeClusters {
 		Write-Host("Group: " + $rgroup)
 		foreach($wspace in $deployments[$rgroup].Keys)
 		{
-			Write-Host("    Workspace: " + $rgroup)
+			Write-Host("    Workspace: " + $wspace)
 			# Now find out what we want 
 			$computeListText = az ml computetarget list -g $rgroup -w $wspace
 			$computeList = $computeListText | ConvertFrom-Json

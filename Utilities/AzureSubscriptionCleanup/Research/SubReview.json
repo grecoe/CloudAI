@@ -1,0 +1,34 @@
+{
+	"compute" : true,
+	"countResources" : true,
+	"tagCompliance" :
+	{
+		"lockState" : "locked",
+		"tags" :[
+			{
+				"name" :"alias",
+				"verify" : true
+			},
+			{
+				"name" :"project",
+				"verify" : false
+			},
+			{
+				"name" :"expires",
+				"verify" : true
+			}
+		]
+	},
+	"results":{
+		"dump" :true,
+		"localPath" : ".\\LocalResults.txt",
+		"storageAcct" : "YOU_STORAGE_ACCT",
+		"storageKey" : "YOU_STORAGE_KEY",
+		"container" : "localresults",
+		"blob" : "local.json"
+	},
+	"deployments" : [
+		"Microsoft.ClassicStorage/storageAccounts",
+		"Microsoft.Network/virtualNetworkGateways",
+		"Microsoft.Search/searchServices"]
+}
