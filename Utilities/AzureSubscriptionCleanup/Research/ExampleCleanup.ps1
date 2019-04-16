@@ -36,7 +36,7 @@
 ################################################################
 # Provide your subscription to verify
 ################################################################
-$subId = 'YOUR_SUBSCRIPTION_ID' 
+$subId = 'YOUR_SUBSCRIPTION_KEY' 
 $requiredTags = ("alias", "project", "expires")
 
 ################################################################

@@ -8,7 +8,7 @@
 # Ensure you have issued a Login-AzureRMAccount command first
 
 # Provide your subscription to verify
-$subId = 'YOUR_RESOURCE_GROUP' 
+$subId = 'YOUR_SUBSCRIPTION_KEY' 
 
 # Set context so we don't get hung up later
 SetContext -subId $subId
