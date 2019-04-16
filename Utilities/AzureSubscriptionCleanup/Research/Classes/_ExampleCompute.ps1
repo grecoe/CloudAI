@@ -3,9 +3,9 @@
 # 	Azure Machine Learning Service compute.
 #############################################################################
 
-. './clsSubscription.ps1'
-. './clsResources.ps1'
-. './clsCompute.ps1'
+using module .\clsSubscription.psm1
+using module .\clsResourceGroupManager.psm1 
+using module .\clsCompute.psm1 
 
 # Perform a login prior to calling this, first call collects the subscriptions.
 $subManager = [SubscriptionManager]::new()
@@ -34,8 +34,8 @@ if($result.Count -eq 1)
 	####################################################################
 	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms()
 	# Call again and it returns cached information
-	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms()
-	$amlsSummary = $azureCompute.GetAMLSSummary()
+	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($null)
+	$amlsSummary = $azureCompute.GetAMLSSummary($null)
 
 	####################################################################
 	# Collect standard VM information

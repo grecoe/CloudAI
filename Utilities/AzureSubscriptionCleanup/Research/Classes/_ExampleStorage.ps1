@@ -1,7 +1,7 @@
 # Perform a login prior to calling this.
 
-. './clsBlobStorage.ps1'
-. './clsSubscription.ps1'
+Using module .\clsBlobStorage.psm1
+Using module .\clsSubscription.psm1
 
 # Information we'll need along the way
 $account='YOUR_STORAGE_ACCOUNT'

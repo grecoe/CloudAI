@@ -5,8 +5,8 @@
 #	Tags: alias, project, expires
 #############################################################################
 
-. './clsSubscription.ps1'
-. './clsResourceGroupManager.ps1'
+Using module .\clsSubscription.psm1
+Using module .\clsResourceGroupManager.psm1
 
 # Perform a login prior to calling this, first call collects the subscriptions.
 $subManager = [SubscriptionManager]::new()

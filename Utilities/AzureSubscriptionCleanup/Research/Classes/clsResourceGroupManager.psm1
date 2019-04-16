@@ -213,6 +213,20 @@ class ResourceGroupManager {
 		return $returnGroup
 	}
 	
+	#########################################################################
+	#	Get group(s) using a name pattern for -like, may return >1
+	#########################################################################
+	[System.Collections.ArrayList] FindGroup([String]$groupNamePattern){
+		$returnGroup = New-Object System.Collections.ArrayList
+		
+		$groups = $this.ResourceGroups | Where-Object { $_.Name -like $groupNamePattern}
+		foreach($group in $groups)
+		{
+			$returnGroup.Add($group)
+		}
+		
+		return $returnGroup
+	}
 	
 	#########################################################################
 	#	Get more details on a resource group
@@ -273,6 +287,9 @@ class ResourceGroupManager {
 		return $returnBuckets
 	}
 	
+	#########################################################################
+	#	Gets a summary of the current resource groups.
+	#########################################################################
 	[GroupSummary] GetGroupSummary(){
 		$returnSummary = [GroupSummary]::new()
 		

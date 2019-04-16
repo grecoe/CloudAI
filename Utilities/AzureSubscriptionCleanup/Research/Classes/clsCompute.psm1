@@ -1,4 +1,5 @@
-. './clsResources.ps1'
+using module .\clsResources.psm1
+using module .\clsResourceGroupManager.psm1
 
 #############################################################################
 #	Represents a single virtual machine (not in AMLS Cluster)
@@ -61,6 +62,7 @@ class AMLSCluster {
 	[int]$CurrentNodes
 	[int]$MaxNodes
 	[int]$MinNodes
+	[ResourceGroup]$ClusterGroup
 }
 
 class ComputeSummary {
@@ -98,11 +100,13 @@ class AzureCompute {
 	# Get an array of AMLSWorkspace instances for all AMLS details
 	# across the subscription. If it's already been collected, just
 	# return the cached information.
+	#
+	#
 	###############################################################
-	[System.Collections.ArrayList] GetAMLSComputeVms(){
+	[System.Collections.ArrayList] GetAMLSComputeVms([ResourceGroupManager]$groupManager){
 		Write-Host("Searching for AMLS Compute Details")
 		$returnList = New-Object System.Collections.ArrayList
-
+		
 		if($this.AMLSCompute)
 		{
 			Write-Host("***Returning cached information***")
@@ -122,7 +126,7 @@ class AzureCompute {
 					# Now find out what we want 
 					$computeListText = az ml computetarget list -g $resourceGroup -w $workspace
 					$computeList = $computeListText | ConvertFrom-Json
-		
+			
 					$amlsWorkspace = [AMLSWorkspace]::new()
 					$amlsWorkspace.ResourceGroup = $resourceGroup
 					$amlsWorkspace.Workspace = $workspace
@@ -143,6 +147,16 @@ class AzureCompute {
 						$amlsCluster.CurrentNodes = $computeDetails.properties.status.currentNodeCount
 						$amlsCluster.MaxNodes = $computeDetails.properties.properties.scaleSettings.maxNodeCount
 						$amlsCluster.MinNodes = $computeDetails.properties.properties.scaleSettings.minNodeCount
+						
+						if($groupManager -and ($amlsCluster.ComputeType -eq 'AKS'))
+						{
+							$groupPattern = "*" + $amlsCluster.ComputeName + "*"
+							$associatedClusterGroup = $groupManager.FindGroup($groupPattern)
+							if($associatedClusterGroup.Count -eq 1)
+							{
+								$amlsCluster.ClusterGroup = $associatedClusterGroup[0]
+							}
+						}
 						
 						$amlsWorkspace.Clusters.Add($amlsCluster) > $null
 					}
@@ -165,12 +179,12 @@ class AzureCompute {
 	#
 	#	Returns a ComputeSummary instance
 	#########################################################################
-	[ComputeSummary] GetAMLSSummary(){
+	[ComputeSummary] GetAMLSSummary([ResourceGroupManager]$groupManager){
 	
 		$returnSummary = [ComputeSummary]::new()
 		
 		# If already called, this is the summary, otherwise, collect
-		$details = $this.GetAMLSComputeVms()
+		$details = $this.GetAMLSComputeVms($groupManager)
 		
 		foreach($workspace in $details)
 		{

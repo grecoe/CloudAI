@@ -3,10 +3,10 @@
 # 	Azure Machine Learning Service compute.
 #############################################################################
 
-. './clsSubscription.ps1'
-. './clsResources.ps1'
-. './clsCompute.ps1'
-. './clsResourceGroupManager.ps1'
+Using module .\clsSubscription.psm1
+Using module .\clsResources.psm1
+Using module .\clsCompute.psm1
+Using module .\clsResourceGroupManager.psm1
 
 # Perform a login prior to calling this, first call collects the subscriptions.
 $subManager = [SubscriptionManager]::new()
@@ -34,7 +34,7 @@ if($result.Count -eq 1)
 	####################################################################
 	# Collect Compute Information
 	####################################################################
-	$amlsSummary = $azureCompute.GetAMLSSummary()
+	$amlsSummary = $azureCompute.GetAMLSSummary($resourceGroupManager)
 	$vmSummary = $azureCompute.GetVirtualMachineSummary($null,$null)
 
 	####################################################################
