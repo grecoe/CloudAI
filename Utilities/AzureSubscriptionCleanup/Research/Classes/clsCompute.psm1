@@ -179,12 +179,12 @@ class AzureCompute {
 	#
 	#	Returns a ComputeSummary instance
 	#########################################################################
-	[ComputeSummary] GetAMLSSummary([ResourceGroupManager]$groupManager){
+	[ComputeSummary] GetAMLSSummary(){
 	
 		$returnSummary = [ComputeSummary]::new()
 		
 		# If already called, this is the summary, otherwise, collect
-		$details = $this.GetAMLSComputeVms($groupManager)
+		$details = $this.GetAMLSComputeVms($null)
 		
 		foreach($workspace in $details)
 		{

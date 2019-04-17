@@ -32,10 +32,10 @@ if($result.Count -eq 1)
 	####################################################################
 	# Collect AMLS Compute cluster information
 	####################################################################
-	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms()
+	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($null)
 	# Call again and it returns cached information
 	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($null)
-	$amlsSummary = $azureCompute.GetAMLSSummary($null)
+	$amlsSummary = $azureCompute.GetAMLSSummary()
 
 	####################################################################
 	# Collect standard VM information

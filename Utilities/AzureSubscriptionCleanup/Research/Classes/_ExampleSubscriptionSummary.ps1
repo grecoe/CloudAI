@@ -34,7 +34,7 @@ if($result.Count -eq 1)
 	####################################################################
 	# Collect Compute Information
 	####################################################################
-	$amlsSummary = $azureCompute.GetAMLSSummary($resourceGroupManager)
+	$amlsSummary = $azureCompute.GetAMLSSummary()
 	$vmSummary = $azureCompute.GetVirtualMachineSummary($null,$null)
 
 	####################################################################
