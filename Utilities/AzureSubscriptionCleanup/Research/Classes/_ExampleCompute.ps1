@@ -28,35 +28,42 @@ if($result.Count -eq 1)
 
 	# Create instance of Azure Compute
 	$azureCompute = [AzureCompute]::new()
+	$rgManager = [ResourceGroupManager]::new()
 
 	####################################################################
 	# Collect AMLS Compute cluster information
 	####################################################################
-	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($null)
+	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($rgManager)
 	# Call again and it returns cached information
-	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($null)
-	$amlsSummary = $azureCompute.GetAMLSSummary()
+	$amlsComputeDetails = $azureCompute.GetAMLSComputeVms($rgManager)
+	$amlsSummary = $azureCompute.GetAMLSSummary($rgManager)
 
 	####################################################################
 	# Collect standard VM information
 	####################################################################
-	$virtualMachines = $azureCompute.GetVirtualMachines($null,'*nc*')
+	$virtualMachines = $azureCompute.GetVirtualMachines($null,$null)
 	# Call again and it returns cached information
-	$virtualMachines = $azureCompute.GetVirtualMachines($null,'*nc*')
-	$vmSummary = $azureCompute.GetVirtualMachineSummary($null,'*nc*')
+	$virtualMachines = $azureCompute.GetVirtualMachines($null,$null)
+	$vmSummary = $azureCompute.GetVirtualMachineSummary($null,$null)
 	
 	Write-Host("AMLS Summary:")
-	Write-Host(($amlsSummary | ConvertTo-Json))
+	Write-Host(($amlsSummary | ConvertTo-Json -depth 100))
+	Write-Host("")
+	Write-Host("")
 	Write-Host("VirtualMachine Summary:")
-	Write-Host(($vmSummary | ConvertTo-Json))
+	Write-Host(($vmSummary | ConvertTo-Json -depth 100))
 
 	foreach($amlsDetails in $amlsComputeDetails)
 	{
+		Write-Host("")
+		Write-Host("")
 		Write-Host("AMLS Workspace Details")
-		Write-Host(($amlsDetails|ConvertTo-Json))
+		Write-Host(($amlsDetails|ConvertTo-Json -depth 100))
 	}
 
+	Write-Host("")
+	Write-Host("")
 	Write-Host("Virtual Machines:")
-	Write-Host(($virtualMachines | ConvertTo-Json))
+	Write-Host(($virtualMachines | ConvertTo-Json -depth 100))
 
 }

@@ -34,7 +34,7 @@ if($result.Count -eq 1)
 	####################################################################
 	# Collect Compute Information
 	####################################################################
-	$amlsSummary = $azureCompute.GetAMLSSummary()
+	$amlsSummary = $azureCompute.GetAMLSSummary($resourceGroupManager)
 	$vmSummary = $azureCompute.GetVirtualMachineSummary($null,$null)
 
 	####################################################################
@@ -49,14 +49,14 @@ if($result.Count -eq 1)
 	$resourceGroupSummary = $resourceGroupManager.GetGroupSummary()
 
 	Write-Host("***Resource Group Summary***")
-	Write-Host(($resourceGroupSummary | ConvertTo-Json))	
+	Write-Host(($resourceGroupSummary | ConvertTo-Json -depth 100))	
 	Write-Host("***Resource Group Buckets***")
-	Write-Host(($resourceGroupBuckets | ConvertTo-Json))
+	Write-Host(($resourceGroupBuckets | ConvertTo-Json -depth 100))
 	Write-Host("***AMLS Compute***")
-	Write-Host(($amlsSummary | ConvertTo-Json))
+	Write-Host(($amlsSummary | ConvertTo-Json -depth 100))
 	Write-Host("***Virtual Machines***")
-	Write-Host(($vmSummary | ConvertTo-Json))
+	Write-Host(($vmSummary | ConvertTo-Json -depth 100))
 	Write-Host("***Resource Lists***")
-	Write-Host(($resourceList | ConvertTo-Json))
+	Write-Host(($resourceList | ConvertTo-Json -depth 100))
 
 }

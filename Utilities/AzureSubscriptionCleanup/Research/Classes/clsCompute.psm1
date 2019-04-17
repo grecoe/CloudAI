@@ -62,7 +62,8 @@ class AMLSCluster {
 	[int]$CurrentNodes
 	[int]$MaxNodes
 	[int]$MinNodes
-	[ResourceGroup]$ClusterGroup
+	[ResourceGroup]$AksClusterGroup
+	[ComputeSummary]$AksClusterSummary
 }
 
 class ComputeSummary {
@@ -154,7 +155,12 @@ class AzureCompute {
 							$associatedClusterGroup = $groupManager.FindGroup($groupPattern)
 							if($associatedClusterGroup.Count -eq 1)
 							{
-								$amlsCluster.ClusterGroup = $associatedClusterGroup[0]
+								$amlsCluster.AksClusterGroup = $associatedClusterGroup[0]
+							}
+							
+							if($amlsCluster.AksClusterGroup)
+							{
+								$amlsCluster.AksClusterSummary = $this.GetVirtualMachineSummary($amlsCluster.AksClusterGroup.Name,$null)
 							}
 						}
 						
@@ -178,13 +184,15 @@ class AzureCompute {
 	#	for expediency. 
 	#
 	#	Returns a ComputeSummary instance
+	#	Input parameter is used to track down AKS cluster information to the 
+	#	summary. If not present, it only detects the AmlCompute nodes.
 	#########################################################################
-	[ComputeSummary] GetAMLSSummary(){
+	[ComputeSummary] GetAMLSSummary([ResourceGroupManager]$groupManager){
 	
 		$returnSummary = [ComputeSummary]::new()
 		
 		# If already called, this is the summary, otherwise, collect
-		$details = $this.GetAMLSComputeVms($null)
+		$details = $this.GetAMLSComputeVms($groupManager)
 		
 		foreach($workspace in $details)
 		{
@@ -203,6 +211,27 @@ class AzureCompute {
 					{
 						$returnSummary.SkuBreakdown.Add($cluster.SKU,$cluster.MaxNodes)
 					}
+				}
+				
+				# If we have aks summary info here, add it in.
+				if($cluster.AksClusterSummary)
+				{
+					$returnSummary.RunningTotal += $cluster.AksClusterSummary.RunningTotal
+					$returnSummary.DeallocatedTotal += $cluster.AksClusterSummary.DeallocatedTotal
+					$returnSummary.StoppedTotal += $cluster.AksClusterSummary.StoppedTotal
+					
+					foreach($key in $cluster.AksClusterSummary.SkuBreakdown.Keys)
+					{
+						if($returnSummary.SkuBreakdown.ContainsKey($key))
+						{
+							$returnSummary.SkuBreakdown[$key] += $cluster.AksClusterSummary.SkuBreakdown[$key]
+						}
+						else
+						{
+							$returnSummary.SkuBreakdown.Add($key,$cluster.AksClusterSummary.SkuBreakdown[$key])
+						}
+					}
+					
 				}
 			}
 		}
