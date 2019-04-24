@@ -14,7 +14,8 @@ class AzureResources {
 	#
 	#	Returns:
 	#		HashTable<[string]resource group, HashTable2>
-	#			HashTable2<[string]resourceName, [string]resourceType
+	#			HashTable2<[string]resourceName, HashTable3>
+	#				HashTable3{Keys are SKU and Location
 	###############################################################
 	static [System.Collections.Hashtable] FindDeployments([string]$resourceType) {
 		$returnList = @{}
@@ -27,7 +28,14 @@ class AzureResources {
 				$returnList.Add($res.ResourceGroupName,@{})
 			}
 			
-			$returnList[$res.ResourceGroupName].Add($res.Name, $resourceType)
+			$details = @{}
+			if($res.Sku)
+			{
+				$details.Add("SKU" , $res.Sku.Name)
+			}
+			$details.Add("Location" , $res.Location)
+			
+			$returnList[$res.ResourceGroupName].Add($res.Name, $details)
 		}		
 		return $returnList
 	}
@@ -62,4 +70,31 @@ class AzureResources {
 		return $returnTable
 	}	
 
+	###############################################################
+	# GetGroupResources
+	#
+	#	Get a list of resources in a specific group.
+	#
+	#
+	#	Returns:
+	#		HashTable<[string]resourceName, [string]resourceType>
+	###############################################################
+	static [System.Collections.Hashtable]  GetGroupResources([string]$resourceGroup) {
+	
+		$returnTable = @{}
+		
+		$allResources = Get-AzureRmResource -ResourceGroupName $resourceGroup
+		foreach($res in $allResources)
+		{
+			$returnTable.Add($res.Name, $res.ResourceType)
+		}
+		
+		return $returnTable
+	}	
+
+	static [void]  DeleteResource([string]$resourceName, [string]$resourceType) {
+		Remove-AzureRmResource -ResourceName $resourceName -ResourceType $resourceType
+	}	
+
+	
 }
